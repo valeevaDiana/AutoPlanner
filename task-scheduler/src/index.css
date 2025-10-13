@@ -193,7 +193,31 @@ body {
 .task-block.priority-high {
   background: #ffe6e6;
 }
+.task-block.priority-completed {
+  background: #f0f0f0 !important; 
+}
 
+.task-text.text-completed {
+  color: #666666 !important;
+  text-decoration: line-through !important;
+}
+
+.action-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.complete-button:hover {
+  background-color: rgb(135, 202, 96) !important;
+}
+
+.uncomplete-button:hover {
+  background-color: #f96868 !important;
+}
+
+.edit-button:hover {
+  background-color: #df9e6c !important;
+}
 
 /*ЦВЕТА ДЛЯ ПРИОРИТЕТА*/
 .cell.priority-low {

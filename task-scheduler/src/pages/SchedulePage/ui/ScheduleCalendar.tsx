@@ -1,14 +1,6 @@
-import React from 'react';
-
-interface Cell {
-  id: string;
-  time: string; 
-  day: number; 
-  content: string;
-  priority: 'low' | 'medium' | 'high';
-  durationMinutes: number; 
-  startMinute?: number; 
-}
+import React, { useState } from 'react';
+import type { Task, TaskAction } from '../../../entities/task/model/types'; 
+import { TaskActionsModal } from '../../../features/task-actions/ui/TaskActionsModal';
 
 const DAYS = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
 
@@ -21,7 +13,7 @@ const generateTimeSlots = (): string[] => {
   return times;
 };
 
-const mockCells: Cell[] = [
+const mockCells: Task[] = [
   {
     id: 'task1',
     time: '08:00',
@@ -30,6 +22,7 @@ const mockCells: Cell[] = [
     priority: 'medium',
     durationMinutes: 90, 
     startMinute: 0, 
+    completed: false,
   },
   {
     id: 'task2',
@@ -39,6 +32,7 @@ const mockCells: Cell[] = [
     priority: 'medium',
     durationMinutes: 30, 
     startMinute: 15, 
+    completed: false,
   },
   {
     id: 'task3',
@@ -48,6 +42,7 @@ const mockCells: Cell[] = [
     priority: 'high',
     durationMinutes: 120, 
     startMinute: 0, 
+    completed: false,
   },
   {
     id: 'task4',
@@ -56,7 +51,8 @@ const mockCells: Cell[] = [
     content: 'Маленькая задачка',
     priority: 'low',
     durationMinutes: 20, 
-    startMinute: 30, 
+    startMinute: 30,
+    completed: false, 
   },
   {
     id: 'task5',
@@ -66,6 +62,7 @@ const mockCells: Cell[] = [
     priority: 'low',
     durationMinutes: 60, 
     startMinute: 0,
+    completed: false,
   },
   {
     id: 'task6',
@@ -75,6 +72,7 @@ const mockCells: Cell[] = [
     priority: 'medium',
     durationMinutes: 180, 
     startMinute: 0,
+    completed: false,
   },
   {
     id: 'task7',
@@ -84,6 +82,7 @@ const mockCells: Cell[] = [
     priority: 'medium',
     durationMinutes: 180, 
     startMinute: 15,
+    completed: false,
   },
   {
     id: 'task8',
@@ -93,6 +92,7 @@ const mockCells: Cell[] = [
     priority: 'medium',
     durationMinutes: 180, 
     startMinute: 30, 
+    completed: false,
   },
   {
     id: 'task9',
@@ -102,6 +102,7 @@ const mockCells: Cell[] = [
     priority: 'medium',
     durationMinutes: 30,  
     startMinute: 45, 
+    completed: false,
   },
   {
     id: 'task10',
@@ -110,7 +111,8 @@ const mockCells: Cell[] = [
     content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
     priority: 'medium',
     durationMinutes: 30,  
-    startMinute: 45, 
+    startMinute: 45,
+    completed: false, 
   },
   {
     id: 'task11',
@@ -120,6 +122,7 @@ const mockCells: Cell[] = [
     priority: 'medium',
     durationMinutes: 130,  
     startMinute: 45, 
+    completed: false,
   },
   {
     id: 'task12',
@@ -128,21 +131,33 @@ const mockCells: Cell[] = [
     content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
     priority: 'medium',
     durationMinutes: 30,  
+    startMinute: 45,
+    completed: false, 
+  },
+  {
+    id: 'task13',
+    time: '10:00',
+    day: 5,
+    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
+    priority: 'medium',
+    durationMinutes: 130,  
     startMinute: 45, 
+    completed: false,
   },
   // {
-  //   id: 'task13',
+  //   id: 'task14',
   //   time: '10:00',
   //   day: 5,
   //   content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
   //   priority: 'medium',
   //   durationMinutes: 30,  
-  //   startMinute: 45, 
+  //   startMinute: 45,
+  //   completed: false, 
   // },
 ];
 
-const getOverlappingTasks = (tasks: Cell[]): Cell[][] => {
-  const groups: Cell[][] = [];
+const getOverlappingTasks = (tasks: Task[]): Task[][] => {
+  const groups: Task[][] = [];
   
   tasks.forEach(task => {
     const taskStart = (parseInt(task.time.split(':')[0]) * 60) + (task.startMinute || 0);
@@ -173,7 +188,7 @@ const getOverlappingTasks = (tasks: Cell[]): Cell[][] => {
   return groups;
 };
 
-const getTaskPosition = (task: Cell, overlappingGroup: Cell[], taskIndex: number) => {
+const getTaskPosition = (task: Task, overlappingGroup: Task[], taskIndex: number) => {
   const totalTasks = overlappingGroup.length;
   
   const maxTasks = Math.min(totalTasks, 5);
@@ -189,27 +204,42 @@ const getTaskPosition = (task: Cell, overlappingGroup: Cell[], taskIndex: number
   }
 };
 
-const TaskBlock: React.FC<{ task: Cell; width: string; left: string; taskCount: number }> = ({ 
+interface TaskBlockProps {
+  task: Task;
+  width: string;
+  left: string;
+  taskCount: number;
+  onTaskClick: (task: Task, event: React.MouseEvent) => void;
+}
+
+const TaskBlock: React.FC<TaskBlockProps> = ({ 
   task, 
   width, 
   left, 
-  taskCount 
+  taskCount,
+  onTaskClick 
 }) => {
   const totalHeight = task.durationMinutes;
   const topOffset = task.startMinute || 0;
+  const isCompleted = task.completed;
 
   let priorityClass = '';
   let textColor = 'text-black';
 
-  if (task.priority === 'low') {
-    priorityClass = 'priority-low';
-    textColor = 'text-green';
-  } else if (task.priority === 'medium') {
-    priorityClass = 'priority-medium';
-    textColor = 'text-yellow';
-  } else if (task.priority === 'high') {
-    priorityClass = 'priority-high';
-    textColor = 'text-red';
+  if (isCompleted) {
+    priorityClass = 'priority-completed';
+    textColor = 'text-completed';
+  } else {
+    if (task.priority === 'low') {
+      priorityClass = 'priority-low';
+      textColor = 'text-green';
+    } else if (task.priority === 'medium') {
+      priorityClass = 'priority-medium';
+      textColor = 'text-yellow';
+    } else if (task.priority === 'high') {
+      priorityClass = 'priority-high';
+      textColor = 'text-red';
+    }
   }
 
   const getTextSettings = () => {
@@ -231,6 +261,11 @@ const TaskBlock: React.FC<{ task: Cell; width: string; left: string; taskCount: 
 
   const textSettings = getTextSettings();
 
+  const handleClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    onTaskClick(task, event);
+  };
+
   return (
     <div
       className={`task-block ${priorityClass}`}
@@ -241,27 +276,33 @@ const TaskBlock: React.FC<{ task: Cell; width: string; left: string; taskCount: 
         width: width, 
         height: `calc(${totalHeight}px - 4px)`, 
         zIndex: 10,
-        opacity: 0.95,
+        opacity: isCompleted ? 0.7 : 0.95,
         minHeight: '15px',
         border: '1px solid rgba(0,0,0,0.1)',
         borderRadius: '2px',
         boxSizing: 'border-box',
         padding: '1px',
+        cursor: 'pointer',
       }}
+      onClick={handleClick}
     >
-      <div className={`task-text ${textColor}`} style={{
-        fontSize: textSettings.fontSize,
-        lineHeight: '1.0',
-        padding: '1px',
-        overflow: 'hidden',
-        display: '-webkit-box',
-        WebkitLineClamp: textSettings.lineClamp,
-        WebkitBoxOrient: 'vertical',
-        width: '100%',
-        height: '100%',
-        wordBreak: 'break-word',
-        textOverflow: 'ellipsis',
-      }}>
+      <div 
+        className={`task-text ${textColor}`} 
+        style={{
+          fontSize: textSettings.fontSize,
+          lineHeight: '1.0',
+          padding: '1px',
+          overflow: 'hidden',
+          display: '-webkit-box',
+          WebkitLineClamp: textSettings.lineClamp,
+          WebkitBoxOrient: 'vertical',
+          width: '100%',
+          height: '100%',
+          wordBreak: 'break-word',
+          textOverflow: 'ellipsis',
+          textDecoration: isCompleted ? 'line-through' : 'none',
+        }}
+      >
         {task.content}
       </div>
     </div>
@@ -270,6 +311,41 @@ const TaskBlock: React.FC<{ task: Cell; width: string; left: string; taskCount: 
 
 export const ScheduleCalendar: React.FC = () => {
   const timeSlots = generateTimeSlots();
+  const [tasks, setTasks] = useState<Task[]>(mockCells);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleTaskClick = (task: Task, event: React.MouseEvent) => {
+    setSelectedTask(task);
+    setModalPosition({
+      top: event.clientY,
+      left: event.clientX
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedTask(null);
+  };
+
+  const handleTaskAction = (action: TaskAction) => {
+    if (!selectedTask) return;
+
+    if (action === 'complete') {
+      setTasks(prevTasks => 
+        prevTasks.map(task => 
+          task.id === selectedTask.id 
+            ? { ...task, completed: !task.completed } 
+            : task
+        )
+      );
+    } else if (action === 'edit') {
+      console.log('Редактирование задачи:', selectedTask.id);
+      alert(`Редактирование задачи: ${selectedTask.content}`);
+    }
+  };
 
   return (
     <div className="calendar-container">
@@ -282,12 +358,12 @@ export const ScheduleCalendar: React.FC = () => {
         </div>
 
         <div className="calendar-body">
-          {timeSlots.map((time, rowIndex) => (
+          {timeSlots.map((time) => ( 
             <div key={time} className="calendar-row">
               <div className="time-cell">{time}</div>
 
               {DAYS.map((_, dayIndex) => {
-                const tasksInThisSlot = mockCells.filter((task) => {
+                const tasksInThisSlot = tasks.filter((task) => {
                   if (task.day !== dayIndex) return false;
                   const taskHour = parseInt(task.time.split(':')[0]);
                   const currentHour = parseInt(time.split(':')[0]);
@@ -304,7 +380,7 @@ export const ScheduleCalendar: React.FC = () => {
                   }}>
                     <span className="plus">+</span>
                     
-                    {overlappingGroups.map((group, groupIndex) =>
+                    {overlappingGroups.map((group) => 
                       group.map((task, taskIndex) => {
                         const position = getTaskPosition(task, group, taskIndex);
                         return (
@@ -314,6 +390,7 @@ export const ScheduleCalendar: React.FC = () => {
                             width={position.width}
                             left={position.left}
                             taskCount={group.length}
+                            onTaskClick={handleTaskClick}
                           />
                         );
                       })
@@ -325,6 +402,16 @@ export const ScheduleCalendar: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {selectedTask && (
+        <TaskActionsModal
+          task={selectedTask}
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onAction={handleTaskAction}
+          position={modalPosition}
+        />
+      )}
     </div>
   );
 };
