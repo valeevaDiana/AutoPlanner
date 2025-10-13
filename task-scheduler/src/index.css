@@ -219,6 +219,18 @@ body {
   background-color: #df9e6c !important;
 }
 
+/* Стили для модального окна задачи */
+.task-form-modal .dates-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.task-form-modal .date-group {
+  display: flex;
+  gap: 10px;
+}
+
 /*ЦВЕТА ДЛЯ ПРИОРИТЕТА*/
 .cell.priority-low {
   background: #e6ffe6; 
@@ -233,13 +245,13 @@ body {
   background: #eeeeee;
 }
 .cell .task-text.text-green {
-  color: #2e7d32; 
+  color: #205623; 
 }
 .cell .task-text.text-yellow {
-  color: #f57f17; 
+  color: #974f0f; 
 }
 .cell .task-text.text-red {
-  color: #c62828; 
+  color: #721717; 
 }
 .cell .task-text.text-black {
   color: #131313; 
@@ -300,6 +312,15 @@ body {
     font-size: 20px;
   }
 
+  .task-form-modal .dates-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .task-form-modal .date-group {
+    flex-direction: column;
+  }
+
   /* ОСНОВНЫЕ ИЗМЕНЕНИЯ ДЛЯ КАЛЕНДАРЯ */
   .calendar-scroll-container {
     max-height: calc(100vh - 160px);
@@ -354,7 +375,6 @@ body {
     font-size: 18px;
   }
 
-  /* Улучшаем отображение текста в задачах */
   .cell.has-task .task-text {
     font-size: 12px;
     line-height: 1.2;
@@ -401,6 +421,15 @@ body {
   .week-selector {
     font-size: 14px;
     padding: 5px 10px;
+  }
+
+  .task-form-modal .dates-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .task-form-modal .date-group {
+    flex-direction: column;
   }
 }
 

@@ -13,6 +13,13 @@ const generateTimeSlots = (): string[] => {
   return times;
 };
 
+interface ScheduleCalendarProps {
+  onAddTask?: (initialDate?: { day: number; time: string; date: string }) => void;
+  onEditTask?: (task: Task) => void;
+  onViewTask?: (task: Task) => void;
+}
+
+
 const mockCells: Task[] = [
   {
     id: 'task1',
@@ -144,16 +151,7 @@ const mockCells: Task[] = [
     startMinute: 45, 
     completed: false,
   },
-  // {
-  //   id: 'task14',
-  //   time: '10:00',
-  //   day: 5,
-  //   content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
-  //   priority: 'medium',
-  //   durationMinutes: 30,  
-  //   startMinute: 45,
-  //   completed: false, 
-  // },
+
 ];
 
 const getOverlappingTasks = (tasks: Task[]): Task[][] => {
@@ -309,7 +307,13 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   );
 };
 
-export const ScheduleCalendar: React.FC = () => {
+
+
+export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
+    onAddTask,
+    onEditTask,
+    onViewTask
+  }) => {
   const timeSlots = generateTimeSlots();
   const [tasks, setTasks] = useState<Task[]>(mockCells);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -330,6 +334,27 @@ export const ScheduleCalendar: React.FC = () => {
     setSelectedTask(null);
   };
 
+  const handleEmptyCellClick = (dayIndex: number, time: string) => {
+    if (onAddTask) {
+      const today = new Date();
+      const currentDay = today.getDay(); 
+      
+      const jsDayOfWeek = dayIndex === 6 ? 0 : dayIndex + 1;
+      
+      const diff = jsDayOfWeek - currentDay;
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() + diff);
+      const dateString = targetDate.toISOString().split('T')[0];
+
+      onAddTask({
+        day: dayIndex,
+        time: time,
+        date: dateString
+      });
+    }
+  };
+
+
   const handleTaskAction = (action: TaskAction) => {
     if (!selectedTask) return;
 
@@ -337,15 +362,17 @@ export const ScheduleCalendar: React.FC = () => {
       setTasks(prevTasks => 
         prevTasks.map(task => 
           task.id === selectedTask.id 
-            ? { ...task, completed: !task.completed } 
+            ? { ...task, completed: !task.completed }
             : task
         )
       );
     } else if (action === 'edit') {
-      console.log('Редактирование задачи:', selectedTask.id);
-      alert(`Редактирование задачи: ${selectedTask.content}`);
+      if (onViewTask) {
+        onViewTask(selectedTask);
+      }
     }
   };
+
 
   return (
     <div className="calendar-container">
@@ -377,7 +404,8 @@ export const ScheduleCalendar: React.FC = () => {
                     position: 'relative',
                     minHeight: '60px',
                     height: '60px'
-                  }}>
+                  }}
+                  onClick={() => handleEmptyCellClick(dayIndex, time)} >
                     <span className="plus">+</span>
                     
                     {overlappingGroups.map((group) => 
