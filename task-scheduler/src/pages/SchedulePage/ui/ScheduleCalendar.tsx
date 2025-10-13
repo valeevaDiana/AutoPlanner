@@ -1,4 +1,3 @@
-// ScheduleCalendar.tsx
 import React from 'react';
 
 interface Cell {
@@ -27,7 +26,7 @@ const mockCells: Cell[] = [
     id: 'task1',
     time: '08:00',
     day: 0,
-    content: 'Первая задача ну ооооочень длинная пряма меееега длинная',
+    content: 'Задачка раз',
     priority: 'medium',
     durationMinutes: 90, 
     startMinute: 0, 
@@ -45,7 +44,7 @@ const mockCells: Cell[] = [
     id: 'task3',
     time: '09:00',
     day: 2,
-    content: 'Тут очень важная задача, не представляете насколько важная',
+    content: 'Тут очень важная задача',
     priority: 'high',
     durationMinutes: 120, 
     startMinute: 0, 
@@ -54,9 +53,9 @@ const mockCells: Cell[] = [
     id: 'task4',
     time: '10:00',
     day: 4,
-    content: 'Маленькая задачка, очень маленькая',
+    content: 'Маленькая задачка',
     priority: 'low',
-    durationMinutes: 15, 
+    durationMinutes: 20, 
     startMinute: 30, 
   },
   {
@@ -72,13 +71,22 @@ const mockCells: Cell[] = [
     id: 'task6',
     time: '12:00',
     day: 3,
-    content: 'Задачка необычная',
+    content: 'Задача 1 (пересекается)',
     priority: 'medium',
     durationMinutes: 180, 
     startMinute: 0,
   },
   {
     id: 'task7',
+    time: '12:00',
+    day: 3,
+    content: 'Задача 2 (пересекается)',
+    priority: 'medium',
+    durationMinutes: 180, 
+    startMinute: 15,
+  },
+  {
+    id: 'task8',
     time: '13:00',
     day: 6,
     content: 'Тест1',
@@ -87,20 +95,107 @@ const mockCells: Cell[] = [
     startMinute: 30, 
   },
   {
-    id: 'task8',
+    id: 'task9',
     time: '10:00',
     day: 5,
-    content: 'Тест2',
+    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
     priority: 'medium',
     durationMinutes: 30,  
     startMinute: 45, 
   },
-
+  {
+    id: 'task10',
+    time: '10:00',
+    day: 5,
+    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
+    priority: 'medium',
+    durationMinutes: 30,  
+    startMinute: 45, 
+  },
+  {
+    id: 'task11',
+    time: '10:00',
+    day: 5,
+    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
+    priority: 'medium',
+    durationMinutes: 130,  
+    startMinute: 45, 
+  },
+  {
+    id: 'task12',
+    time: '10:00',
+    day: 5,
+    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
+    priority: 'medium',
+    durationMinutes: 30,  
+    startMinute: 45, 
+  },
+  // {
+  //   id: 'task13',
+  //   time: '10:00',
+  //   day: 5,
+  //   content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
+  //   priority: 'medium',
+  //   durationMinutes: 30,  
+  //   startMinute: 45, 
+  // },
 ];
 
-const TaskBlock: React.FC<{ task: Cell }> = ({ task }) => {
-  const totalHeight = task.durationMinutes;
+const getOverlappingTasks = (tasks: Cell[]): Cell[][] => {
+  const groups: Cell[][] = [];
+  
+  tasks.forEach(task => {
+    const taskStart = (parseInt(task.time.split(':')[0]) * 60) + (task.startMinute || 0);
+    const taskEnd = taskStart + task.durationMinutes;
+    
+    let addedToGroup = false;
+    
+    for (const group of groups) {
+      const groupHasOverlap = group.some(groupTask => {
+        const groupStart = (parseInt(groupTask.time.split(':')[0]) * 60) + (groupTask.startMinute || 0);
+        const groupEnd = groupStart + groupTask.durationMinutes;
+        
+        return (taskStart < groupEnd && taskEnd > groupStart);
+      });
+      
+      if (groupHasOverlap) {
+        group.push(task);
+        addedToGroup = true;
+        break;
+      }
+    }
+    
+    if (!addedToGroup) {
+      groups.push([task]);
+    }
+  });
+  
+  return groups;
+};
 
+const getTaskPosition = (task: Cell, overlappingGroup: Cell[], taskIndex: number) => {
+  const totalTasks = overlappingGroup.length;
+  
+  const maxTasks = Math.min(totalTasks, 5);
+  
+  if (maxTasks === 1) {
+    return { width: 'calc(100% - 4px)', left: '2px' };
+  } else {
+    const availableWidth = 100 - 4; 
+    const taskWidth = availableWidth / maxTasks;
+    const width = `calc(${taskWidth}% - 2px)`;
+    const left = `calc(${2 + (taskIndex * taskWidth)}% + 1px)`;
+    return { width, left };
+  }
+};
+
+const TaskBlock: React.FC<{ task: Cell; width: string; left: string; taskCount: number }> = ({ 
+  task, 
+  width, 
+  left, 
+  taskCount 
+}) => {
+  const totalHeight = task.durationMinutes;
   const topOffset = task.startMinute || 0;
 
   let priorityClass = '';
@@ -117,29 +212,55 @@ const TaskBlock: React.FC<{ task: Cell }> = ({ task }) => {
     textColor = 'text-red';
   }
 
+  const getTextSettings = () => {
+    switch (taskCount) {
+      case 1:
+        return { fontSize: '12px', lineClamp: Math.max(1, Math.floor(totalHeight / 15)) };
+      case 2:
+        return { fontSize: '11px', lineClamp: Math.max(1, Math.floor(totalHeight / 12)) };
+      case 3:
+        return { fontSize: '11px', lineClamp: Math.max(1, Math.floor(totalHeight / 10)) };
+      case 4:
+        return { fontSize: '10px', lineClamp: Math.max(1, Math.floor(totalHeight / 8)) };
+      case 5:
+        return { fontSize: '9px', lineClamp: Math.max(1, Math.floor(totalHeight / 6)) };
+      default:
+        return { fontSize: '9px', lineClamp: Math.max(1, Math.floor(totalHeight / 6)) };
+    }
+  };
+
+  const textSettings = getTextSettings();
+
   return (
     <div
-      className={`cell has-task ${priorityClass}`}
+      className={`task-block ${priorityClass}`}
       style={{
         position: 'absolute',
         top: `calc(${topOffset}px + 1px)`, 
-        left: '1%', 
-        width: '98%', 
+        left: left, 
+        width: width, 
         height: `calc(${totalHeight}px - 4px)`, 
         zIndex: 10,
         opacity: 0.95,
         minHeight: '15px',
-        
+        border: '1px solid rgba(0,0,0,0.1)',
+        borderRadius: '2px',
+        boxSizing: 'border-box',
+        padding: '1px',
       }}
     >
       <div className={`task-text ${textColor}`} style={{
-        fontSize: '10px', 
-        lineHeight: '1.1',
-        padding: '2px',
+        fontSize: textSettings.fontSize,
+        lineHeight: '1.0',
+        padding: '1px',
         overflow: 'hidden',
         display: '-webkit-box',
-        WebkitLineClamp: Math.max(1, Math.floor(totalHeight / 15)), 
+        WebkitLineClamp: textSettings.lineClamp,
         WebkitBoxOrient: 'vertical',
+        width: '100%',
+        height: '100%',
+        wordBreak: 'break-word',
+        textOverflow: 'ellipsis',
       }}>
         {task.content}
       </div>
@@ -173,6 +294,8 @@ export const ScheduleCalendar: React.FC = () => {
                   return taskHour === currentHour;
                 });
 
+                const overlappingGroups = getOverlappingTasks(tasksInThisSlot);
+
                 return (
                   <div key={dayIndex} className="cell empty" style={{ 
                     position: 'relative',
@@ -180,9 +303,21 @@ export const ScheduleCalendar: React.FC = () => {
                     height: '60px'
                   }}>
                     <span className="plus">+</span>
-                    {tasksInThisSlot.map((task) => (
-                      <TaskBlock key={task.id} task={task} />
-                    ))}
+                    
+                    {overlappingGroups.map((group, groupIndex) =>
+                      group.map((task, taskIndex) => {
+                        const position = getTaskPosition(task, group, taskIndex);
+                        return (
+                          <TaskBlock 
+                            key={task.id} 
+                            task={task} 
+                            width={position.width}
+                            left={position.left}
+                            taskCount={group.length}
+                          />
+                        );
+                      })
+                    )}
                   </div>
                 );
               })}

@@ -176,6 +176,25 @@ body {
   z-index: 10;
 }
 
+.task-block {
+  position: absolute;
+  z-index: 10;
+  opacity: 0.95;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.task-block.priority-low {
+  background: #e6ffe6; 
+}
+.task-block.priority-medium {
+  background: #fffacd; 
+}
+.task-block.priority-high {
+  background: #ffe6e6;
+}
+
+
 /*ЦВЕТА ДЛЯ ПРИОРИТЕТА*/
 .cell.priority-low {
   background: #e6ffe6; 
