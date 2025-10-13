@@ -25,32 +25,27 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
   }, [isOpen, position]);
 
   const adjustPosition = (originalPosition: { top: number; left: number }) => {
-    const modalWidth = 250; // минимальная ширина модального окна
-    const modalHeight = 150; // примерная высота модального окна
-    const margin = 20; // отступ от краев экрана
+    const modalWidth = 250; 
+    const modalHeight = 150; 
+    const margin = 20;
 
     let { top, left } = originalPosition;
 
-    // Получаем размеры окна
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
-    // Проверяем правую границу
     if (left + modalWidth / 2 > windowWidth - margin) {
       left = windowWidth - modalWidth / 2 - margin;
     }
 
-    // Проверяем левую границу
     if (left - modalWidth / 2 < margin) {
       left = modalWidth / 2 + margin;
     }
 
-    // Проверяем нижнюю границу
     if (top + modalHeight / 2 > windowHeight - margin) {
       top = windowHeight - modalHeight / 2 - margin;
     }
 
-    // Проверяем верхнюю границу
     if (top - modalHeight / 2 < margin) {
       top = modalHeight / 2 + margin;
     }
