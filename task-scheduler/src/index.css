@@ -58,7 +58,7 @@ body {
   color: white;
   padding: 8px 16px;
   border-radius: 8px;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   border: none;
   cursor: pointer;
@@ -76,6 +76,7 @@ body {
   margin-bottom: 5vh;
   overflow-y: auto;
   padding: 12px 0;
+  height: calc(100vh - 140px); 
 }
 
 .calendar-container {
@@ -86,13 +87,14 @@ body {
   max-width: 100%;
   margin: 0 auto;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  height: 100%; 
 }
 
 /* Общий контейнер для скролла */
 .calendar-scroll-container {
   overflow-x: auto;
   overflow-y: auto;
-  max-height: calc(100vh - 180px);
+  height: calc(100% - 85px);
 }
 
 .calendar-header {
@@ -257,6 +259,53 @@ body {
   color: #131313; 
 }
 
+/* НАВИГАЦИЯ КАЛЕНДАРЯ */
+.calendar-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px; 
+  background-color: #f9f0e6;
+  border-bottom: 1px solid #d9b7a0;
+}
+
+.calendar-navigation button {
+  padding: 6px 12px; 
+  background-color: #c68b5e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 5px;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.calendar-navigation button:hover {
+  background-color: #b37a4e;
+}
+
+.calendar-navigation .today-button {
+  background-color: transparent;
+  color: #c68b5e;
+  border: 1px solid #c68b5e;
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.calendar-navigation .today-button:hover {
+  background-color: #c68b5e;
+  color: white;
+}
+
+.direct-edit-button:hover {
+  background-color: #56c6f1ff !important;
+}
+
+.direct-edit-button:hover {
+  background-color: #56c6f1ff !important;
+}
+
 /* ПОДВАЛ */
 .footer-fixed {
   position: fixed;
@@ -291,6 +340,12 @@ body {
 
 /* АДАПТИВКИ ДЛЯ МОБИЛКИ */
 @media (max-width: 768px) {
+  .content-wrapper {
+    margin-top: 4vh;
+    margin-bottom: 4vh;
+    height: calc(100vh - 100px); 
+  }
+  
   .page-container {
     padding: 8px 12px;
   }
@@ -299,13 +354,8 @@ body {
     padding: 8px 12px;
   }
 
-  .header-title {
-    font-size: 18px;
-  }
-
   .week-selector {
     padding: 6px 12px;
-    font-size: 16px;
   }
 
   .notification-icon {
@@ -414,12 +464,7 @@ body {
     min-width: 110px;
   }
 
-  .header-title {
-    font-size: 16px;
-  }
-
   .week-selector {
-    font-size: 14px;
     padding: 5px 10px;
   }
 
@@ -450,4 +495,33 @@ body {
 
 .calendar-scroll-container::-webkit-scrollbar-thumb:hover {
   background: #b37a4e;
+}
+
+/*НАСТРОЙКА КТО СВЕРХУ*/
+.modal-overlay {
+  z-index: 2000 !important; 
+}
+
+.task-form-modal {
+  z-index: 2001 !important; 
+}
+
+.header-fixed {
+  z-index: 1000;
+}
+
+.footer-fixed {
+  z-index: 1000;
+}
+
+.calendar-header {
+  z-index: 20;
+}
+
+.time-cell {
+  z-index: 15;
+}
+
+.task-block {
+  z-index: 10;
 }

@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import type { Task, TaskAction } from '../../../entities/task/model/types';
+import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
+
 
 interface TaskActionsModalProps {
   task: Task;
   isOpen: boolean;
   onClose: () => void;
   onAction: (action: TaskAction) => void;
+  onEdit?: (task: Task) => void; 
   position: { top: number; left: number };
 }
 
@@ -14,44 +17,12 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
   isOpen,
   onClose,
   onAction,
+  onEdit,
   position
 }) => {
-  const [adjustedPosition, setAdjustedPosition] = useState(position);
-
-  useEffect(() => {
-    if (isOpen) {
-      adjustPosition(position);
-    }
-  }, [isOpen, position]);
-
-  const adjustPosition = (originalPosition: { top: number; left: number }) => {
-    const modalWidth = 250; 
-    const modalHeight = 150; 
-    const margin = 20;
-
-    let { top, left } = originalPosition;
-
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-
-    if (left + modalWidth / 2 > windowWidth - margin) {
-      left = windowWidth - modalWidth / 2 - margin;
-    }
-
-    if (left - modalWidth / 2 < margin) {
-      left = modalWidth / 2 + margin;
-    }
-
-    if (top + modalHeight / 2 > windowHeight - margin) {
-      top = windowHeight - modalHeight / 2 - margin;
-    }
-
-    if (top - modalHeight / 2 < margin) {
-      top = modalHeight / 2 + margin;
-    }
-
-    setAdjustedPosition({ top, left });
-  };
+  useEscapeKey(onClose, isOpen);
+  
+  if (!isOpen) return null;
 
   const handleBackgroundClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -64,6 +35,13 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
     onClose();
   };
 
+  const handleEditClick = () => {
+    if (onEdit) {
+      onEdit(task);
+      onClose();
+    }
+  };
+
   const getActionButton = () => {
     if (task.completed) {
       return (
@@ -72,7 +50,7 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
           onClick={() => handleAction('complete')}
           style={{
             padding: '10px 15px',
-            backgroundColor: '#e55c5c',
+            backgroundColor: '#ff6b6b',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
@@ -104,8 +82,6 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
     <div 
       className="modal-overlay" 
@@ -132,12 +108,9 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           minWidth: '250px',
           position: 'absolute',
-          top: `${adjustedPosition.top}px`,
-          left: `${adjustedPosition.left}px`,
+          top: `${position.top}px`,
+          left: `${position.left}px`,
           transform: 'translate(-50%, -50%)',
-          maxWidth: 'calc(100vw - 40px)', 
-          maxHeight: 'calc(100vh - 40px)', 
-          overflow: 'auto', 
         }}
       >
         <h3 style={{ marginBottom: '15px', textAlign: 'center' }}>
@@ -161,6 +134,23 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
             }}
           >
             Открыть задачу
+          </button>
+
+          {/* Новая кнопка для прямого редактирования */}
+          <button
+            className="action-button direct-edit-button"
+            onClick={handleEditClick}
+            style={{
+              padding: '10px 15px',
+              backgroundColor: '#21b8f3ff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px',
+            }}
+          >
+            Редактировать задачу
           </button>
         </div>
       </div>

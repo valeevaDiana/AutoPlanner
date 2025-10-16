@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Task, TaskAction } from '../../../entities/task/model/types'; 
 import { TaskActionsModal } from '../../../features/task-actions/ui/TaskActionsModal';
+import { useWeekNavigation } from '../../../shared/lib/hooks/useWeekNavigation';
 
 const DAYS = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
 
@@ -15,144 +16,11 @@ const generateTimeSlots = (): string[] => {
 
 interface ScheduleCalendarProps {
   onAddTask?: (initialDate?: { day: number; time: string; date: string }) => void;
-  onEditTask?: (task: Task) => void;
+  onEditTask?: (task: Task) => void; 
   onViewTask?: (task: Task) => void;
+  tasks: Task[];
+  onTasksUpdate?: (tasks: Task[]) => void;
 }
-
-
-const mockCells: Task[] = [
-  {
-    id: 'task1',
-    time: '08:00',
-    day: 0,
-    content: 'Задачка раз',
-    priority: 'medium',
-    durationMinutes: 90, 
-    startMinute: 0, 
-    completed: false,
-  },
-  {
-    id: 'task2',
-    time: '09:00',
-    day: 1,
-    content: 'Задача про что то',
-    priority: 'medium',
-    durationMinutes: 30, 
-    startMinute: 15, 
-    completed: false,
-  },
-  {
-    id: 'task3',
-    time: '09:00',
-    day: 2,
-    content: 'Тут очень важная задача',
-    priority: 'high',
-    durationMinutes: 120, 
-    startMinute: 0, 
-    completed: false,
-  },
-  {
-    id: 'task4',
-    time: '10:00',
-    day: 4,
-    content: 'Маленькая задачка',
-    priority: 'low',
-    durationMinutes: 20, 
-    startMinute: 30,
-    completed: false, 
-  },
-  {
-    id: 'task5',
-    time: '11:00',
-    day: 0,
-    content: 'Задачка обычная',
-    priority: 'low',
-    durationMinutes: 60, 
-    startMinute: 0,
-    completed: false,
-  },
-  {
-    id: 'task6',
-    time: '12:00',
-    day: 3,
-    content: 'Задача 1 (пересекается)',
-    priority: 'medium',
-    durationMinutes: 180, 
-    startMinute: 0,
-    completed: false,
-  },
-  {
-    id: 'task7',
-    time: '12:00',
-    day: 3,
-    content: 'Задача 2 (пересекается)',
-    priority: 'medium',
-    durationMinutes: 180, 
-    startMinute: 15,
-    completed: false,
-  },
-  {
-    id: 'task8',
-    time: '13:00',
-    day: 6,
-    content: 'Тест1',
-    priority: 'medium',
-    durationMinutes: 180, 
-    startMinute: 30, 
-    completed: false,
-  },
-  {
-    id: 'task9',
-    time: '10:00',
-    day: 5,
-    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
-    priority: 'medium',
-    durationMinutes: 30,  
-    startMinute: 45, 
-    completed: false,
-  },
-  {
-    id: 'task10',
-    time: '10:00',
-    day: 5,
-    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
-    priority: 'medium',
-    durationMinutes: 30,  
-    startMinute: 45,
-    completed: false, 
-  },
-  {
-    id: 'task11',
-    time: '10:00',
-    day: 5,
-    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
-    priority: 'medium',
-    durationMinutes: 130,  
-    startMinute: 45, 
-    completed: false,
-  },
-  {
-    id: 'task12',
-    time: '10:00',
-    day: 5,
-    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
-    priority: 'medium',
-    durationMinutes: 30,  
-    startMinute: 45,
-    completed: false, 
-  },
-  {
-    id: 'task13',
-    time: '10:00',
-    day: 5,
-    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
-    priority: 'medium',
-    durationMinutes: 130,  
-    startMinute: 45, 
-    completed: false,
-  },
-
-];
 
 const getOverlappingTasks = (tasks: Task[]): Task[][] => {
   const groups: Task[][] = [];
@@ -307,18 +175,31 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   );
 };
 
-
-
 export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
-    onAddTask,
-    onEditTask,
-    onViewTask
-  }) => {
+  onAddTask,
+  onEditTask, 
+  onViewTask,
+  tasks,
+  onTasksUpdate
+}) => {
   const timeSlots = generateTimeSlots();
-  const [tasks, setTasks] = useState<Task[]>(mockCells);
+  const {
+    weekDates,
+    nextWeek,
+    prevWeek,
+    goToToday,
+    formatDate,
+    getISODate
+  } = useWeekNavigation();
+
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const getTasksForDate = (date: Date) => {
+    const dateString = getISODate(date);
+    return tasks.filter(task => task.realDate === dateString);
+  };
 
   const handleTaskClick = (task: Task, event: React.MouseEvent) => {
     setSelectedTask(task);
@@ -334,38 +215,26 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
     setSelectedTask(null);
   };
 
-  const handleEmptyCellClick = (dayIndex: number, time: string) => {
+  const handleEmptyCellClick = (dayIndex: number, time: string, date: Date) => {
     if (onAddTask) {
-      const today = new Date();
-      const currentDay = today.getDay(); 
-      
-      const jsDayOfWeek = dayIndex === 6 ? 0 : dayIndex + 1;
-      
-      const diff = jsDayOfWeek - currentDay;
-      const targetDate = new Date(today);
-      targetDate.setDate(today.getDate() + diff);
-      const dateString = targetDate.toISOString().split('T')[0];
-
       onAddTask({
         day: dayIndex,
         time: time,
-        date: dateString
+        date: getISODate(date)
       });
     }
   };
-
 
   const handleTaskAction = (action: TaskAction) => {
     if (!selectedTask) return;
 
     if (action === 'complete') {
-      setTasks(prevTasks => 
-        prevTasks.map(task => 
-          task.id === selectedTask.id 
-            ? { ...task, completed: !task.completed }
-            : task
-        )
+      const updatedTasks = tasks.map(task => 
+        task.id === selectedTask.id 
+          ? { ...task, completed: !task.completed }
+          : task
       );
+      onTasksUpdate?.(updatedTasks);
     } else if (action === 'edit') {
       if (onViewTask) {
         onViewTask(selectedTask);
@@ -373,14 +242,89 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
     }
   };
 
+  const handleDirectEdit = (task: Task) => {
+    if (onEditTask) {
+      onEditTask(task);
+    }
+  };
+
+  const weekRange = `${formatDate(weekDates[0])} - ${formatDate(weekDates[6])}`;
 
   return (
     <div className="calendar-container">
+      {/* Навигация по неделям */}
+      <div className="calendar-navigation" style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '15px 20px',
+        backgroundColor: '#f9f0e6',
+        borderBottom: '1px solid #d9b7a0'
+      }}>
+        <button
+          onClick={prevWeek}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#c68b5e',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '20px',
+            fontWeight: '600'
+          }}
+        >
+          ←
+        </button>
+        
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '18px', fontWeight: '600', color: '#333' }}>
+            {weekRange}
+          </div>
+          <button
+            onClick={goToToday}
+            style={{
+              marginTop: '5px',
+              padding: '4px 12px',
+              backgroundColor: 'transparent',
+              color: '#c68b5e',
+              border: '1px solid #c68b5e',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '12px'
+            }}
+          >
+            Сегодня
+          </button>
+        </div>
+        
+        <button
+          onClick={nextWeek}
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#c68b5e',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '20px',
+            fontWeight: '600'
+          }}
+        >
+          →
+        </button>
+      </div>
+
       <div className="calendar-scroll-container">
         <div className="calendar-header">
           <div>Время</div>
-          {DAYS.map((day, i) => (
-            <div key={i}>{day}</div>
+          {weekDates.map((date, index) => (
+            <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ fontWeight: '600' }}>{DAYS[index]}</div>
+              <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
+                {formatDate(date)}
+              </div>
+            </div>
           ))}
         </div>
 
@@ -389,9 +333,9 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
             <div key={time} className="calendar-row">
               <div className="time-cell">{time}</div>
 
-              {DAYS.map((_, dayIndex) => {
-                const tasksInThisSlot = tasks.filter((task) => {
-                  if (task.day !== dayIndex) return false;
+              {weekDates.map((date, dayIndex) => {
+                const tasksForDate = getTasksForDate(date);
+                const tasksInThisSlot = tasksForDate.filter((task) => {
                   const taskHour = parseInt(task.time.split(':')[0]);
                   const currentHour = parseInt(time.split(':')[0]);
                   return taskHour === currentHour;
@@ -400,12 +344,16 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
                 const overlappingGroups = getOverlappingTasks(tasksInThisSlot);
 
                 return (
-                  <div key={dayIndex} className="cell empty" style={{ 
-                    position: 'relative',
-                    minHeight: '60px',
-                    height: '60px'
-                  }}
-                  onClick={() => handleEmptyCellClick(dayIndex, time)} >
+                  <div 
+                    key={dayIndex} 
+                    className="cell empty" 
+                    style={{ 
+                      position: 'relative',
+                      minHeight: '60px',
+                      height: '60px'
+                    }}
+                    onClick={() => handleEmptyCellClick(dayIndex, time, date)}
+                  >
                     <span className="plus">+</span>
                     
                     {overlappingGroups.map((group) => 
@@ -432,14 +380,15 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
       </div>
 
       {selectedTask && (
-        <TaskActionsModal
-          task={selectedTask}
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
-          onAction={handleTaskAction}
-          position={modalPosition}
-        />
-      )}
+      <TaskActionsModal
+        task={selectedTask}
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onAction={handleTaskAction}
+        onEdit={handleDirectEdit} 
+        position={modalPosition}
+      />
+    )}
     </div>
   );
 };

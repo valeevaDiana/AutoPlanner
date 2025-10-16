@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import type { Task } from '../../../entities/task/model/types';
+import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
 
 interface TaskFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (taskData: Partial<Task>) => void;
+  onEdit?: () => void; 
   task?: Task | null;
   mode?: 'create' | 'edit' | 'view';
   initialDate?: { 
@@ -18,6 +20,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  onEdit, 
   task,
   mode = 'create',
   initialDate
@@ -32,6 +35,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [durationHours, setDurationHours] = useState('1');
   const [durationMinutes, setDurationMinutes] = useState('0');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  useEscapeKey(onClose, isOpen);
 
   const minutesToDuration = (totalMinutes: number) => {
     const days = Math.floor(totalMinutes / (24 * 60));
@@ -445,73 +449,91 @@ const taskData: Partial<Task> = {
             </div>
           </div>
 
-          {/* Кнопки действий */}
-          {!isViewMode && (
-            <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-              <button
-                onClick={handleSave}
-                style={{
-                  flex: 1,
-                  padding: '14px',
-                  backgroundColor: '#84c65e',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s ease'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#72b352'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#84c65e'}
-              >
-                {mode === 'create' ? 'Создать задачу' : 'Сохранить изменения'}
-              </button>
-              <button
-                onClick={onClose}
-                style={{
-                  flex: 1,
-                  padding: '14px',
-                  backgroundColor: '#f0f0f0',
-                  color: '#333',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s ease'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-              >
-                Отмена
-              </button>
-            </div>
-          )}
-          
-          {isViewMode && (
-            <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-              <button
-                onClick={onClose}
-                style={{
-                  flex: 1,
-                  padding: '14px',
-                  backgroundColor: '#c68b5e',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s ease'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#b37a4e'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#c68b5e'}
-              >
-                Закрыть
-              </button>
-            </div>
-          )}
+        {!isViewMode && (
+              <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                <button
+                  onClick={handleSave}
+                  style={{
+                    flex: 1,
+                    padding: '14px',
+                    backgroundColor: '#84c65e',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#72b352'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#84c65e'}
+                >
+                  {mode === 'create' ? 'Создать задачу' : 'Сохранить изменения'}
+                </button>
+                <button
+                  onClick={onClose}
+                  style={{
+                    flex: 1,
+                    padding: '14px',
+                    backgroundColor: '#f0f0f0',
+                    color: '#333',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                >
+                  Отмена
+                </button>
+              </div>
+            )}
+            
+            {isViewMode && (
+              <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                <button
+                  onClick={onEdit} 
+                  style={{
+                    flex: 1,
+                    padding: '14px',
+                    backgroundColor: '#2196F3',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1976D2'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2196F3'}
+                >
+                  Редактировать
+                </button>
+                <button
+                  onClick={onClose}
+                  style={{
+                    flex: 1,
+                    padding: '14px',
+                    backgroundColor: '#c68b5e',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#b37a4e'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#c68b5e'}
+                >
+                  Закрыть
+                </button>
+              </div>
+            )}
         </div>
       </div>
     </div>

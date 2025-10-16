@@ -13,6 +13,7 @@ export interface Task {
   endDate?: string; 
   startTime?: string; 
   endTime?: string; 
+  realDate?: string; 
 }
 
 export type TaskAction = 'complete' | 'edit';
