@@ -147,13 +147,22 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
             onClick={handleEditClick}
             style={{
               padding: '10px 15px',
-              backgroundColor: '#21b8f3ff',
+              backgroundColor: currentTheme.colors.edit, 
               color: 'white',
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',
               fontSize: '14px',
+              transition: 'all 0.3s ease',
+              transform: 'scale(1)'
             }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+
           >
             Редактировать задачу
           </button>

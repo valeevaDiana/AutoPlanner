@@ -1165,10 +1165,15 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   fontSize: '16px',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  transition: 'background-color 0.2s ease'
+                  transition: 'all 0.3s ease',
+                  transform: 'scale(1)'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.accent}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.success}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
               >
                 {mode === 'create' ? 'Создать задачу' : 'Сохранить изменения'}
               </button>
@@ -1184,10 +1189,15 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   fontSize: '16px',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  transition: 'background-color 0.2s ease'
+                  transition: 'all 0.3s ease',
+                  transform: 'scale(1)'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.secondary}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.background}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
               >
                 Отмена
               </button>
@@ -1201,17 +1211,22 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 style={{
                   flex: 1,
                   padding: '14px',
-                  backgroundColor: currentTheme.colors.primary,
+                  backgroundColor: currentTheme.colors.edit,
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
                   fontSize: '16px',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  transition: 'background-color 0.2s ease'
+                  transition: 'all 0.3s ease',
+                  transform: 'scale(1)'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.accent}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.primary}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
               >
                 Редактировать
               </button>
@@ -1227,10 +1242,15 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   fontSize: '16px',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  transition: 'background-color 0.2s ease'
+                  transition: 'all 0.3s ease',
+                  transform: 'scale(1)'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.secondary}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.background}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                }}
               >
                 Закрыть
               </button>

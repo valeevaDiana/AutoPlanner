@@ -15,6 +15,7 @@ export interface ThemeColors {
   success: string;
   warning: string;
   error: string;
+  edit: string;  
   
   // Цвета приоритетов задач
   priorityLow: string;

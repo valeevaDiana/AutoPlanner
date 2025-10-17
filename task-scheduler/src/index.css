@@ -92,11 +92,11 @@ body {
   font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .week-selector:hover {
-  background: var(--color-accent); 
+  transform: scale(1.05);
 }
 
 .notification-icon {
@@ -251,16 +251,28 @@ body {
   transform: translateY(-1px);
 }
 
+.complete-button {
+  transition: all 0.3s ease;
+}
+
 .complete-button:hover {
-  background-color: var(--color-success) !important;
+  transform: scale(1.05);
+}
+
+.uncomplete-button {
+  transition: all 0.3s ease;
 }
 
 .uncomplete-button:hover {
-  background-color: var(--color-error) !important;
+  transform: scale(1.05);
+}
+
+.edit-button {
+  transition: all 0.3s ease;
 }
 
 .edit-button:hover {
-  background-color: var(--color-warning) !important;
+  transform: scale(1.05);
 }
 
 /* Стили для модального окна задачи */
@@ -321,11 +333,11 @@ body {
   cursor: pointer;
   font-size: 5px;
   font-weight: 600;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .calendar-navigation button:hover {
-  background-color: var(--color-accent);
+  transform: scale(1.1);
 }
 
 .calendar-navigation .today-button {
@@ -334,15 +346,16 @@ body {
   border: 1px solid var(--color-primary);
   padding: 4px 12px;
   font-size: 12px;
+  transition: all 0.3s ease;
 }
 
 .calendar-navigation .today-button:hover {
-  background-color: var(--color-primary);
+  transform: scale(1.1);
   color: white;
 }
 
 .direct-edit-button:hover {
-  background-color: var(--color-accent) !important;
+  transform: scale(1.1);
 }
 
 /* ПОДВАЛ */
@@ -372,11 +385,11 @@ body {
   width: 100%;
   max-width: 400px;
   text-align: center;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .add-button:hover {
-  background: var(--color-accent);
+  transform: scale(1.1);
 }
 
 /* АДАПТИВКИ ДЛЯ МОБИЛКИ */
@@ -540,10 +553,11 @@ body {
 .calendar-scroll-container::-webkit-scrollbar-thumb {
   background: var(--color-primary);
   border-radius: 4px;
+  transition: all 0.3s ease;
 }
 
 .calendar-scroll-container::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent);
+  transform: scale(1.1);
 }
 
 /*НАСТРОЙКА КТО СВЕРХУ*/

@@ -48,13 +48,13 @@ export const ThemeCustomizer: React.FC = () => {
     { key: 'text', label: 'Текст' },
     { key: 'textSecondary', label: 'Вторичный текст' },
     { key: 'border', label: 'Границы' },
-    { key: 'accent', label: 'Акцент' },
     { key: 'success', label: 'Успех' },
     { key: 'warning', label: 'Предупреждение' },
     { key: 'error', label: 'Ошибка' },
     { key: 'calendarHeader', label: 'Шапка календаря' },
     { key: 'calendarNavigation', label: 'Навигация календаря' },
     { key: 'timeCell', label: 'Ячейки времени' },
+    { key: 'edit', label: 'Кнопка редактирования задачи' },
   ];
 
   return (
@@ -183,14 +183,23 @@ export const ThemeCustomizer: React.FC = () => {
             style={{
               flex: 1,
               padding: '12px',
-              backgroundColor: currentTheme.colors.accent,
+              backgroundColor: currentTheme.colors.primary,
               color: 'white',
               border: 'none',
               borderRadius: '6px',
               fontSize: '16px',
               fontWeight: '600',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              transform: 'scale(1)'
             }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+
           >
             Сохранить как новую тему
           </button>
@@ -205,7 +214,15 @@ export const ThemeCustomizer: React.FC = () => {
               borderRadius: '6px',
               fontSize: '16px',
               fontWeight: '600',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              transform: 'scale(1)'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
             }}
           >
             Закрыть
