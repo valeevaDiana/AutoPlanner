@@ -1,0 +1,117 @@
+import type { Theme } from './theme.types';
+
+export const predefinedThemes: Theme[] = [
+  {
+    name: 'Светлая',
+    colors: {
+        primary: '#c68b5e', //основные кнопки (добавить задачу, -> <- итд)
+        secondary: '#d9b7a0', //цвет столбика времени
+        background: '#fff8f0', //фон таблицы и блока управления неделями
+        surface: '#ffffff', //фон модальных окон
+        text: '#333333', //основной темный текст
+        textSecondary: '#666666', //текст неосновного текста (плюсы и второстепенный текст)
+        border: '#d9b7a0', //границы таблицы
+        accent: '#84c65e', //цвет при наведении
+        success: '#84c65e', //кнопки успеха: выполнить задачу, сохранить изменения
+        warning: '#ffb74d', //hover "открыть задачу"
+        error: '#ff6b6b', //отменить выполнение
+        priorityLow: '#e6ffe6', //цвет фона низкого приоритета
+        priorityLowText: '#205623', //текст низкого приоритета
+        priorityMedium: '#fffacd', //фон среднего приоритета
+        priorityMediumText: '#974f0f', //текст среднего приоритета
+        priorityHigh: '#ffe6e6', //фон высокого приоритета
+        priorityHighText: '#721717', //текст высокого приоритета
+        priorityCompleted: '#f0f0f0', //цвет выполненной задачи
+        priorityCompletedText: '#666666', //текст выполненой задачи
+
+        calendarHeader: '#d9b7a0', // шапка календаря
+        calendarNavigation: '#f9f0e6', // навигация недель
+        timeCell: '#f9f0e6' // ячейки времени
+    }
+  },
+  {
+    name: 'Темная',
+    colors: {
+        primary: '#8b5a3c',
+        secondary: '#6d4c41',
+        background: '#1a1a1a',
+        surface: '#2d2d2d',
+        text: '#ffffff',
+        textSecondary: '#b0b0b0',
+        border: '#4a4a4a',
+        accent: '#4caf50',
+        success: '#4caf50',
+        warning: '#ff9800',
+        error: '#f44336',
+        priorityLow: '#1a331a',
+        priorityLowText: '#88cc88',
+        priorityMedium: '#332b1a',
+        priorityMediumText: '#ffcc66',
+        priorityHigh: '#331a1a',
+        priorityHighText: '#ff6666',
+        priorityCompleted: '#404040',
+        priorityCompletedText: '#888888',
+
+        calendarHeader: '#3e2723',
+        calendarNavigation: '#2d1b17',
+        timeCell: '#2d1b17'
+
+    }
+  },
+  {
+    name: 'Розовая',
+    colors: {
+        primary: '#e91e63',
+        secondary: '#f8bbd9',
+        background: '#fff0f5',
+        surface: '#ffffff',
+        text: '#333333',
+        textSecondary: '#666666',
+        border: '#f8bbd9',
+        accent: '#ff4081',
+        success: '#4caf50',
+        warning: '#ff9800',
+        error: '#f44336',
+        priorityLow: '#fff0ffff',
+        priorityLowText: '#880f6eff',
+        priorityMedium: '#ff93b7ff',
+        priorityMediumText: '#e91e63',
+        priorityHigh: '#880f6eff',
+        priorityHighText: '#880f6eff',
+        priorityCompleted: '#f5f5f5',
+        priorityCompletedText: '#666666',
+
+        calendarHeader: '#f8bbd9',
+        calendarNavigation: '#fce4ec',
+        timeCell: '#fce4ec'
+    }
+  },
+  {
+    name: 'Синяя',
+    colors: {
+        primary: '#2196f3',
+        secondary: '#bbdefb',
+        background: '#f3f8ff',
+        surface: '#ffffff',
+        text: '#333333',
+        textSecondary: '#666666',
+        border: '#bbdefb',
+        accent: '#2196f3',
+        success: '#4caf50',
+        warning: '#ff9800',
+        error: '#f44336',
+        priorityLow: '#e3f2fd',
+        priorityLowText: '#0d47a1',
+        priorityMedium: '#84d8ffff',
+        priorityMediumText: '#01579b',
+        priorityHigh: '#ffebee',
+        priorityHighText: '#b71c1c',
+        priorityCompleted: '#f5f5f5',
+        priorityCompletedText: '#666666',
+
+        calendarHeader: '#bbdefb',
+        calendarNavigation: '#e3f2fd',
+        timeCell: '#e3f2fd'
+    }
+  }
+];

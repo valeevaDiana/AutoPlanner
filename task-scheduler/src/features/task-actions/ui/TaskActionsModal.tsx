@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Task, TaskAction } from '../../../entities/task/model/types';
 import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
-
+import { useTheme } from '../../../shared/lib/contexts';
 
 interface TaskActionsModalProps {
   task: Task;
@@ -20,6 +20,7 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
   onEdit,
   position
 }) => {
+  const { currentTheme } = useTheme();
   useEscapeKey(onClose, isOpen);
   
   if (!isOpen) return null;
@@ -50,7 +51,7 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
           onClick={() => handleAction('complete')}
           style={{
             padding: '10px 15px',
-            backgroundColor: '#ff6b6b',
+            backgroundColor: currentTheme.colors.error,
             color: 'white',
             border: 'none',
             borderRadius: '4px',
@@ -68,7 +69,7 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
           onClick={() => handleAction('complete')}
           style={{
             padding: '10px 15px',
-            backgroundColor: '#84c65e',
+            backgroundColor: currentTheme.colors.success,
             color: 'white',
             border: 'none',
             borderRadius: '4px',
@@ -102,7 +103,7 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
       <div 
         className="modal-content"
         style={{
-          backgroundColor: 'white',
+          backgroundColor: currentTheme.colors.surface,
           padding: '20px',
           borderRadius: '8px',
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
@@ -111,9 +112,14 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
           top: `${position.top}px`,
           left: `${position.left}px`,
           transform: 'translate(-50%, -50%)',
+          border: `1px solid ${currentTheme.colors.border}`,
         }}
       >
-        <h3 style={{ marginBottom: '15px', textAlign: 'center' }}>
+        <h3 style={{ 
+          marginBottom: '15px', 
+          textAlign: 'center',
+          color: currentTheme.colors.text 
+        }}>
           Выберите действие
         </h3>
         
@@ -125,7 +131,7 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
             onClick={() => handleAction('edit')}
             style={{
               padding: '10px 15px',
-              backgroundColor: '#c68b5e',
+              backgroundColor: currentTheme.colors.primary,
               color: 'white',
               border: 'none',
               borderRadius: '4px',
@@ -136,7 +142,6 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
             Открыть задачу
           </button>
 
-          {/* Новая кнопка для прямого редактирования */}
           <button
             className="action-button direct-edit-button"
             onClick={handleEditClick}

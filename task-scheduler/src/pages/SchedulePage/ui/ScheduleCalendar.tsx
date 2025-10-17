@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { Task, TaskAction } from '../../../entities/task/model/types'; 
 import { TaskActionsModal } from '../../../features/task-actions/ui/TaskActionsModal';
 import { useWeekNavigation } from '../../../shared/lib/hooks/useWeekNavigation';
+import { useTheme } from '../../../shared/lib/contexts';
 
 const DAYS = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
 
@@ -182,6 +183,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
   tasks,
   onTasksUpdate
 }) => {
+  const { currentTheme } = useTheme();
   const timeSlots = generateTimeSlots();
   const {
     weekDates,
@@ -253,19 +255,12 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
   return (
     <div className="calendar-container">
       {/* Навигация по неделям */}
-      <div className="calendar-navigation" style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '15px 20px',
-        backgroundColor: '#f9f0e6',
-        borderBottom: '1px solid #d9b7a0'
-      }}>
+      <div className="calendar-navigation">
         <button
           onClick={prevWeek}
           style={{
             padding: '8px 16px',
-            backgroundColor: '#c68b5e',
+            backgroundColor: currentTheme.colors.primary,
             color: 'white',
             border: 'none',
             borderRadius: '6px',
@@ -278,7 +273,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
         </button>
         
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '18px', fontWeight: '600', color: '#333' }}>
+          <div style={{ fontSize: '18px', fontWeight: '600', color: currentTheme.colors.text }}>
             {weekRange}
           </div>
           <button
@@ -287,8 +282,8 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
               marginTop: '5px',
               padding: '4px 12px',
               backgroundColor: 'transparent',
-              color: '#c68b5e',
-              border: '1px solid #c68b5e',
+              color: currentTheme.colors.primary,
+              border: `1px solid ${currentTheme.colors.primary}`,
               borderRadius: '4px',
               cursor: 'pointer',
               fontSize: '12px'
@@ -302,7 +297,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
           onClick={nextWeek}
           style={{
             padding: '8px 16px',
-            backgroundColor: '#c68b5e',
+            backgroundColor: currentTheme.colors.primary,
             color: 'white',
             border: 'none',
             borderRadius: '6px',
@@ -313,7 +308,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
         >
           →
         </button>
-      </div>
+      </div>  
 
       <div className="calendar-scroll-container">
         <div className="calendar-header">

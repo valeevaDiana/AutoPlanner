@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Task } from '../../../entities/task/model/types';
 import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
+import { useTheme } from '../../../shared/lib/contexts';
 
 interface TaskFormModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   mode = 'create',
   initialDate
 }) => {
+  const { currentTheme } = useTheme();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -222,7 +224,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       <div 
         className="task-form-modal"
         style={{
-          backgroundColor: 'white',
+          backgroundColor: currentTheme.colors.surface,
           padding: '30px',
           borderRadius: '12px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
@@ -230,12 +232,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           maxWidth: '600px',
           maxHeight: '90vh',
           overflow: 'auto',
+          border: `1px solid ${currentTheme.colors.border}`,
         }}
       >
         <h2 style={{ 
           marginBottom: '25px', 
           textAlign: 'center',
-          color: '#333',
+          color: currentTheme.colors.text,
           fontSize: '24px',
           fontWeight: '600'
         }}>
@@ -249,7 +252,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               display: 'block', 
               marginBottom: '8px',
               fontWeight: '500',
-              color: '#333'
+              color: currentTheme.colors.text
             }}>
               Задача:
             </label>
@@ -262,12 +265,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               style={{
                 width: '100%',
                 padding: '12px',
-                border: '1px solid #ddd',
+                border: `1px solid ${currentTheme.colors.border}`,
                 borderRadius: '6px',
                 fontSize: '16px',
                 fontStyle: title ? 'normal' : 'italic',
-                color: title ? '#333' : '#999',
-                backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                color: title ? currentTheme.colors.text : currentTheme.colors.textSecondary,
+                backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                 cursor: isViewMode ? 'not-allowed' : 'text'
               }}
             />
@@ -279,7 +282,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               display: 'block', 
               marginBottom: '8px',
               fontWeight: '500',
-              color: '#333'
+              color: currentTheme.colors.text
             }}>
               Описание задачи:
             </label>
@@ -292,12 +295,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               style={{
                 width: '100%',
                 padding: '12px',
-                border: '1px solid #ddd',
+                border: `1px solid ${currentTheme.colors.border}`,
                 borderRadius: '6px',
                 fontSize: '16px',
                 fontStyle: description ? 'normal' : 'italic',
-                color: description ? '#333' : '#999',
-                backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                color: description ? currentTheme.colors.text : currentTheme.colors.textSecondary,
+                backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                 cursor: isViewMode ? 'not-allowed' : 'text',
                 resize: 'vertical',
                 minHeight: '100px'
@@ -311,13 +314,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               display: 'block', 
               marginBottom: '12px',
               fontWeight: '500',
-              color: '#333'
+              color: currentTheme.colors.text
             }}>
               Сроки:
             </label>
             <div className="dates-container">
               <div>
-                <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Начать с:</div>
+                <div style={{ fontSize: '14px', color: currentTheme.colors.textSecondary, marginBottom: '5px' }}>Начать с:</div>
                 <div className="date-group">
                   <input
                     type="date"
@@ -327,10 +330,11 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     style={{
                       flex: 1,
                       padding: '8px',
-                      border: '1px solid #ddd',
+                      border: `1px solid ${currentTheme.colors.border}`,
                       borderRadius: '4px',
-                      backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                       cursor: isViewMode ? 'not-allowed' : 'text',
+                      color: currentTheme.colors.text
                     }}
                   />
                   <input
@@ -341,16 +345,17 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     style={{
                       flex: 1,
                       padding: '8px',
-                      border: '1px solid #ddd',
+                      border: `1px solid ${currentTheme.colors.border}`,
                       borderRadius: '4px',
-                      backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                       cursor: isViewMode ? 'not-allowed' : 'text',
+                      color: currentTheme.colors.text
                     }}
                   />
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>Закончить до:</div>
+                <div style={{ fontSize: '14px', color: currentTheme.colors.textSecondary, marginBottom: '5px' }}>Закончить до:</div>
                 <div className="date-group">
                   <input
                     type="date"
@@ -360,10 +365,11 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     style={{
                       flex: 1,
                       padding: '8px',
-                      border: '1px solid #ddd',
+                      border: `1px solid ${currentTheme.colors.border}`,
                       borderRadius: '4px',
-                      backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                       cursor: isViewMode ? 'not-allowed' : 'text',
+                      color: currentTheme.colors.text
                     }}
                   />
                   <input
@@ -374,10 +380,11 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     style={{
                       flex: 1,
                       padding: '8px',
-                      border: '1px solid #ddd',
+                      border: `1px solid ${currentTheme.colors.border}`,
                       borderRadius: '4px',
-                      backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                       cursor: isViewMode ? 'not-allowed' : 'text',
+                      color: currentTheme.colors.text
                     }}
                   />
                 </div>
@@ -391,13 +398,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               display: 'block', 
               marginBottom: '12px',
               fontWeight: '500',
-              color: '#333'
+              color: currentTheme.colors.text
             }}>
               Длительность:
             </label>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <div style={{ fontSize: '12px', color: '#666' }}>Дни</div>
+                <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Дни</div>
                 <input
                   type="number"
                   value={durationDays}
@@ -408,17 +415,18 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   style={{
                     width: '100%',
                     padding: '8px',
-                    border: '1px solid #ddd',
+                    border: `1px solid ${currentTheme.colors.border}`,
                     borderRadius: '4px',
                     fontSize: '14px',
-                    backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                    backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                     cursor: isViewMode ? 'not-allowed' : 'text',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    color: currentTheme.colors.text
                   }}
                 />
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <div style={{ fontSize: '12px', color: '#666' }}>Часы</div>
+                <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Часы</div>
                 <input
                   type="number"
                   value={durationHours}
@@ -429,17 +437,18 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   style={{
                     width: '100%',
                     padding: '8px',
-                    border: '1px solid #ddd',
+                    border: `1px solid ${currentTheme.colors.border}`,
                     borderRadius: '4px',
                     fontSize: '14px',
-                    backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                    backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                     cursor: isViewMode ? 'not-allowed' : 'text',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    color: currentTheme.colors.text
                   }}
                 />
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <div style={{ fontSize: '12px', color: '#666' }}>Минуты</div>
+                <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Минуты</div>
                 <input
                   type="number"
                   value={durationMinutes}
@@ -451,17 +460,18 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   style={{
                     width: '100%',
                     padding: '8px',
-                    border: '1px solid #ddd',
+                    border: `1px solid ${currentTheme.colors.border}`,
                     borderRadius: '4px',
                     fontSize: '14px',
-                    backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                    backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                     cursor: isViewMode ? 'not-allowed' : 'text',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                    color: currentTheme.colors.text
                   }}
                 />
               </div>
             </div>
-            <div style={{ fontSize: '12px', color: '#666', marginTop: '5px', textAlign: 'center' }}>
+            <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, marginTop: '5px', textAlign: 'center' }}>
               Общая длительность: {durationToMinutes(
                 parseInt(durationDays) || 0,
                 parseInt(durationHours) || 0,
@@ -476,7 +486,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               display: 'block', 
               marginBottom: '12px',
               fontWeight: '500',
-              color: '#333'
+              color: currentTheme.colors.text
             }}>
               Приоритет:
             </label>
@@ -490,12 +500,16 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   style={{
                     flex: 1,
                     padding: '12px',
-                    border: `2px solid ${priority === prio ? '#333' : 'transparent'}`,
+                    border: `2px solid ${priority === prio ? currentTheme.colors.primary : 'transparent'}`,
                     borderRadius: '6px',
                     backgroundColor: 
-                      prio === 'low' ? '#e6ffe6' :
-                      prio === 'medium' ? '#fffacd' : '#ffe6e6',
-                    color: '#333',
+                      prio === 'low' ? currentTheme.colors.priorityLow :
+                      prio === 'medium' ? currentTheme.colors.priorityMedium : 
+                      currentTheme.colors.priorityHigh,
+                    color: 
+                      prio === 'low' ? currentTheme.colors.priorityLowText :
+                      prio === 'medium' ? currentTheme.colors.priorityMediumText : 
+                      currentTheme.colors.priorityHighText,
                     cursor: isViewMode ? 'default' : 'pointer',
                     fontWeight: priority === prio ? '600' : '400',
                     transition: 'all 0.2s ease'
@@ -514,7 +528,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <label style={{ 
                 fontWeight: '500',
-                color: '#333'
+                color: currentTheme.colors.text
               }}>
                 Задача повторяется?
               </label>
@@ -534,9 +548,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             {isRepeating && (
               <div style={{ 
                 padding: '15px', 
-                backgroundColor: '#f9f9f9', 
+                backgroundColor: currentTheme.colors.background,
                 borderRadius: '6px',
-                border: '1px solid #eee',
+                border: `1px solid ${currentTheme.colors.border}`,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '15px'
@@ -547,13 +561,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     display: 'block', 
                     marginBottom: '8px',
                     fontSize: '14px',
-                    color: '#333'
+                    color: currentTheme.colors.text
                   }}>
                     Через какое время повторить задачу:
                   </label>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ fontSize: '12px', color: '#666' }}>Дни</div>
+                      <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Дни</div>
                       <input
                         type="number"
                         value={repeatDays}
@@ -563,17 +577,18 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                         style={{
                           width: '100%',
                           padding: '8px',
-                          border: '1px solid #ddd',
+                          border: `1px solid ${currentTheme.colors.border}`,
                           borderRadius: '4px',
                           fontSize: '14px',
-                          backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                           cursor: isViewMode ? 'not-allowed' : 'text',
-                          textAlign: 'center'
+                          textAlign: 'center',
+                          color: currentTheme.colors.text
                         }}
                       />
                     </div>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ fontSize: '12px', color: '#666' }}>Часы</div>
+                      <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Часы</div>
                       <input
                         type="number"
                         value={repeatHours}
@@ -584,17 +599,18 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                         style={{
                           width: '100%',
                           padding: '8px',
-                          border: '1px solid #ddd',
+                          border: `1px solid ${currentTheme.colors.border}`,
                           borderRadius: '4px',
                           fontSize: '14px',
-                          backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                           cursor: isViewMode ? 'not-allowed' : 'text',
-                          textAlign: 'center'
+                          textAlign: 'center',
+                          color: currentTheme.colors.text
                         }}
                       />
                     </div>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ fontSize: '12px', color: '#666' }}>Минуты</div>
+                      <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Минуты</div>
                       <input
                         type="number"
                         value={repeatMinutes}
@@ -605,12 +621,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                         style={{
                           width: '100%',
                           padding: '8px',
-                          border: '1px solid #ddd',
+                          border: `1px solid ${currentTheme.colors.border}`,
                           borderRadius: '4px',
                           fontSize: '14px',
-                          backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                           cursor: isViewMode ? 'not-allowed' : 'text',
-                          textAlign: 'center'
+                          textAlign: 'center',
+                          color: currentTheme.colors.text
                         }}
                       />
                     </div>
@@ -623,7 +640,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     display: 'block', 
                     marginBottom: '8px',
                     fontSize: '14px',
-                    color: '#333'
+                    color: currentTheme.colors.text
                   }}>
                     Количество повторений:
                   </label>
@@ -636,16 +653,17 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     style={{
                       width: '100%',
                       padding: '8px',
-                      border: '1px solid #ddd',
+                      border: `1px solid ${currentTheme.colors.border}`,
                       borderRadius: '4px',
                       fontSize: '14px',
-                      backgroundColor: isViewMode ? '#f5f5f5' : 'white',
-                      cursor: isViewMode ? 'not-allowed' : 'text'
+                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                      cursor: isViewMode ? 'not-allowed' : 'text',
+                      color: currentTheme.colors.text
                     }}
                   />
                 </div>
 
-                <div style={{ textAlign: 'center', color: '#666', fontSize: '14px', fontWeight: '500' }}>
+                <div style={{ textAlign: 'center', color: currentTheme.colors.textSecondary, fontSize: '14px', fontWeight: '500' }}>
                   ИЛИ
                 </div>
 
@@ -655,7 +673,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     display: 'block', 
                     marginBottom: '8px',
                     fontSize: '14px',
-                    color: '#333'
+                    color: currentTheme.colors.text
                   }}>
                     Начало периода повторения задачи:
                   </label>
@@ -668,11 +686,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       style={{
                         flex: 1,
                         padding: '8px',
-                        border: '1px solid #ddd',
+                        border: `1px solid ${currentTheme.colors.border}`,
                         borderRadius: '4px',
                         fontSize: '14px',
-                        backgroundColor: isViewMode ? '#f5f5f5' : 'white',
-                        cursor: isViewMode ? 'not-allowed' : 'text'
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        color: currentTheme.colors.text
                       }}
                     />
                     <input
@@ -683,11 +702,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       style={{
                         flex: 1,
                         padding: '8px',
-                        border: '1px solid #ddd',
+                        border: `1px solid ${currentTheme.colors.border}`,
                         borderRadius: '4px',
                         fontSize: '14px',
-                        backgroundColor: isViewMode ? '#f5f5f5' : 'white',
-                        cursor: isViewMode ? 'not-allowed' : 'text'
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        color: currentTheme.colors.text
                       }}
                     />
                   </div>
@@ -698,7 +718,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     display: 'block', 
                     marginBottom: '8px',
                     fontSize: '14px',
-                    color: '#333'
+                    color: currentTheme.colors.text
                   }}>
                     Конец периода повторения задачи:
                   </label>
@@ -711,11 +731,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       style={{
                         flex: 1,
                         padding: '8px',
-                        border: '1px solid #ddd',
+                        border: `1px solid ${currentTheme.colors.border}`,
                         borderRadius: '4px',
                         fontSize: '14px',
-                        backgroundColor: isViewMode ? '#f5f5f5' : 'white',
-                        cursor: isViewMode ? 'not-allowed' : 'text'
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        color: currentTheme.colors.text
                       }}
                     />
                     <input
@@ -726,11 +747,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       style={{
                         flex: 1,
                         padding: '8px',
-                        border: '1px solid #ddd',
+                        border: `1px solid ${currentTheme.colors.border}`,
                         borderRadius: '4px',
                         fontSize: '14px',
-                        backgroundColor: isViewMode ? '#f5f5f5' : 'white',
-                        cursor: isViewMode ? 'not-allowed' : 'text'
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        color: currentTheme.colors.text
                       }}
                     />
                   </div>
@@ -744,7 +766,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <label style={{ 
                 fontWeight: '500',
-                color: '#333'
+                color: currentTheme.colors.text
               }}>
                 У задачи есть конкретное время начала?
               </label>
@@ -764,9 +786,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             {hasSpecificTime && (
               <div style={{ 
                 padding: '15px', 
-                backgroundColor: '#f9f9f9', 
+                backgroundColor: currentTheme.colors.background,
                 borderRadius: '6px',
-                border: '1px solid #eee',
+                border: `1px solid ${currentTheme.colors.border}`,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '15px'
@@ -777,7 +799,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       display: 'block', 
                       marginBottom: '5px',
                       fontSize: '14px',
-                      color: '#333'
+                      color: currentTheme.colors.text
                     }}>
                       Время начала:
                     </label>
@@ -789,11 +811,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       style={{
                         width: '100%',
                         padding: '8px',
-                        border: '1px solid #ddd',
+                        border: `1px solid ${currentTheme.colors.border}`,
                         borderRadius: '4px',
                         fontSize: '14px',
-                        backgroundColor: isViewMode ? '#f5f5f5' : 'white',
-                        cursor: isViewMode ? 'not-allowed' : 'text'
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        color: currentTheme.colors.text
                       }}
                     />
                   </div>
@@ -802,7 +825,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       display: 'block', 
                       marginBottom: '5px',
                       fontSize: '14px',
-                      color: '#333'
+                      color: currentTheme.colors.text
                     }}>
                       Время окончания:
                     </label>
@@ -814,11 +837,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       style={{
                         width: '100%',
                         padding: '8px',
-                        border: '1px solid #ddd',
+                        border: `1px solid ${currentTheme.colors.border}`,
                         borderRadius: '4px',
                         fontSize: '14px',
-                        backgroundColor: isViewMode ? '#f5f5f5' : 'white',
-                        cursor: isViewMode ? 'not-allowed' : 'text'
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        color: currentTheme.colors.text
                       }}
                     />
                   </div>
@@ -832,7 +856,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <label style={{ 
                 fontWeight: '500',
-                color: '#333'
+                color: currentTheme.colors.text
               }}>
                 Есть ли возможное время начала и конца задачи?
               </label>
@@ -852,9 +876,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             {hasPossibleTime && (
               <div style={{ 
                 padding: '15px', 
-                backgroundColor: '#f9f9f9', 
+                backgroundColor: currentTheme.colors.background,
                 borderRadius: '6px',
-                border: '1px solid #eee',
+                border: `1px solid ${currentTheme.colors.border}`,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '15px'
@@ -870,13 +894,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       style={{
                         width: '100%',
                         padding: '8px',
-                        border: '1px solid #ddd',
+                        border: `1px solid ${currentTheme.colors.border}`,
                         borderRadius: '4px',
                         fontSize: '14px',
-                        backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                         cursor: isViewMode ? 'not-allowed' : 'text',
                         fontStyle: possibleStartTime ? 'normal' : 'italic',
-                        color: possibleStartTime ? '#333' : '#999'
+                        color: possibleStartTime ? currentTheme.colors.text : currentTheme.colors.textSecondary
                       }}
                     />
                   </div>
@@ -890,13 +914,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       style={{
                         width: '100%',
                         padding: '8px',
-                        border: '1px solid #ddd',
+                        border: `1px solid ${currentTheme.colors.border}`,
                         borderRadius: '4px',
                         fontSize: '14px',
-                        backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                         cursor: isViewMode ? 'not-allowed' : 'text',
                         fontStyle: possibleEndTime ? 'normal' : 'italic',
-                        color: possibleEndTime ? '#333' : '#999'
+                        color: possibleEndTime ? currentTheme.colors.text : currentTheme.colors.textSecondary
                       }}
                     />
                   </div>
@@ -910,7 +934,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <label style={{ 
                 fontWeight: '500',
-                color: '#333'
+                color: currentTheme.colors.text
               }}>
                 Зависит ли задача от другой задачи?
               </label>
@@ -930,9 +954,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             {hasDependency && (
               <div style={{ 
                 padding: '15px', 
-                backgroundColor: '#f9f9f9', 
+                backgroundColor: currentTheme.colors.background,
                 borderRadius: '6px',
-                border: '1px solid #eee',
+                border: `1px solid ${currentTheme.colors.border}`,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '15px'
@@ -943,7 +967,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     display: 'block', 
                     marginBottom: '8px',
                     fontSize: '14px',
-                    color: '#333'
+                    color: currentTheme.colors.text
                   }}>
                     Что за задача:
                   </label>
@@ -954,11 +978,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     style={{
                       width: '100%',
                       padding: '8px',
-                      border: '1px solid #ddd',
+                      border: `1px solid ${currentTheme.colors.border}`,
                       borderRadius: '4px',
                       fontSize: '14px',
-                      backgroundColor: isViewMode ? '#f5f5f5' : 'white',
-                      cursor: isViewMode ? 'not-allowed' : 'pointer'
+                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                      cursor: isViewMode ? 'not-allowed' : 'pointer',
+                      color: currentTheme.colors.text
                     }}
                   >
                     <option value="">Выберите задачу</option>
@@ -975,7 +1000,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     display: 'block', 
                     marginBottom: '8px',
                     fontSize: '14px',
-                    color: '#333'
+                    color: currentTheme.colors.text
                   }}>
                     До или после:
                   </label>
@@ -987,10 +1012,10 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       style={{
                         flex: 1,
                         padding: '8px',
-                        border: `2px solid ${dependencyType === 'before' ? '#333' : '#ddd'}`,
+                        border: `2px solid ${dependencyType === 'before' ? currentTheme.colors.primary : currentTheme.colors.border}`,
                         borderRadius: '4px',
-                        backgroundColor: dependencyType === 'before' ? '#f0f0f0' : 'white',
-                        color: '#333',
+                        backgroundColor: dependencyType === 'before' ? currentTheme.colors.background : currentTheme.colors.surface,
+                        color: currentTheme.colors.text,
                         cursor: isViewMode ? 'not-allowed' : 'pointer',
                         fontWeight: dependencyType === 'before' ? '600' : '400'
                       }}
@@ -1004,10 +1029,10 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       style={{
                         flex: 1,
                         padding: '8px',
-                        border: `2px solid ${dependencyType === 'after' ? '#333' : '#ddd'}`,
+                        border: `2px solid ${dependencyType === 'after' ? currentTheme.colors.primary : currentTheme.colors.border}`,
                         borderRadius: '4px',
-                        backgroundColor: dependencyType === 'after' ? '#f0f0f0' : 'white',
-                        color: '#333',
+                        backgroundColor: dependencyType === 'after' ? currentTheme.colors.background : currentTheme.colors.surface,
+                        color: currentTheme.colors.text,
                         cursor: isViewMode ? 'not-allowed' : 'pointer',
                         fontWeight: dependencyType === 'after' ? '600' : '400'
                       }}
@@ -1023,7 +1048,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     display: 'block', 
                     marginBottom: '8px',
                     fontSize: '14px',
-                    color: '#333'
+                    color: currentTheme.colors.text
                   }}>
                     Через какое время:
                   </label>
@@ -1034,11 +1059,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       disabled={isViewMode}
                       style={{
                         padding: '8px',
-                        border: '1px solid #ddd',
+                        border: `1px solid ${currentTheme.colors.border}`,
                         borderRadius: '4px',
                         fontSize: '14px',
-                        backgroundColor: isViewMode ? '#f5f5f5' : 'white',
-                        cursor: isViewMode ? 'not-allowed' : 'pointer'
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'pointer',
+                        color: currentTheme.colors.text
                       }}
                     >
                       <option value=">">{'>'}</option>
@@ -1059,15 +1085,16 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                         style={{
                           flex: 1,
                           padding: '8px',
-                          border: '1px solid #ddd',
+                          border: `1px solid ${currentTheme.colors.border}`,
                           borderRadius: '4px',
                           fontSize: '14px',
-                          backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                           cursor: isViewMode ? 'not-allowed' : 'text',
-                          textAlign: 'center'
+                          textAlign: 'center',
+                          color: currentTheme.colors.text
                         }}
                       />
-                      <span style={{ fontSize: '12px', color: '#666' }}>дн</span>
+                      <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>дн</span>
                     </div>
                     
                     <div style={{ flex: 1, display: 'flex', gap: '5px', alignItems: 'center' }}>
@@ -1082,15 +1109,16 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                         style={{
                           flex: 1,
                           padding: '8px',
-                          border: '1px solid #ddd',
+                          border: `1px solid ${currentTheme.colors.border}`,
                           borderRadius: '4px',
                           fontSize: '14px',
-                          backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                           cursor: isViewMode ? 'not-allowed' : 'text',
-                          textAlign: 'center'
+                          textAlign: 'center',
+                          color: currentTheme.colors.text
                         }}
                       />
-                      <span style={{ fontSize: '12px', color: '#666' }}>час</span>
+                      <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>час</span>
                     </div>
                     
                     <div style={{ flex: 1, display: 'flex', gap: '5px', alignItems: 'center' }}>
@@ -1105,15 +1133,16 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                         style={{
                           flex: 1,
                           padding: '8px',
-                          border: '1px solid #ddd',
+                          border: `1px solid ${currentTheme.colors.border}`,
                           borderRadius: '4px',
                           fontSize: '14px',
-                          backgroundColor: isViewMode ? '#f5f5f5' : 'white',
+                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                           cursor: isViewMode ? 'not-allowed' : 'text',
-                          textAlign: 'center'
+                          textAlign: 'center',
+                          color: currentTheme.colors.text
                         }}
                       />
-                      <span style={{ fontSize: '12px', color: '#666' }}>мин</span>
+                      <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>мин</span>
                     </div>
                   </div>
                 </div>
@@ -1129,7 +1158,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 style={{
                   flex: 1,
                   padding: '14px',
-                  backgroundColor: '#84c65e',
+                  backgroundColor: currentTheme.colors.success,
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
@@ -1138,8 +1167,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   cursor: 'pointer',
                   transition: 'background-color 0.2s ease'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#72b352'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#84c65e'}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.accent}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.success}
               >
                 {mode === 'create' ? 'Создать задачу' : 'Сохранить изменения'}
               </button>
@@ -1148,17 +1177,17 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 style={{
                   flex: 1,
                   padding: '14px',
-                  backgroundColor: '#f0f0f0',
-                  color: '#333',
-                  border: 'none',
+                  backgroundColor: currentTheme.colors.background,
+                  color: currentTheme.colors.text,
+                  border: `1px solid ${currentTheme.colors.border}`,
                   borderRadius: '6px',
                   fontSize: '16px',
                   fontWeight: '600',
                   cursor: 'pointer',
                   transition: 'background-color 0.2s ease'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e0e0e0'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.secondary}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.background}
               >
                 Отмена
               </button>
@@ -1172,7 +1201,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 style={{
                   flex: 1,
                   padding: '14px',
-                  backgroundColor: '#2196F3',
+                  backgroundColor: currentTheme.colors.primary,
                   color: 'white',
                   border: 'none',
                   borderRadius: '6px',
@@ -1181,8 +1210,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   cursor: 'pointer',
                   transition: 'background-color 0.2s ease'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1976D2'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2196F3'}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.accent}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.primary}
               >
                 Редактировать
               </button>
@@ -1191,17 +1220,17 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 style={{
                   flex: 1,
                   padding: '14px',
-                  backgroundColor: '#c68b5e',
-                  color: 'white',
-                  border: 'none',
+                  backgroundColor: currentTheme.colors.background,
+                  color: currentTheme.colors.text,
+                  border: `1px solid ${currentTheme.colors.border}`,
                   borderRadius: '6px',
                   fontSize: '16px',
                   fontWeight: '600',
                   cursor: 'pointer',
                   transition: 'background-color 0.2s ease'
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#b37a4e'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#c68b5e'}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.secondary}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = currentTheme.colors.background}
               >
                 Закрыть
               </button>

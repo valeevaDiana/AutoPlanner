@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { TaskFormModal } from '../../../features/task-form/ui/TaskFormModal';
+import { ThemeSelector } from '../../../features/theme-selector/ui/ThemeSelector';
 import type { Task } from '../../../entities/task/model/types';
 
 const initialTasks: Task[] = [
@@ -20,7 +21,7 @@ const initialTasks: Task[] = [
     time: '09:00',
     day: 1,
     content: 'Задача про что то',
-    priority: 'medium',
+    priority: 'low',
     durationMinutes: 30, 
     startMinute: 15, 
     completed: false,
@@ -36,116 +37,6 @@ const initialTasks: Task[] = [
     startMinute: 0, 
     completed: false,
     realDate: '2025-10-19'
-  },
-  {
-    id: 'task4',
-    time: '10:00',
-    day: 4,
-    content: 'Маленькая задачка',
-    priority: 'low',
-    durationMinutes: 20, 
-    startMinute: 30,
-    completed: false, 
-    realDate: '2025-10-20'
-  },
-  {
-    id: 'task5',
-    time: '11:00',
-    day: 0,
-    content: 'Задачка обычная',
-    priority: 'low',
-    durationMinutes: 60, 
-    startMinute: 0,
-    completed: false,
-    realDate: '2025-10-01'
-  },
-  {
-    id: 'task6',
-    time: '12:00',
-    day: 3,
-    content: 'Задача 1 (пересекается)',
-    priority: 'medium',
-    durationMinutes: 180, 
-    startMinute: 0,
-    completed: false,
-    realDate: '2025-10-27'
-  },
-  {
-    id: 'task7',
-    time: '12:00',
-    day: 3,
-    content: 'Задача 2 (пересекается)',
-    priority: 'medium',
-    durationMinutes: 180, 
-    startMinute: 15,
-    completed: false,
-    realDate: '2025-10-27'
-  },
-  {
-    id: 'task8',
-    time: '13:00',
-    day: 6,
-    content: 'Тест1',
-    priority: 'medium',
-    durationMinutes: 180, 
-    startMinute: 30, 
-    completed: false,
-    realDate: '2025-10-16'
-  },
-  {
-    id: 'task9',
-    time: '10:00',
-    day: 5,
-    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
-    priority: 'medium',
-    durationMinutes: 30,  
-    startMinute: 45, 
-    completed: false,
-    realDate: '2025-11-30'
-  },
-  {
-    id: 'task10',
-    time: '10:00',
-    day: 5,
-    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
-    priority: 'medium',
-    durationMinutes: 30,  
-    startMinute: 45,
-    completed: false, 
-    realDate: '2025-11-30'
-  },
-  {
-    id: 'task11',
-    time: '10:00',
-    day: 5,
-    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
-    priority: 'medium',
-    durationMinutes: 130,  
-    startMinute: 45, 
-    completed: false,
-    realDate: '2025-11-30'
-  },
-  {
-    id: 'task12',
-    time: '10:00',
-    day: 5,
-    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
-    priority: 'medium',
-    durationMinutes: 30,  
-    startMinute: 45,
-    completed: false, 
-    realDate: '2025-11-30'
-  },
-  {
-    id: 'task13',
-    time: '10:00',
-    day: 5,
-    content: 'Подготовка к завтрашнему рабочему дню: составление списка дел на завтра, выбор одежды, в которой завтра нужно пойти на встречу, и другие дела',
-    priority: 'medium',
-    durationMinutes: 130,  
-    startMinute: 45, 
-    completed: false,
-    realDate: '2025-11-30'
   },
   
 ];
@@ -225,7 +116,6 @@ export const SchedulePage: React.FC = () => {
     }
   };
 
-
   const handleTasksUpdate = (updatedTasks: Task[]) => {
     setTasks(updatedTasks);
   };
@@ -234,6 +124,7 @@ export const SchedulePage: React.FC = () => {
     <div className="page-container">
       <div className="header-fixed">
         <div className="header-title-wrapper"> 
+          <ThemeSelector />
           <div className="header-title">Твой план на</div>
           <button className="week-selector" onClick={handleToggleView}>неделю</button>
         </div>
@@ -265,7 +156,6 @@ export const SchedulePage: React.FC = () => {
         mode={taskFormMode}
         initialDate={initialDate}
     />
-
     </div>
   );
 };
