@@ -76,7 +76,7 @@ export const DependencyFields: React.FC<DependencyFieldsProps> = ({
           }}
         >
           <option value="">Выберите задачу</option>
-          {/* Здесь будут подгружаться задачи из списка */}
+          {/* Затычка */}
           <option value="task1">Задача 1</option>
           <option value="task2">Задача 2</option>
           <option value="task3">Задача 3</option>
