@@ -170,6 +170,19 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     }
   }, [isOpen, task, initialDate]);
 
+  useEffect(() => {
+    if (hasDependency) {
+      setHasSpecificTime(false);
+      setHasPossibleTime(false);
+    }
+  }, [hasDependency]);
+
+  useEffect(() => {
+    if (hasSpecificTime || hasPossibleTime) {
+      setHasDependency(false);
+    }
+  }, [hasSpecificTime, hasPossibleTime]);
+
   const handleSave = () => {
     const totalMinutes = durationToMinutes(
       parseInt(durationDays) || 0,
@@ -804,7 +817,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 type="checkbox"
                 checked={hasSpecificTime}
                 onChange={(e) => !isViewMode && setHasSpecificTime(e.target.checked)}
-                disabled={isViewMode}
+                disabled={hasDependency}
                 style={{
                   width: '18px',
                   height: '18px',
@@ -894,7 +907,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 type="checkbox"
                 checked={hasPossibleTime}
                 onChange={(e) => !isViewMode && setHasPossibleTime(e.target.checked)}
-                disabled={isViewMode}
+                disabled={hasDependency}
                 style={{
                   width: '18px',
                   height: '18px',
@@ -972,7 +985,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 type="checkbox"
                 checked={hasDependency}
                 onChange={(e) => !isViewMode && setHasDependency(e.target.checked)}
-                disabled={isViewMode}
+                disabled={hasSpecificTime || hasPossibleTime}
                 style={{
                   width: '18px',
                   height: '18px',
