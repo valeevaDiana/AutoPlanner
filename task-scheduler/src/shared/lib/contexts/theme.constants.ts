@@ -9,18 +9,17 @@ export const predefinedThemes: Theme[] = [
         background: '#fff8f0', //фон таблицы и блока управления неделями
         surface: '#fff8f0', //фон модальных окон
         text: '#333333', //основной темный текст
-        textSecondary: '#666666', //текст неосновного текста (плюсы и второстепенный текст)
+        textSecondary: '#b1b1b1ff', //текст неосновного текста (плюсы и второстепенный текст)
         border: '#d9b7a0', //границы таблицы
         accent: '#27c5e1ff', //цвет при наведении
         success: '#79bb49ff', //кнопки успеха: выполнить задачу, сохранить изменения
         warning: '#de9f75ff', //hover "открыть задачу"
         error: '#ff6b6b', //отменить выполнение
-        priorityLow: '#c0ffc0ff', //цвет фона низкого приоритета
-        priorityLowText: '#205623', //текст низкого приоритета
-        priorityMedium: '#fff6a3ff', //фон среднего приоритета
-        priorityMediumText: '#974f0f', //текст среднего приоритета
-        priorityHigh: '#ffceceff', //фон высокого приоритета
-        priorityHighText: '#721717', //текст высокого приоритета
+
+        priorityStart: '#8b0000',    
+        priorityEnd: '#ff6b6b',      
+        priorityText: '#ffffff',
+
         priorityCompleted: '#d7d7d7ff', //цвет выполненной задачи
         priorityCompletedText: '#3a3a3aff', //текст выполненой задачи
         calendarHeader: '#d9b7a0', // шапка календаря
@@ -43,12 +42,11 @@ export const predefinedThemes: Theme[] = [
         success: '#4caf50',
         warning: '#ff9800',
         error: '#f44336',
-        priorityLow: '#1a331a',
-        priorityLowText: '#88cc88',
-        priorityMedium: '#332b1a',
-        priorityMediumText: '#ffcc66',
-        priorityHigh: '#331a1a',
-        priorityHighText: '#ff6666',
+        
+        priorityStart: '#8b0000',    
+        priorityEnd: '#ff6b6b',      
+        priorityText: '#ffffff',
+
         priorityCompleted: '#404040',
         priorityCompletedText: '#888888',
 
@@ -67,18 +65,21 @@ export const predefinedThemes: Theme[] = [
         background: '#fff0f5',
         surface: '#ffffff',
         text: '#333333',
-        textSecondary: '#666666',
+        textSecondary: '#b1b1b1ff',
         border: '#f8bbd9',
         accent: '#ff4081',
         success: '#6f4cafff',
         warning: '#ff9800',
         error: '#f44336',
-        priorityLow: '#ffc1ebff',
-        priorityLowText: '#880f6eff',
-        priorityMedium: '#ff93b7ff',
-        priorityMediumText: '#850d35ff',
-        priorityHigh: '#880f6eff',
-        priorityHighText: '#ffe6faff',
+        // priorityLow: '#ffc1ebff',
+        // priorityLowText: '#880f6eff',
+        // priorityMedium: '#ff93b7ff',
+        // priorityMediumText: '#850d35ff',
+        // priorityHigh: '#880f6eff',
+        // priorityHighText: '#ffe6faff',
+        priorityStart: '#ff4444',    
+        priorityEnd: '#ffcccc',      
+        priorityText: '#721717',     
         priorityCompleted: '#f5f5f5',
         priorityCompletedText: '#666666',
 
@@ -96,18 +97,16 @@ export const predefinedThemes: Theme[] = [
         background: '#f3f8ff',
         surface: '#ffffff',
         text: '#333333',
-        textSecondary: '#666666',
+        textSecondary: '#b1b1b1ff',
         border: '#bbdefb',
         accent: '#2196f3',
         success: '#4caf50',
         warning: '#ff9800',
         error: '#f44336',
-        priorityLow: '#c7e8ffff',
-        priorityLowText: '#0d47a1',
-        priorityMedium: '#4fb6e6ff',
-        priorityMediumText: '#0d47a1',
-        priorityHigh: '#18688dff',
-        priorityHighText: '#eff6ffff',
+
+        priorityStart: '#8b0000',    
+        priorityEnd: '#ff6b6b',      
+        priorityText: '#ffffff',
         priorityCompleted: '#f5f5f5',
         priorityCompletedText: '#666666',
 

@@ -51,10 +51,13 @@ export const ThemeCustomizer: React.FC = () => {
     { key: 'success', label: 'Успех' },
     { key: 'warning', label: 'Предупреждение' },
     { key: 'error', label: 'Ошибка' },
+    { key: 'edit', label: 'Кнопка редактирования задачи' },
+    { key: 'priorityStart', label: 'Цвет высокого приоритета (1)' },
+    { key: 'priorityEnd', label: 'Цвет низкого приоритета (10)' },
+    { key: 'priorityText', label: 'Цвет текста приоритетов' },
     { key: 'calendarHeader', label: 'Шапка календаря' },
     { key: 'calendarNavigation', label: 'Навигация календаря' },
     { key: 'timeCell', label: 'Ячейки времени' },
-    { key: 'edit', label: 'Кнопка редактирования задачи' },
   ];
 
   return (

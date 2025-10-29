@@ -3,6 +3,7 @@ import type { Task, TaskAction } from '../../../entities/task/model/types';
 import { TaskActionsModal } from '../../../features/task-actions/ui/TaskActionsModal';
 import { useWeekNavigation } from '../../../shared/lib/hooks/useWeekNavigation';
 import { useTheme } from '../../../shared/lib/contexts';
+import { getContrastColor, getPriorityColor } from '../../../shared/lib/utils/priorityGradient';
 
 const DAYS = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
 
@@ -86,28 +87,19 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   taskCount,
   onTaskClick 
 }) => {
+  const { currentTheme } = useTheme();
+
   const totalHeight = task.durationMinutes;
   const topOffset = task.startMinute || 0;
   const isCompleted = task.completed;
 
-  let priorityClass = '';
-  let textColor = 'text-black';
+  const backgroundColor = getPriorityColor(
+    task.priority, 
+    currentTheme.colors.priorityStart, 
+    currentTheme.colors.priorityEnd
+  );
 
-  if (isCompleted) {
-    priorityClass = 'priority-completed';
-    textColor = 'text-completed';
-  } else {
-    if (task.priority === 'low') {
-      priorityClass = 'priority-low';
-      textColor = 'text-green';
-    } else if (task.priority === 'medium') {
-      priorityClass = 'priority-medium';
-      textColor = 'text-yellow';
-    } else if (task.priority === 'high') {
-      priorityClass = 'priority-high';
-      textColor = 'text-red';
-    }
-  }
+  const textColor = getContrastColor(backgroundColor);
 
   const getTextSettings = () => {
     switch (taskCount) {
@@ -135,13 +127,13 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
 
   return (
     <div
-      className={`task-block ${priorityClass}`}
+      className="task-block"
       style={{
         position: 'absolute',
-        top: `calc(${topOffset}px + 1px)`, 
-        left: left, 
-        width: width, 
-        height: `calc(${totalHeight}px - 4px)`, 
+        top: `calc(${topOffset}px + 1px)`,
+        left: left,
+        width: width,
+        height: `calc(${totalHeight}px - 4px)`,
         zIndex: 10,
         opacity: isCompleted ? 0.7 : 0.95,
         minHeight: '15px',
@@ -150,11 +142,12 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
         boxSizing: 'border-box',
         padding: '1px',
         cursor: 'pointer',
+        backgroundColor: isCompleted ? currentTheme.colors.priorityCompleted : backgroundColor,
       }}
       onClick={handleClick}
     >
-      <div 
-        className={`task-text ${textColor}`} 
+      <div
+        className="task-text"
         style={{
           fontSize: textSettings.fontSize,
           lineHeight: '1.0',
@@ -168,6 +161,7 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
           wordBreak: 'break-word',
           textOverflow: 'ellipsis',
           textDecoration: isCompleted ? 'line-through' : 'none',
+          color: isCompleted ? currentTheme.colors.priorityCompletedText : textColor,
         }}
       >
         {task.content}

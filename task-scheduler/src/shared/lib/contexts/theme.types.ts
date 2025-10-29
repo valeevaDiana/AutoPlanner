@@ -18,12 +18,17 @@ export interface ThemeColors {
   edit: string;  
   
   // Цвета приоритетов задач
-  priorityLow: string;
-  priorityLowText: string;
-  priorityMedium: string;
-  priorityMediumText: string;
-  priorityHigh: string;
-  priorityHighText: string;
+  
+  // priorityLow: string;
+  // priorityLowText: string;
+  // priorityMedium: string;
+  // priorityMediumText: string;
+  // priorityHigh: string;
+  // priorityHighText: string;
+
+  priorityStart: string;    
+  priorityEnd: string;      
+  priorityText: string;     
   priorityCompleted: string;
   priorityCompletedText: string;
   

@@ -3,7 +3,7 @@ export interface Task {
   time: string; 
   day: number; 
   content: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: number;
   durationMinutes: number; 
   startMinute?: number;
   completed: boolean;

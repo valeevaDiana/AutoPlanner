@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { Task } from '../../../entities/task/model/types';
 import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
 import { useTheme } from '../../../shared/lib/contexts';
+import { getPriorityColor } from '../../../shared/lib/utils/priorityGradient';
 
 interface TaskFormModalProps {
   isOpen: boolean;
@@ -36,7 +37,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [durationDays, setDurationDays] = useState('0');
   const [durationHours, setDurationHours] = useState('1');
   const [durationMinutes, setDurationMinutes] = useState('0');
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
+  const [priority, setPriority] = useState<number>(5);
+  // const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   
   // Новые состояния для повторяющихся задач
   const [isRepeating, setIsRepeating] = useState(false);
@@ -139,7 +141,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setDurationDays('0');
         setDurationHours('1');
         setDurationMinutes('0');
-        setPriority('medium');
+        setPriority(5);
         
         // Сброс новых полей при создании новой задачи
         setIsRepeating(false);
@@ -488,39 +490,67 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               fontWeight: '500',
               color: currentTheme.colors.text
             }}>
-              Приоритет:
+              Приоритет: {priority}/10
             </label>
-            <div style={{ display: 'flex', gap: '15px' }}>
-              {(['low', 'medium', 'high'] as const).map((prio) => (
-                <button
-                  key={prio}
-                  type="button"
-                  onClick={() => !isViewMode && setPriority(prio)}
-                  disabled={isViewMode}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    border: `2px solid ${priority === prio ? currentTheme.colors.primary : 'transparent'}`,
-                    borderRadius: '6px',
-                    backgroundColor: 
-                      prio === 'low' ? currentTheme.colors.priorityLow :
-                      prio === 'medium' ? currentTheme.colors.priorityMedium : 
-                      currentTheme.colors.priorityHigh,
-                    color: 
-                      prio === 'low' ? currentTheme.colors.priorityLowText :
-                      prio === 'medium' ? currentTheme.colors.priorityMediumText : 
-                      currentTheme.colors.priorityHighText,
-                    cursor: isViewMode ? 'default' : 'pointer',
-                    fontWeight: priority === prio ? '600' : '400',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  {prio === 'low' && 'Низкий'}
-                  {prio === 'medium' && 'Средний'}
-                  {prio === 'high' && 'Высокий'}
-                </button>
-              ))}
+
+            <div style={{ 
+              padding: '20px 15px',
+              backgroundColor: currentTheme.colors.background,
+              borderRadius: '8px',
+              marginBottom: '10px'
+            }}>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={priority}
+                onChange={(e) => !isViewMode && setPriority(parseInt(e.target.value))}
+                disabled={isViewMode}
+                style={{
+                  width: '100%',
+                  height: '6px',
+                  borderRadius: '3px',
+                  background: `linear-gradient(to right, ${currentTheme.colors.priorityStart}, ${currentTheme.colors.priorityEnd})`,
+                  outline: 'none',
+                  cursor: isViewMode ? 'not-allowed' : 'pointer',
+                }}
+              />
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginTop: '8px',
+                fontSize: '12px',
+                color: currentTheme.colors.textSecondary
+              }}>
+                <span>1 (Высокий)</span>
+                <span>10 (Низкий)</span>
+              </div>
             </div>
+            
+            {/* Визуализация текущего приоритета */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '10px',
+              marginTop: '10px'
+            }}>
+              <div style={{
+                width: '20px',
+                height: '20px',
+                borderRadius: '50%',
+                backgroundColor: getPriorityColor(priority, currentTheme.colors.priorityStart, currentTheme.colors.priorityEnd),
+                border: `2px solid ${currentTheme.colors.border}`
+              }} />
+              <span style={{
+                fontSize: '14px',
+                color: currentTheme.colors.text,
+                fontWeight: '500'
+              }}>
+                Текущий приоритет: {priority}
+              </span>
+            </div>
+          </div>
           </div>
 
           {/* Задача повторяется? */}
@@ -1258,6 +1288,5 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           )}
         </div>
       </div>
-    </div>
   );
 };

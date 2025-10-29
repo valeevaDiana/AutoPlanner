@@ -10,7 +10,7 @@ const initialTasks: Task[] = [
     time: '08:00',
     day: 0,
     content: 'Задачка раз',
-    priority: 'medium',
+    priority: 3,
     durationMinutes: 90, 
     startMinute: 0, 
     completed: false,
@@ -21,7 +21,7 @@ const initialTasks: Task[] = [
     time: '09:00',
     day: 1,
     content: 'Задача про что то',
-    priority: 'low',
+    priority: 1,
     durationMinutes: 30, 
     startMinute: 15, 
     completed: false,
@@ -32,7 +32,7 @@ const initialTasks: Task[] = [
     time: '09:00',
     day: 2,
     content: 'Тут очень важная задача',
-    priority: 'high',
+    priority: 10,
     durationMinutes: 120, 
     startMinute: 0, 
     completed: false,
@@ -59,7 +59,7 @@ export const SchedulePage: React.FC = () => {
     setIsTaskFormOpen(true);
   };
 
-  const handleCellAddTask = (initialDate: { day: number; time: string; date: string }) => {
+  const handleCellAddTask = (initialDate?: { day: number; time: string; date: string }) => {
     setTaskFormMode('create');
     setEditingTask(null);
     setInitialDate(initialDate);
@@ -91,7 +91,7 @@ export const SchedulePage: React.FC = () => {
         time: taskData.startTime || '00:00',
         day: 0,
         content: taskData.title || '',
-        priority: taskData.priority || 'medium',
+        priority: taskData.priority || 5,
         durationMinutes: taskData.durationMinutes || 60,
         startMinute: 0,
         completed: false,
