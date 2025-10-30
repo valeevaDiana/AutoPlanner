@@ -177,7 +177,7 @@ export const ThemeSelector: React.FC = () => {
               width: '100%',
               padding: '12px 16px',
               backgroundColor: 'transparent',
-              color: currentTheme.colors.primary,
+              color: currentTheme.colors.text,
               border: 'none',
               textAlign: 'center',
               cursor: 'pointer',

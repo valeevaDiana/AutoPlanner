@@ -6,21 +6,10 @@
   --color-text: #333333;
   --color-textSecondary: #666666;
   --color-border: #d9b7a0;
-  --color-accent: #84c65e;
   --color-success: #84c65e;
-  --color-warning: #ffb74d;
   --color-error: #ff6b6b;
-  
-  /* --priority-low-bg: #e6ffe6;
-  --priority-low-text: #205623;
-  --priority-medium-bg: #fffacd;
-  --priority-medium-text: #974f0f;
-  --priority-high-bg: #ffe6e6;
-  --priority-high-text: #721717; */
-
   --priority-completed-bg: #f0f0f0;
   --priority-completed-text: #666666;
-
   --calendar-header-bg: #d9b7a0;
   --calendar-navigation-bg: #f9f0e6;
   --time-cell-bg: #f9f0e6;
@@ -228,16 +217,6 @@ body {
   overflow: hidden;
   transition: background-color 0.3s ease;
 }
-
-/* .task-block.priority-low {
-  background: var(--priority-low-bg); 
-}
-.task-block.priority-medium {
-  background: var(--priority-medium-bg); 
-}
-.task-block.priority-high {
-  background: var(--priority-high-bg);
-} */
  
 .task-block.priority-completed {
   background: var(--priority-completed-bg) !important; 

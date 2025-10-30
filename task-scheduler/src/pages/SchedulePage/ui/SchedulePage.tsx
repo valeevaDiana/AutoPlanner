@@ -10,11 +10,11 @@ const initialTasks: Task[] = [
     time: '08:00',
     day: 0,
     content: 'Задачка раз',
-    priority: 3,
+    priority: 5,
     durationMinutes: 90, 
     startMinute: 0, 
     completed: false,
-    realDate: '2025-10-16'
+    realDate: '2025-10-28'
   },
   {
     id: 'task2',
@@ -25,7 +25,7 @@ const initialTasks: Task[] = [
     durationMinutes: 30, 
     startMinute: 15, 
     completed: false,
-    realDate: '2025-10-13'
+    realDate: '2025-10-31'
   },
   {
     id: 'task3',
@@ -36,7 +36,7 @@ const initialTasks: Task[] = [
     durationMinutes: 120, 
     startMinute: 0, 
     completed: false,
-    realDate: '2025-10-19'
+    realDate: '2025-10-30'
   },
   
 ];

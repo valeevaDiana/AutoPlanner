@@ -10,7 +10,7 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [currentTheme, setCurrentTheme] = useState<Theme>(predefinedThemes[0]);
+  const [currentTheme, setCurrentTheme] = useState<Theme>(predefinedThemes[1]);
   const [customThemes, setCustomThemes] = useState<Theme[]>([]);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
 
@@ -64,8 +64,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     
     root.style.setProperty('--calendar-header-bg', theme.colors.calendarHeader);
     root.style.setProperty('--calendar-navigation-bg', theme.colors.calendarNavigation);
-    root.style.setProperty('--time-cell-bg', theme.colors.timeCell);
-
     };
 
 

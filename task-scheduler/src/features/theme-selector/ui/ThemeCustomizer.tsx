@@ -41,23 +41,20 @@ export const ThemeCustomizer: React.FC = () => {
   if (!isCustomizerOpen) return null;
 
   const colorFields: { key: keyof ThemeColors; label: string }[] = [
-    { key: 'primary', label: 'Основной цвет' },
-    { key: 'secondary', label: 'Вторичный цвет' },
-    { key: 'background', label: 'Фон' },
-    { key: 'surface', label: 'Поверхность' },
-    { key: 'text', label: 'Текст' },
-    { key: 'textSecondary', label: 'Вторичный текст' },
-    { key: 'border', label: 'Границы' },
-    { key: 'success', label: 'Успех' },
-    { key: 'warning', label: 'Предупреждение' },
-    { key: 'error', label: 'Ошибка' },
+    { key: 'primary', label: 'Основной цвет кнопок' },
+    { key: 'secondary', label: 'Цвет столбца со временем "00:00, 01:00 и т.д."' },
+    { key: 'background', label: 'Основной фон' },
+    { key: 'surface', label: 'Фон модальных окон' },
+    { key: 'text', label: 'Основной текст' },
+    { key: 'textSecondary', label: 'Не основной текст' },
+    { key: 'border', label: 'Все границы' },
+    { key: 'success', label: 'Кнопки "Выполнить задачу" и "Сохранить изменения"' },
+    { key: 'error', label: 'Кнопка "Отменить выполнение' },
     { key: 'edit', label: 'Кнопка редактирования задачи' },
     { key: 'priorityStart', label: 'Цвет высокого приоритета (1)' },
     { key: 'priorityEnd', label: 'Цвет низкого приоритета (10)' },
-    { key: 'priorityText', label: 'Цвет текста приоритетов' },
-    { key: 'calendarHeader', label: 'Шапка календаря' },
-    { key: 'calendarNavigation', label: 'Навигация календаря' },
-    { key: 'timeCell', label: 'Ячейки времени' },
+    { key: 'calendarHeader', label: 'Цвет шапки календаря' },
+    { key: 'calendarNavigation', label: 'Цвет фона навигации недель' },
   ];
 
   return (
