@@ -9,7 +9,7 @@ export const predefinedThemes: Theme[] = [
         background: '#fff8f0',
         surface: '#fff8f0',
         text: '#333333', 
-        textSecondary: '#b1b1b1ff', 
+        textSecondary: '#737373ff', 
         border: '#d9b7a0', 
         success: '#79bb49ff', 
         error: '#ff6b6b', 
@@ -50,26 +50,26 @@ export const predefinedThemes: Theme[] = [
     }
   },
   {
-    name: 'Розовая',
+    name: 'ЧБ',
     colors: {
-        primary: '#e91e63',
-        secondary: '#f8bbd9',
-        background: '#fff0f5',
-        surface: '#ffffff',
-        text: '#333333',
-        textSecondary: '#b1b1b1ff',
-        border: '#f8bbd9',
-        success: '#6f4cafff',
-        error: '#f44336',
+        primary: '#000000c0',
+        secondary: '#9c9c9c',
+        background: '#f4f4f4',
+        surface: '#e6e6e6',
+        text: '#1f1f1f',
+        textSecondary: '#4a4a4a',
+        border: '#181818',
+        success: '#50a064',
+        error: '#cb6a6a',
 
-        priorityStart: '#ff4444',    
-        priorityEnd: '#ffcccc',      
+        priorityStart: '#161616',    
+        priorityEnd: '#b7b7b7',      
 
-        priorityCompleted: '#f5f5f5',
-        priorityCompletedText: '#666666',
+        priorityCompleted: '#b9b9b9',
+        priorityCompletedText: '#151515',
 
-        calendarHeader: '#f8bbd9',
-        calendarNavigation: '#fce4ec',
+        calendarHeader: '#dadadaff',
+        calendarNavigation: '#989898ff',
         edit: '#21b8f3ff' 
     }
   },

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+// import type { ReactNode } from 'react';
 
 export interface ThemeColors {
   primary: string;
@@ -20,4 +20,19 @@ export interface ThemeColors {
   
   calendarHeader: string;        
   calendarNavigation: string;    
+}
+
+export interface Theme {
+  name: string;
+  colors: ThemeColors;
+}
+
+export interface ThemeContextType {
+  currentTheme: Theme;
+  customThemes: Theme[];
+  setTheme: (themeName: string) => void;
+  addCustomTheme: (theme: Theme) => void;
+  updateCurrentTheme: (colors: Partial<Theme['colors']>) => void;
+  isCustomizerOpen: boolean;
+  setIsCustomizerOpen: (open: boolean) => void;
 }

@@ -1,16 +1,15 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { ThemeContextType, Theme } from './theme.types';
+import type { Theme } from './theme.types';
 import { predefinedThemes } from './theme.constants';
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+import { ThemeContext } from './themeContextInstance';
 
 interface ThemeProviderProps {
   children: ReactNode;
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [currentTheme, setCurrentTheme] = useState<Theme>(predefinedThemes[0]);
+  const [currentTheme, setCurrentTheme] = useState<Theme>(predefinedThemes[2]);
   const [customThemes, setCustomThemes] = useState<Theme[]>([]);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
 
@@ -52,13 +51,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         root.style.setProperty(`--color-${key}`, value);
     });
 
-    
-    root.style.setProperty('--priority-low-bg', theme.colors.priorityLow);
-    root.style.setProperty('--priority-low-text', theme.colors.priorityLowText);
-    root.style.setProperty('--priority-medium-bg', theme.colors.priorityMedium);
-    root.style.setProperty('--priority-medium-text', theme.colors.priorityMediumText);
-    root.style.setProperty('--priority-high-bg', theme.colors.priorityHigh);
-    root.style.setProperty('--priority-high-text', theme.colors.priorityHighText);
     root.style.setProperty('--priority-completed-bg', theme.colors.priorityCompleted);
     root.style.setProperty('--priority-completed-text', theme.colors.priorityCompletedText);
     
@@ -100,12 +92,4 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       {children}
     </ThemeContext.Provider>
   );
-};
-
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
 };
