@@ -1278,7 +1278,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 style={{
                   flex: 1,
                   padding: '14px',
-                  backgroundColor: currentTheme.colors.primary,
+                  backgroundColor: currentTheme.colors.background,
                   color: currentTheme.colors.text,
                   border: `1px solid ${currentTheme.colors.border}`,
                   borderRadius: '6px',

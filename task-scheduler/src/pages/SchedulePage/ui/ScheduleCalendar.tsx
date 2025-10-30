@@ -284,7 +284,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
               border: `1px solid ${currentTheme.colors.primary}`,
               borderRadius: '4px',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '16px'
             }}
           >
             Сегодня
