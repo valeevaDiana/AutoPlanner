@@ -102,21 +102,24 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   const textColor = getContrastColor(backgroundColor);
 
   const getTextSettings = () => {
+    const maxLines = Math.max(1, Math.floor(totalHeight / 20));
+  
     switch (taskCount) {
       case 1:
-        return { fontSize: '12px', lineClamp: Math.max(1, Math.floor(totalHeight / 15)) };
+        return { fontSize: '14px', lineClamp: maxLines };
       case 2:
-        return { fontSize: '11px', lineClamp: Math.max(1, Math.floor(totalHeight / 12)) };
+        return { fontSize: '12px', lineClamp: maxLines };
       case 3:
-        return { fontSize: '11px', lineClamp: Math.max(1, Math.floor(totalHeight / 10)) };
+        return { fontSize: '11px', lineClamp: maxLines };
       case 4:
-        return { fontSize: '10px', lineClamp: Math.max(1, Math.floor(totalHeight / 8)) };
+        return { fontSize: '10px', lineClamp: maxLines };
       case 5:
-        return { fontSize: '9px', lineClamp: Math.max(1, Math.floor(totalHeight / 6)) };
+        return { fontSize: '9px', lineClamp: maxLines };
       default:
-        return { fontSize: '9px', lineClamp: Math.max(1, Math.floor(totalHeight / 6)) };
+        return { fontSize: '9px', lineClamp: 1 };
     }
   };
+
 
   const textSettings = getTextSettings();
 
@@ -150,16 +153,17 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
         className="task-text"
         style={{
           fontSize: textSettings.fontSize,
-          lineHeight: '1.0',
-          padding: '1px',
+          lineHeight: '1.2', 
+          padding: '1px', 
           overflow: 'hidden',
           display: '-webkit-box',
           WebkitLineClamp: textSettings.lineClamp,
           WebkitBoxOrient: 'vertical',
           width: '100%',
-          height: '100%',
+          // height: '100%',
+          maxHeight: `calc(${totalHeight - 4 - 2}px)`, 
           wordBreak: 'break-word',
-          textOverflow: 'ellipsis',
+          textOverflow: 'ellipsis ',
           textDecoration: isCompleted ? 'line-through' : 'none',
           color: isCompleted ? currentTheme.colors.priorityCompletedText : textColor,
         }}
@@ -310,7 +314,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
           {weekDates.map((date, index) => (
             <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div style={{ fontWeight: '600' }}>{DAYS[index]}</div>
-              <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>
+              <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, marginTop: '2px' }}>
                 {formatDate(date)}
               </div>
             </div>

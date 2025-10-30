@@ -4,48 +4,48 @@ export const predefinedThemes: Theme[] = [
   {
     name: 'Светлая',
     colors: {
-        primary: '#c68b5e', //основные кнопки (добавить задачу, -> <- итд)
-        secondary: '#d9b7a0', //цвет столбика времени
-        background: '#fff8f0', //фон таблицы и блока управления неделями
-        surface: '#fff8f0', //фон модальных окон
-        text: '#333333', //основной темный текст
-        textSecondary: '#b1b1b1ff', //текст неосновного текста (плюсы и второстепенный текст)
-        border: '#d9b7a0', //границы таблицы
-        success: '#79bb49ff', //кнопки успеха: выполнить задачу, сохранить изменения
-        error: '#ff6b6b', //отменить выполнение
+        primary: '#c68b5e',
+        secondary: '#d9b7a0',
+        background: '#fff8f0',
+        surface: '#fff8f0',
+        text: '#333333', 
+        textSecondary: '#b1b1b1ff', 
+        border: '#d9b7a0', 
+        success: '#79bb49ff', 
+        error: '#ff6b6b', 
 
         priorityStart: '#8b0000',    
         priorityEnd: '#ff6b6b',      
 
-        priorityCompleted: '#d7d7d7ff', //цвет выполненной задачи
-        priorityCompletedText: '#3a3a3aff', //текст выполненой задачи
-        calendarHeader: '#d9b7a0', // шапка календаря
-        calendarNavigation: '#f9f0e6', // навигация недель
-        edit: '#24b5ceff' //кнопка редактирования
+        priorityCompleted: '#d7d7d7ff', 
+        priorityCompletedText: '#3a3a3aff', 
+        calendarHeader: '#d9b7a0', 
+        calendarNavigation: '#f9f0e6', 
+        edit: '#24b5ceff' 
     }
   },
   {
     name: 'Темная',
     colors: {
-        primary: '#8b5a3c',
-        secondary: '#6d4c41',
-        background: '#1a1a1a',
-        surface: '#2d2d2d',
+        primary: '#868cccbf',
+        secondary: '#868cccce',
+        background: '#161618',
+        surface: '#1f1f1f',
         text: '#ffffff',
-        textSecondary: '#b0b0b0',
-        border: '#4a4a4a',
-        success: '#4caf50',
-        error: '#f44336',
+        textSecondary: '#c5c5c5',
+        border: '#868ccc',
+        success: '#52b3a6',
+        error: '#e17f78',
         
-        priorityStart: '#8b0000',    
-        priorityEnd: '#ff6b6b',      
+        priorityStart: '#af51b9',    
+        priorityEnd: '#3fc1b0',      
 
-        priorityCompleted: '#404040',
-        priorityCompletedText: '#888888',
+        priorityCompleted: '#e3e3e3',
+        priorityCompletedText: '#424242',
 
-        calendarHeader: '#3e2723',
-        calendarNavigation: '#2d1b17',
-        edit: '#21b8f3ff' 
+        calendarHeader: '#1f2125',
+        calendarNavigation: '#868ccc53',
+        edit: '#b277d2' 
 
     }
   },

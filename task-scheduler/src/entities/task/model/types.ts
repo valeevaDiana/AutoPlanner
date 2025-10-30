@@ -1,7 +1,6 @@
 export interface Task {
   id: string;
   time: string; 
-  day: number; 
   content: string;
   priority: number;
   durationMinutes: number; 

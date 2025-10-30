@@ -126,7 +126,7 @@ body {
 
 .calendar-header {
   display: grid;
-  grid-template-columns: 120px repeat(7, 1fr);
+  grid-template-columns: 120px repeat(7, minmax(180px, 1fr));
   background: var(--calendar-header-bg);
   color: var(--color-text);
   font-weight: bold;
@@ -151,7 +151,7 @@ body {
 
 .calendar-row {
   display: grid;
-  grid-template-columns: 120px repeat(7, 1fr);
+  grid-template-columns: 120px repeat(7, minmax(180px, 1fr));
 }
 
 /*ЯЧЕЙКИ КАЛЕНДАРЯ*/
@@ -159,10 +159,10 @@ body {
 .time-cell {
   padding: 8px;
   text-align: center;
-  font-size: 14px;
+  font-size: 18px;
   outline: 1px solid var(--color-border);
   background: var(--color-secondary);
-  font-weight: 500;
+  font-weight: 400;
   height: 60px;
   position: sticky;
   left: 0;
@@ -174,6 +174,7 @@ body {
 
 .cell {
   height: 60px;
+  min-width: 180px; 
   padding: 4px;
   border: 1px solid var(--color-border);
   display: flex;
@@ -421,9 +422,9 @@ body {
 
   .calendar-header {
     display: grid;
-    grid-template-columns: 80px repeat(7, minmax(120px, 1fr));
-    min-width: 1000px;
-    background: var(--color-secondary);
+    grid-template-columns: 80px repeat(7, minmax(150px, 1fr));
+    min-width: 1200px;
+    background: var(--calendar-header-bg);
     position: sticky;
     top: 0;
     left: 0;
@@ -436,19 +437,19 @@ body {
   }
 
   .calendar-body {
-    min-width: 1000px;
+    min-width: 1200px;
   }
 
   .calendar-row {
     display: grid;
-    grid-template-columns: 80px repeat(7, minmax(120px, 1fr));
-    min-width: 1000px;
+    grid-template-columns: 80px repeat(7, minmax(150px, 1fr));
+    min-width: 1200px;
   }
 
   .time-cell {
     width: 80px;
     padding: 8px 4px;
-    font-size: 12px;
+    font-size: 16px;
     height: 60px;
     position: sticky;
     left: 0;
@@ -460,7 +461,7 @@ body {
   .cell {
     height: 60px;
     padding: 4px;
-    min-width: 120px;
+    min-width: 150px;
     position: relative;
   }
 
@@ -490,21 +491,21 @@ body {
 @media (max-width: 480px) {
   .calendar-header,
   .calendar-row {
-    grid-template-columns: 70px repeat(7, minmax(110px, 1fr));
-    min-width: 900px;
+    grid-template-columns: 70px repeat(7, minmax(140px, 1fr));
+    min-width: 1100px;
   }
 
   .calendar-body {
-    min-width: 900px;
+    min-width: 1100px;
   }
 
   .time-cell {
     width: 70px;
-    font-size: 11px;
+    font-size: 16px;
   }
 
   .cell {
-    min-width: 110px;
+    min-width: 140px;
   }
 
   .week-selector {

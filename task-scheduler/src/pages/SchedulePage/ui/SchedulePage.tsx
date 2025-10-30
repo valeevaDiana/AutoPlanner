@@ -8,10 +8,9 @@ const initialTasks: Task[] = [
   {
     id: 'task1',
     time: '08:00',
-    day: 0,
-    content: 'Задачка раз',
+    content: 'Старый дуб, весь преображенный, раскинувшись шатром сочной, темной зелени, млел, чуть колыхаясь Старый дуб, весь преображенный, раскинувшись шатром сочной, темной зелени, млел, чуть колыхаясь Старый дуб, весь преображенный, раскинувшись шатром сочной, темной зелени, млел, чуть колыхаясь',
     priority: 5,
-    durationMinutes: 90, 
+    durationMinutes: 247, 
     startMinute: 0, 
     completed: false,
     realDate: '2025-10-28'
@@ -19,24 +18,92 @@ const initialTasks: Task[] = [
   {
     id: 'task2',
     time: '09:00',
-    day: 1,
-    content: 'Задача про что то',
+    content: 'Задача очень важная Задача очень важная Задача очень важная',
     priority: 1,
     durationMinutes: 30, 
     startMinute: 15, 
     completed: false,
     realDate: '2025-10-31'
   },
-  {
+   {
     id: 'task3',
     time: '09:00',
-    day: 2,
-    content: 'Тут очень важная задача',
+    content: 'Тут очень НЕважная задача',
     priority: 10,
     durationMinutes: 120, 
     startMinute: 0, 
     completed: false,
     realDate: '2025-10-30'
+  },
+  {
+    id: '1',
+    time: '05:00',
+    content: 'ПРИМЕР ТЕКСТА ДЛЯ ПРОСМОТРА ЦВЕТА ТЕКСТА и еще немного текста просто так бла бла бл',
+    priority: 10,
+    durationMinutes: 60, 
+    startMinute: 0, 
+    completed: false,
+    realDate: '2025-10-27'
+  },
+  {
+    id: '2',
+    time: '05:00',
+    content: 'ПРИМЕР ТЕКСТА ДЛЯ ПРОСМОТРА ЦВЕТА ТЕКСТА',
+    priority: 9,
+    durationMinutes: 60, 
+    startMinute: 0, 
+    completed: false,
+    realDate: '2025-10-28'
+  },
+  {
+    id: '3',
+    time: '05:00',
+    content: 'ПРИМЕР ТЕКСТА ДЛЯ ПРОСМОТРА ЦВЕТА ТЕКСТА',
+    priority: 7,
+    durationMinutes: 60, 
+    startMinute: 0, 
+    completed: false,
+    realDate: '2025-10-29'
+  },
+  {
+    id: '4',
+    time: '05:00',
+    content: 'ПРИМЕР ТЕКСТА ДЛЯ ПРОСМОТРА ЦВЕТА ТЕКСТА',
+    priority: 5,
+    durationMinutes: 60, 
+    startMinute: 0, 
+    completed: false,
+    realDate: '2025-10-30'
+  },
+  {
+    id: '5',
+    time: '05:00',
+    content: 'ПРИМЕР ТЕКСТА ДЛЯ ПРОСМОТРА ЦВЕТА ТЕКСТА',
+    priority: 4,
+    durationMinutes: 60, 
+    startMinute: 0, 
+    completed: false,
+    realDate: '2025-10-31'
+  },
+  {
+    id: '6',
+    time: '05:00',
+    content: 'ПРИМЕР ТЕКСТА ДЛЯ ПРОСМОТРА ЦВЕТА ТЕКСТА',
+    priority: 2,
+    durationMinutes: 60, 
+    startMinute: 0, 
+    completed: false,
+    realDate: '2025-11-01'
+  },
+  {
+    id: '7',
+    time: '05:00',
+    content: 'ПРИМЕР ТЕКСТА ДЛЯ ПРОСМОТРА ЦВЕТА ТЕКСТА',
+    priority: 1,
+    durationMinutes: 60, 
+    startMinute: 0, 
+    completed: false,
+    realDate: '2025-11-02'
   },
   
 ];
@@ -89,7 +156,6 @@ export const SchedulePage: React.FC = () => {
       const newTask: Task = {
         id: `task-${Date.now()}`,
         time: taskData.startTime || '00:00',
-        day: 0,
         content: taskData.title || '',
         priority: taskData.priority || 5,
         durationMinutes: taskData.durationMinutes || 60,
