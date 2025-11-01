@@ -95,8 +95,8 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
 
   const backgroundColor = getPriorityColor(
     task.priority, 
-    currentTheme.colors.priorityStart, 
-    currentTheme.colors.priorityEnd
+    currentTheme.colors.priorityHigh, 
+    currentTheme.colors.priorityLow
   );
 
   const textColor = getContrastColor(backgroundColor);

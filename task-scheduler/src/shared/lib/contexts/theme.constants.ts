@@ -14,39 +14,14 @@ export const predefinedThemes: Theme[] = [
         success: '#74bc7a', 
         error: '#74bc7a', 
 
-        priorityStart: '#ff5b6c',    
-        priorityEnd: '#ffdcdf',      
+        priorityHigh: '#ff5b6c',    
+        priorityLow: '#ffdcdf',      
 
         priorityCompleted: '#bbc3bbff', 
         priorityCompletedText: '#19281a', 
         calendarHeader: '#fdb4bb', 
         calendarNavigation: '#48764ca3', 
         edit: '#e88f98' 
-    }
-  },
-  {
-    name: 'Темная',
-    colors: {
-        primary: '#868cccd3',
-        secondary: '#868cccce',
-        background: '#161618',
-        surface: '#2d2d2d',
-        text: '#ffffff',
-        textSecondary: '#d9d9d9',
-        border: '#5f638a',
-        success: '#52b3a6',
-        error: '#e17f78',
-        
-        priorityStart: '#af51b9',    
-        priorityEnd: '#3fc1b0',      
-
-        priorityCompleted: '#b0bdde',
-        priorityCompletedText: '#424242',
-
-        calendarHeader: '#1f2125',
-        calendarNavigation: '#393b4e',
-        edit: '#b277d2' 
-
     }
   },
   {
@@ -63,8 +38,8 @@ export const predefinedThemes: Theme[] = [
         error: '#817b76',
 
         edit: '#22201f',
-        priorityStart: '#272422',    
-        priorityEnd: '#bab2ac',      
+        priorityHigh: '#272422',    
+        priorityLow: '#bab2ac',      
 
         priorityCompleted: '#b9b9b9',
         priorityCompletedText: '#151515',
@@ -74,27 +49,52 @@ export const predefinedThemes: Theme[] = [
     }
   },
   {
-    name: 'Синяя',
+    name: 'Темная',
     colors: {
-        primary: '#2196f3',
-        secondary: '#bbdefb',
-        background: '#f3f8ff',
-        surface: '#ffffff',
-        text: '#333333',
-        textSecondary: '#b1b1b1',
-        border: '#bbdefb',
-        success: '#4caf50',
-        error: '#f44336',
+        primary: '#868cccd3',
+        secondary: '#868cccce',
+        background: '#161618',
+        surface: '#2d2d2d',
+        text: '#ffffff',
+        textSecondary: '#d9d9d9',
+        border: '#5f638a',
+        success: '#52b3a6',
+        error: '#e17f78',
+        
+        priorityHigh: '#af51b9',    
+        priorityLow: '#3fc1b0',      
 
-        priorityStart: '#8b0000',    
-        priorityEnd: '#ff6b6b',      
+        priorityCompleted: '#b0bdde',
+        priorityCompletedText: '#424242',
 
-        priorityCompleted: '#f5f5f5',
-        priorityCompletedText: '#666666',
+        calendarHeader: '#1f2125',
+        calendarNavigation: '#393b4e',
+        edit: '#b277d2' 
 
-        calendarHeader: '#bbdefb',
-        calendarNavigation: '#e3f2fd',
-        edit: '#21b8f3' 
+    }
+  },
+  {
+    name: 'Ржавая',
+    colors: {
+        primary: '#ffb25fc0',
+        secondary: '#aa5047',
+        background: '#251f18',
+        surface: '#322c24',
+        text: '#f5f0ebff',
+        textSecondary: '#e6e1dbff',
+        border: '#48392aff',
+        success: '#648862',
+        error: '#aa5047',
+        edit: '#748c9cff',
+
+        priorityHigh: '#974242',    
+        priorityLow: '#dfa05d',      
+
+        priorityCompleted: '#979f97',
+        priorityCompletedText: '#333633',
+
+        calendarHeader: '#648862',
+        calendarNavigation: '#3f5a3d',
     }
   }
 ];

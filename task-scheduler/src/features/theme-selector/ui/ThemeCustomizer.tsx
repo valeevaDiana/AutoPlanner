@@ -51,8 +51,8 @@ export const ThemeCustomizer: React.FC = () => {
     { key: 'success', label: 'Кнопки "Выполнить задачу" и "Сохранить изменения"' },
     { key: 'error', label: 'Кнопка "Отменить выполнение' },
     { key: 'edit', label: 'Кнопка редактирования задачи' },
-    { key: 'priorityStart', label: 'Цвет высокого приоритета (1)' },
-    { key: 'priorityEnd', label: 'Цвет низкого приоритета (10)' },
+    { key: 'priorityHigh', label: 'Цвет высокого приоритета (1)' },
+    { key: 'priorityLow', label: 'Цвет низкого приоритета (10)' },
     { key: 'calendarHeader', label: 'Цвет шапки календаря' },
     { key: 'calendarNavigation', label: 'Цвет фона навигации недель' },
   ];

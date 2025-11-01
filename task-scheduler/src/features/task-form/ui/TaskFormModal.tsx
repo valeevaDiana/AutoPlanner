@@ -523,7 +523,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   width: '100%',
                   height: '6px',
                   borderRadius: '3px',
-                  background: `linear-gradient(to right, ${currentTheme.colors.priorityStart}, ${currentTheme.colors.priorityEnd})`,
+                  background: `linear-gradient(to right, ${currentTheme.colors.priorityHigh}, ${currentTheme.colors.priorityLow})`,
                   outline: 'none',
                   cursor: isViewMode ? 'not-allowed' : 'pointer',
                 }}
@@ -552,7 +552,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 width: '20px',
                 height: '20px',
                 borderRadius: '50%',
-                backgroundColor: getPriorityColor(priority, currentTheme.colors.priorityStart, currentTheme.colors.priorityEnd),
+                backgroundColor: getPriorityColor(priority, currentTheme.colors.priorityHigh, currentTheme.colors.priorityLow),
                 border: `2px solid ${currentTheme.colors.border}`
               }} />
               <span style={{

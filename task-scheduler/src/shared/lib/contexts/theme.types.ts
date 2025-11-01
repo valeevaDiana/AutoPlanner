@@ -13,8 +13,8 @@ export interface ThemeColors {
   error: string;
   edit: string;  
 
-  priorityStart: string;    
-  priorityEnd: string;      
+  priorityHigh: string;    
+  priorityLow: string;      
   priorityCompleted: string;
   priorityCompletedText: string;
   
