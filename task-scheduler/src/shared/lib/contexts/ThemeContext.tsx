@@ -9,7 +9,7 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [currentTheme, setCurrentTheme] = useState<Theme>(predefinedThemes[3]);
+  const [currentTheme, setCurrentTheme] = useState<Theme>(predefinedThemes[0]);
   const [customThemes, setCustomThemes] = useState<Theme[]>([]);
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
 

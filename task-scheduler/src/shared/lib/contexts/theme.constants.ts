@@ -7,7 +7,7 @@ export const predefinedThemes: Theme[] = [
         primary: '#334f35df',
         secondary: '#426545af',
         background: '#fffdde',
-        surface: '#fff8e1ff',
+        surface: '#fff8e1',
         text: '#19281aff', 
         textSecondary: '#274129', 
         border: '#d1a7ab', 
@@ -25,7 +25,7 @@ export const predefinedThemes: Theme[] = [
     }
   },
   {
-    name: 'ЧБ',
+    name: 'Серая',
     colors: {
         primary: '#22201fc0',
         secondary: '#b4aca6',
@@ -46,6 +46,30 @@ export const predefinedThemes: Theme[] = [
 
         calendarHeader: '#ded7d3',
         calendarNavigation: '#98918e'
+    }
+  },
+  {
+    name: 'Яркая',
+    colors: {
+        primary: '#232849df',
+        secondary: '#e96f4a',
+        background: '#e6d5b7',
+        surface: '#f1e8d7',
+        text: '#0f111d',
+        textSecondary: '#1e223d',
+        border: '#48392a',
+        success: '#5da98bff',
+        error: '#e96f4a',
+        edit: '#748c9cff',
+
+        priorityHigh: '#e86a44',    
+        priorityLow: '#2a3053',      
+
+        priorityCompleted: '#a1a1a6',
+        priorityCompletedText: '#16192d',
+
+        calendarHeader: '#8b94af',
+        calendarNavigation: '#ea6138',
     }
   },
   {
@@ -81,8 +105,8 @@ export const predefinedThemes: Theme[] = [
         background: '#251f18',
         surface: '#322c24',
         text: '#f5f0ebff',
-        textSecondary: '#e6e1dbff',
-        border: '#48392aff',
+        textSecondary: '#e6e1db',
+        border: '#48392a',
         success: '#648862',
         error: '#aa5047',
         edit: '#748c9cff',
