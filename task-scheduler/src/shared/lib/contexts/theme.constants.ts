@@ -4,24 +4,24 @@ export const predefinedThemes: Theme[] = [
   {
     name: 'Светлая',
     colors: {
-        primary: '#c68b5e',
-        secondary: '#d9b7a0',
-        background: '#fff8f0',
-        surface: '#fff8f0',
-        text: '#333333', 
-        textSecondary: '#737373', 
-        border: '#d9b7a0', 
-        success: '#79bb49', 
-        error: '#ff6b6b', 
+        primary: '#334f35df',
+        secondary: '#426545af',
+        background: '#fffdde',
+        surface: '#fff8e1ff',
+        text: '#19281aff', 
+        textSecondary: '#274129', 
+        border: '#d1a7ab', 
+        success: '#74bc7a', 
+        error: '#74bc7a', 
 
-        priorityStart: '#8b0000',    
-        priorityEnd: '#ff6b6b',      
+        priorityStart: '#ff5b6c',    
+        priorityEnd: '#ffdcdf',      
 
-        priorityCompleted: '#d7d7d7', 
-        priorityCompletedText: '#3a3a3a', 
-        calendarHeader: '#d9b7a0', 
-        calendarNavigation: '#f9f0e6', 
-        edit: '#24b5ce' 
+        priorityCompleted: '#bbc3bbff', 
+        priorityCompletedText: '#19281a', 
+        calendarHeader: '#fdb4bb', 
+        calendarNavigation: '#48764ca3', 
+        edit: '#e88f98' 
     }
   },
   {
@@ -30,9 +30,9 @@ export const predefinedThemes: Theme[] = [
         primary: '#868cccd3',
         secondary: '#868cccce',
         background: '#161618',
-        surface: '#2d2d2dff',
+        surface: '#2d2d2d',
         text: '#ffffff',
-        textSecondary: '#d9d9d9ff',
+        textSecondary: '#d9d9d9',
         border: '#5f638a',
         success: '#52b3a6',
         error: '#e17f78',
@@ -55,7 +55,7 @@ export const predefinedThemes: Theme[] = [
         primary: '#22201fc0',
         secondary: '#b4aca6',
         background: '#f5f1ee',
-        surface: '#e4e0ddff',//44403d
+        surface: '#e4e0dd',//44403d
         text: '#1f1f1f',
         textSecondary: '#3a3735',
         border: '#1c1a19',

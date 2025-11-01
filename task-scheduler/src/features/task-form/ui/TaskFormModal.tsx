@@ -89,7 +89,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
   const getDateByDayOfWeek = (dayOfWeek: number) => {
     const today = new Date();
-    const currentDay = today.getDay(); // 0-6 (ВС-СБ)
+    const currentDay = today.getDay(); 
     
     const jsDayOfWeek = dayOfWeek === 6 ? 0 : dayOfWeek + 1;
     
@@ -503,7 +503,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               fontWeight: '500',
               color: currentTheme.colors.text
             }}>
-              Приоритет: {priority}/10
+              Приоритет: {priority}
             </label>
 
             <div style={{ 
@@ -516,8 +516,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 type="range"
                 min="1"
                 max="10"
-                value={priority}
-                onChange={(e) => !isViewMode && setPriority(parseInt(e.target.value))}
+                value={11 - priority}
+                onChange={(e) => !isViewMode && setPriority(11 - parseInt(e.target.value))}
                 disabled={isViewMode}
                 style={{
                   width: '100%',
@@ -535,8 +535,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 fontSize: '12px',
                 color: currentTheme.colors.textSecondary
               }}>
-                <span>1 (Высокий)</span>
                 <span>10 (Низкий)</span>
+                <span>1 (Высокий)</span>
               </div>
             </div>
             
