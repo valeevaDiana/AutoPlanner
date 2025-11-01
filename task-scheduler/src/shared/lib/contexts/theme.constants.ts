@@ -25,30 +25,6 @@ export const predefinedThemes: Theme[] = [
     }
   },
   {
-    name: 'Серая',
-    colors: {
-        primary: '#22201fc0',
-        secondary: '#b4aca6',
-        background: '#f5f1ee',
-        surface: '#e4e0dd',//44403d
-        text: '#1f1f1f',
-        textSecondary: '#3a3735',
-        border: '#1c1a19',
-        success: '#817b76',
-        error: '#817b76',
-
-        edit: '#22201f',
-        priorityHigh: '#272422',    
-        priorityLow: '#bab2ac',      
-
-        priorityCompleted: '#b9b9b9',
-        priorityCompletedText: '#151515',
-
-        calendarHeader: '#ded7d3',
-        calendarNavigation: '#98918e'
-    }
-  },
-  {
     name: 'Яркая',
     colors: {
         primary: '#232849df',
@@ -70,6 +46,30 @@ export const predefinedThemes: Theme[] = [
 
         calendarHeader: '#8b94af',
         calendarNavigation: '#ea6138',
+    }
+  },
+  {
+    name: 'Серая',
+    colors: {
+        primary: '#22201fc0',
+        secondary: '#b4aca6',
+        background: '#f5f1ee',
+        surface: '#e4e0dd',//44403d
+        text: '#1f1f1f',
+        textSecondary: '#3a3735',
+        border: '#1c1a19',
+        success: '#817b76',
+        error: '#817b76',
+
+        edit: '#22201f',
+        priorityHigh: '#272422',    
+        priorityLow: '#bab2ac',      
+
+        priorityCompleted: '#b9b9b9',
+        priorityCompletedText: '#151515',
+
+        calendarHeader: '#ded7d3',
+        calendarNavigation: '#98918e'
     }
   },
   {
