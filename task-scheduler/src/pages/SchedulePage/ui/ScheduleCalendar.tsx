@@ -1,3 +1,4 @@
+import { ConfirmDeleteModal } from '../../../features/task-actions/ui/ConfirmDeleteModal'; 
 import React, { useState } from 'react';
 import type { Task, TaskAction } from '../../../entities/task/model/types'; 
 import { TaskActionsModal } from '../../../features/task-actions/ui/TaskActionsModal';
@@ -20,6 +21,7 @@ interface ScheduleCalendarProps {
   onAddTask?: (initialDate?: { day: number; time: string; date: string }) => void;
   onEditTask?: (task: Task) => void; 
   onViewTask?: (task: Task) => void;
+  onDeleteTask?: (task: Task) => void; 
   tasks: Task[];
   onTasksUpdate?: (tasks: Task[]) => void;
 }
@@ -178,6 +180,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
   onAddTask,
   onEditTask, 
   onViewTask,
+  onDeleteTask,
   tasks,
   onTasksUpdate
 }) => {
@@ -195,6 +198,10 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteModalPosition, setDeleteModalPosition] = useState({ top: 0, left: 0 });
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+
 
   const getTasksForDate = (date: Date) => {
     const dateString = getISODate(date);
@@ -246,6 +253,25 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
     if (onEditTask) {
       onEditTask(task);
     }
+  };
+
+  const handleTaskDelete = (task: Task) => {
+    setTaskToDelete(task);
+    setDeleteModalPosition(modalPosition); 
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = (task: Task) => {
+    if (onDeleteTask) {
+      onDeleteTask(task);
+    }
+    setIsDeleteModalOpen(false);
+    setTaskToDelete(null);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setTaskToDelete(null);
   };
 
   const weekRange = `${formatDate(weekDates[0])} - ${formatDate(weekDates[6])}`;
@@ -379,9 +405,19 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
         onClose={handleModalClose}
         onAction={handleTaskAction}
         onEdit={handleDirectEdit} 
+        onDelete={handleTaskDelete} 
         position={modalPosition}
       />
     )}
+      {taskToDelete && (
+          <ConfirmDeleteModal
+            task={taskToDelete}
+            isOpen={isDeleteModalOpen}
+            onClose={handleCloseDeleteModal}
+            onConfirm={handleConfirmDelete}
+            position={deleteModalPosition}
+          />
+        )}
     </div>
   );
 };

@@ -15,4 +15,4 @@ export interface Task {
   realDate?: string; 
 }
 
-export type TaskAction = 'complete' | 'edit';
+export type TaskAction = 'complete' | 'edit' | 'delete'; 

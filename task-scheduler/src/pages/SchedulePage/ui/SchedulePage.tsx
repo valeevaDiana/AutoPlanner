@@ -149,6 +149,12 @@ export const SchedulePage: React.FC = () => {
     setTaskFormMode('edit');
   };
 
+  const handleDeleteTask = (task: Task) => {
+    const updatedTasks = tasks.filter(t => t.id !== task.id);
+    setTasks(updatedTasks);
+    console.log('Задача удалена:', task.id);
+  };
+
   const handleSaveTask = (taskData: Partial<Task>) => {
     console.log('Сохранение задачи:', taskData);
     
@@ -202,6 +208,7 @@ export const SchedulePage: React.FC = () => {
           onAddTask={handleCellAddTask}
           onEditTask={handleEditTask}
           onViewTask={handleViewTask}
+          onDeleteTask={handleDeleteTask} 
           tasks={tasks}
           onTasksUpdate={handleTasksUpdate}
         />

@@ -49,7 +49,7 @@ export const ThemeCustomizer: React.FC = () => {
     { key: 'textSecondary', label: 'Не основной текст' },
     { key: 'border', label: 'Все границы' },
     { key: 'success', label: 'Кнопки "Выполнить задачу" и "Сохранить изменения"' },
-    { key: 'error', label: 'Кнопка "Отменить выполнение' },
+    { key: 'error', label: 'Кнопка "Отменить выполнение" и "Удалить задачу"' },
     { key: 'edit', label: 'Кнопка редактирования задачи' },
     { key: 'priorityHigh', label: 'Цвет высокого приоритета (1)' },
     { key: 'priorityLow', label: 'Цвет низкого приоритета (10)' },

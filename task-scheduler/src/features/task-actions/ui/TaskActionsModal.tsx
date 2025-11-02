@@ -9,6 +9,7 @@ interface TaskActionsModalProps {
   onClose: () => void;
   onAction: (action: TaskAction) => void;
   onEdit?: (task: Task) => void; 
+  onDelete?: (task: Task) => void; 
   position: { top: number; left: number };
 }
 
@@ -18,6 +19,7 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
   onClose,
   onAction,
   onEdit,
+  onDelete,
   position
 }) => {
   const { currentTheme } = useTheme();
@@ -42,6 +44,14 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
       onClose();
     }
   };
+
+  const handleDeleteClick = () => {
+    if (onDelete) {
+      onDelete(task); 
+      onClose(); 
+    }
+  };
+
 
   const getActionButton = () => {
     if (task.completed) {
@@ -165,6 +175,30 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
 
           >
             Редактировать задачу
+          </button>
+
+          <button
+            className="action-button delete-button"
+            onClick={handleDeleteClick}
+            style={{
+              padding: '10px 15px',
+              backgroundColor: currentTheme.colors.error,
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: 'all 0.3s ease',
+              transform: 'scale(1)'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            Удалить задачу
           </button>
         </div>
       </div>
