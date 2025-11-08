@@ -10,6 +10,7 @@ interface TaskActionsModalProps {
   onAction: (action: TaskAction) => void;
   onEdit?: (task: Task) => void; 
   onDelete?: (task: Task) => void; 
+  onComplete?: (task: Task) => void; 
   position: { top: number; left: number };
 }
 
@@ -20,6 +21,7 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
   onAction,
   onEdit,
   onDelete,
+  onComplete,
   position
 }) => {
   const { currentTheme } = useTheme();
@@ -34,7 +36,11 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
   };
 
   const handleAction = (action: TaskAction) => {
-    onAction(action);
+    if (action === 'complete' && onComplete) {
+      onComplete(task); 
+    } else {
+      onAction(action);
+    }
     onClose();
   };
 

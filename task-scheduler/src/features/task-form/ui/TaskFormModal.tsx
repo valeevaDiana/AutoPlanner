@@ -8,14 +8,15 @@ interface TaskFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (taskData: Partial<Task>) => void;
-  onEdit?: () => void; 
+  onEdit?: () => void;
   task?: Task | null;
   mode?: 'create' | 'edit' | 'view';
-  initialDate?: { 
-    day: number; 
+  initialDate?: {
+    day: number;
     time: string;
-    date: string; 
+    date: string;
   };
+  isSaving?: boolean;
 }
 
 export const TaskFormModal: React.FC<TaskFormModalProps> = ({
@@ -25,7 +26,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   onEdit, 
   task,
   mode = 'create',
-  initialDate
+  initialDate,
+  isSaving = false,
 }) => {
   const { currentTheme } = useTheme();
   const [title, setTitle] = useState('');
@@ -1198,6 +1200,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
               <button
                 onClick={handleSave}
+                disabled={isSaving}
                 style={{
                   flex: 1,
                   padding: '14px',
@@ -1222,6 +1225,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               </button>
               <button
                 onClick={onClose}
+                disabled={isSaving} 
                 style={{
                   flex: 1,
                   padding: '14px',

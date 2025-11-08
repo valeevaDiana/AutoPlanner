@@ -22,6 +22,8 @@ interface ScheduleCalendarProps {
   onEditTask?: (task: Task) => void; 
   onViewTask?: (task: Task) => void;
   onDeleteTask?: (task: Task) => void; 
+  onCompleteTask?: (task: Task) => void;
+  onAction?: (action: TaskAction) => void;
   tasks: Task[];
   onTasksUpdate?: (tasks: Task[]) => void;
 }
@@ -181,6 +183,8 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
   onEditTask, 
   onViewTask,
   onDeleteTask,
+  onCompleteTask, 
+  onAction, 
   tasks,
   onTasksUpdate
 }) => {
@@ -234,20 +238,17 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
 
   const handleTaskAction = (action: TaskAction) => {
     if (!selectedTask) return;
-
     if (action === 'complete') {
-      const updatedTasks = tasks.map(task => 
-        task.id === selectedTask.id 
-          ? { ...task, completed: !task.completed }
-          : task
-      );
-      onTasksUpdate?.(updatedTasks);
-    } else if (action === 'edit') {
-      if (onViewTask) {
-        onViewTask(selectedTask);
+      if (onCompleteTask) {
+        onCompleteTask(selectedTask);
+      }
+    } else {
+      if (onAction) { 
+        onAction(action);
       }
     }
   };
+
 
   const handleDirectEdit = (task: Task) => {
     if (onEditTask) {
@@ -406,6 +407,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
         onAction={handleTaskAction}
         onEdit={handleDirectEdit} 
         onDelete={handleTaskDelete} 
+        onComplete={onCompleteTask}
         position={modalPosition}
       />
     )}
