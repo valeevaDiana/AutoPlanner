@@ -32,31 +32,39 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
   const groups: Task[][] = [];
   
   tasks.forEach(task => {
-    const taskStart = (parseInt(task.time.split(':')[0]) * 60) + (task.startMinute || 0);
+    let taskStart = 0;
+    if (task.startTime) {
+      const [hours, minutes] = task.startTime.split(':').map(Number);
+      taskStart = hours * 60 + minutes; // Начало задачи в минутах
+    }
     const taskEnd = taskStart + task.durationMinutes;
-    
+
     let addedToGroup = false;
     
     for (const group of groups) {
       const groupHasOverlap = group.some(groupTask => {
-        const groupStart = (parseInt(groupTask.time.split(':')[0]) * 60) + (groupTask.startMinute || 0);
+        let groupStart = 0;
+        if (groupTask.startTime) {
+          const [hours, minutes] = groupTask.startTime.split(':').map(Number);
+          groupStart = hours * 60 + minutes;
+        }
         const groupEnd = groupStart + groupTask.durationMinutes;
         
-        return (taskStart < groupEnd && taskEnd > groupStart);
+        return taskStart < groupEnd && taskEnd > groupStart;
       });
-      
+
       if (groupHasOverlap) {
         group.push(task);
         addedToGroup = true;
         break;
       }
     }
-    
+
     if (!addedToGroup) {
       groups.push([task]);
     }
   });
-  
+
   return groups;
 };
 
@@ -94,7 +102,11 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   const { currentTheme } = useTheme();
 
   const totalHeight = task.durationMinutes;
-  const topOffset = task.startMinute || 0;
+  let topOffset = 0;
+  if (task.startTime) {
+    const [hours, minutes] = task.startTime.split(':').map(Number);
+    topOffset = hours * 60 + minutes; 
+  }
   const isCompleted = task.completed;
 
   const backgroundColor = getPriorityColor(
@@ -137,7 +149,8 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
       className="task-block"
       style={{
         position: 'absolute',
-        top: `calc(${topOffset}px + 1px)`,
+        //top: `calc(${topOffset}px + 1px)`,
+        top: `${topOffset}px`,
         left: left,
         width: width,
         height: `calc(${totalHeight}px - 4px)`,
@@ -172,7 +185,7 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
           color: isCompleted ? currentTheme.colors.priorityCompletedText : textColor,
         }}
       >
-        {task.content}
+        {task.title}
       </div>
     </div>
   );
@@ -356,8 +369,8 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
               {weekDates.map((date, dayIndex) => {
                 const tasksForDate = getTasksForDate(date);
                 const tasksInThisSlot = tasksForDate.filter((task) => {
-                  const taskHour = parseInt(task.time.split(':')[0]);
-                  const currentHour = parseInt(time.split(':')[0]);
+                  const taskHour = parseInt(task.startTime?.split(':')[0] || '0', 10);
+                  const currentHour = parseInt(time.split(':')[0], 10);
                   return taskHour === currentHour;
                 });
 

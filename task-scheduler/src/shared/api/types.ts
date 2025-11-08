@@ -1,6 +1,6 @@
-// src/shared/api/types.ts
 export interface ApiTask {
-  id: number;
+  id?: number; 
+  myTaskId?: number; 
   name: string;
   description?: string;
   createdDate?: string;

@@ -61,7 +61,7 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
 };
 
 const apiTaskToTask = (apiTask: ApiTask): Task => {
-    const parseDate = (isoString: string | null | undefined) : { date?: string; time?: string } => {
+  const parseDate = (isoString: string | null | undefined): { date?: string; time?: string } => {
     if (!isoString) return {};
     const date = new Date(isoString);
     return {
@@ -71,15 +71,38 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
   };
 
   const start = parseDate(apiTask.startDateTime);
-  const end = parseDate(apiTask.endDateTime);
+
+  let end = parseDate(apiTask.endDateTime);
+
+  if (!apiTask.endDateTime && apiTask.duration && apiTask.startDateTime) {
+    const startMs = new Date(apiTask.startDateTime).getTime();
+    const durationMatch = apiTask.duration.match(/(\d+):(\d+):(\d+)/);
+    if (durationMatch) {
+      const hours = parseInt(durationMatch[1], 10);
+      const minutes = parseInt(durationMatch[2], 10);
+      const seconds = parseInt(durationMatch[3], 10);
+      const durationMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
+      const endMs = startMs + durationMs;
+      const endDate = new Date(endMs);
+      end = {
+        date: endDate.toISOString().split('T')[0],
+        time: endDate.toTimeString().slice(0, 5),
+      };
+    }
+  }
 
   let durationMinutes = 60;
   if (apiTask.duration) {
-    durationMinutes = parseDuration(apiTask.duration);
+    const match = apiTask.duration.match(/(\d+):(\d+):(\d+)/);
+    if (match) {
+      const hours = parseInt(match[1], 10);
+      const minutes = parseInt(match[2], 10);
+      durationMinutes = hours * 60 + minutes;
+    }
   }
 
   return {
-    id: String(apiTask.id),
+    id: String(apiTask.id ?? apiTask.myTaskId ?? 'unknown'), 
     title: apiTask.name || '',
     description: apiTask.description || '',
     priority: apiTask.priority || 5,
@@ -167,6 +190,18 @@ export const taskApi = {
       if (!response.ok) throw new Error(`Ошибка завершения: ${response.status}`);
     } catch (error) {
       console.error('Error completing task:', error);
+      throw error;
+    }
+  },
+
+  async rebuildTimeTable(userId: number): Promise<void> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/time-table?userId=${userId}`, {
+        method: 'POST',
+      });
+      if (!response.ok) throw new Error(`Ошибка перестройки: ${response.status}`);
+    } catch (error) {
+      console.error('Error rebuilding timetable:', error);
       throw error;
     }
   },

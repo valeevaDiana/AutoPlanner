@@ -20,8 +20,10 @@ export const useTasks = () => {
   });
 
   const createTask = useMutation({
-    mutationFn: (taskData: Parameters<typeof taskApi.createTask>[0]) =>
-      taskApi.createTask(taskData, USER_ID),
+    mutationFn: async (taskData: Parameters<typeof taskApi.createTask>[0]) => {
+      await taskApi.createTask(taskData, USER_ID);
+      await taskApi.rebuildTimeTable(USER_ID); 
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
     },
