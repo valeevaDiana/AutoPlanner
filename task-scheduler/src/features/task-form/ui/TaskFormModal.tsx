@@ -107,7 +107,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       if (task) {
         const duration = minutesToDuration(task.durationMinutes);
         
-        setTitle(task.title || task.content);
+        setTitle(task.title || '');
         setDescription(task.description || '');
         setStartDate(task.startDate || '');
         setEndDate(task.endDate || '');
@@ -193,8 +193,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     );
 
     const taskData: Partial<Task> = {
+      id: task?.id, 
       title: title,
-      content: title, 
       description,
       startDate: startDate || undefined,
       endDate: endDate || undefined,

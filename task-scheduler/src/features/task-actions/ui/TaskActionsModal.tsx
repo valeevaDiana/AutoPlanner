@@ -11,6 +11,7 @@ interface TaskActionsModalProps {
   onEdit?: (task: Task) => void; 
   onDelete?: (task: Task) => void; 
   onComplete?: (task: Task) => void; 
+  onViewTask?: (task: Task) => void;
   position: { top: number; left: number };
 }
 
@@ -22,6 +23,7 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
   onEdit,
   onDelete,
   onComplete,
+  onViewTask, 
   position
 }) => {
   const { currentTheme } = useTheme();
@@ -143,8 +145,11 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
           {getActionButton()}
           
           <button
-            className="action-button edit-button"
-            onClick={() => handleAction('edit')}
+            className="action-button view-button"
+            onClick={() => {
+              onClose();
+              if (onViewTask) onViewTask(task); 
+            }}
             style={{
               padding: '10px 15px',
               backgroundColor: currentTheme.colors.primary,

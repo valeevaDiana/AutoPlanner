@@ -22,7 +22,7 @@ export const useTasks = () => {
   const createTask = useMutation({
     mutationFn: async (taskData: Parameters<typeof taskApi.createTask>[0]) => {
       await taskApi.createTask(taskData, USER_ID);
-      await taskApi.rebuildTimeTable(USER_ID); 
+      await taskApi.rebuildTimeTable(USER_ID);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
@@ -30,21 +30,30 @@ export const useTasks = () => {
   });
 
   const updateTask = useMutation({
-    mutationFn: taskApi.updateTask,
+    mutationFn: async (taskData: Parameters<typeof taskApi.updateTask>[0]) => {
+      await taskApi.updateTask(taskData);
+      await taskApi.rebuildTimeTable(USER_ID); 
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
     },
   });
 
   const deleteTask = useMutation({
-    mutationFn: taskApi.deleteTask,
+    mutationFn: async (taskId: string) => {
+      await taskApi.deleteTask(taskId);
+      await taskApi.rebuildTimeTable(USER_ID); 
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
     },
   });
 
   const completeTask = useMutation({
-    mutationFn: taskApi.completeTask,
+    mutationFn: async (taskId: string) => {
+      await taskApi.completeTask(taskId);
+      await taskApi.rebuildTimeTable(USER_ID);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
     },

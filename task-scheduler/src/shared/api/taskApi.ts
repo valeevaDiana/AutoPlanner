@@ -3,10 +3,9 @@ import type { ApiTask, ApiTimeTableResponse } from './types';
 
 const API_BASE_URL = '/api'; 
 
-const formatToISO = (date: string, time: string): string => {
-  const [year, month, day] = date.split('-').map(Number);
-  const [hours, minutes] = time.split(':').map(Number);
-  return new Date(year, month - 1, day, hours, minutes).toISOString();
+const formatToISO = (date: string, time: string = '00:00'): string => {
+  if (!date) return '';
+  return `${date}T${time}:00`;
 };
 
 const parseDuration = (durationStr: string): number => {

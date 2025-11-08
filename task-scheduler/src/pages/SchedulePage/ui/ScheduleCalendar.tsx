@@ -421,6 +421,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
         onEdit={handleDirectEdit} 
         onDelete={handleTaskDelete} 
         onComplete={onCompleteTask}
+        onViewTask={onViewTask} 
         position={modalPosition}
       />
     )}
