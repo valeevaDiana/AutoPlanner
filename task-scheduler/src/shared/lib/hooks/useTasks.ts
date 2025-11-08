@@ -1,65 +1,50 @@
+// src/shared/lib/hooks/useTasks.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Task } from '../../../entities/task/model/types';
 import { taskApi } from '../../api/taskApi';
 
-const USER_ID = 1;
+const USER_ID = 1; // захардкожен
 
 export const useTasks = () => {
   const queryClient = useQueryClient();
 
-  const { 
-    data: tasks = [], 
-    isLoading, 
+  const {
+    data: tasks = [],
+    isLoading,
     error,
-    refetch 
+    refetch,
   } = useQuery({
     queryKey: ['tasks', USER_ID],
     queryFn: () => taskApi.getTasks(USER_ID),
+    staleTime: 1000 * 60 * 5, 
     retry: 2,
-    staleTime: 1000 * 60 * 5, // 5 минут
   });
 
-  // Мутация для создания задачи
-  const createTaskMutation = useMutation({
-    mutationFn: (taskData: Partial<Task>) => taskApi.createTask(taskData, USER_ID),
+  const createTask = useMutation({
+    mutationFn: (taskData: Parameters<typeof taskApi.createTask>[0]) =>
+      taskApi.createTask(taskData, USER_ID),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
     },
-    onError: (error: Error) => {
-      console.error('Error creating task:', error);
-    },
   });
 
-  // Мутация для обновления задачи
-  const updateTaskMutation = useMutation({
+  const updateTask = useMutation({
     mutationFn: taskApi.updateTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
     },
-    onError: (error: Error) => {
-      console.error('Error updating task:', error);
-    },
   });
 
-  // Мутация для удаления задачи
-  const deleteTaskMutation = useMutation({
+  const deleteTask = useMutation({
     mutationFn: taskApi.deleteTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
     },
-    onError: (error: Error) => {
-      console.error('Error deleting task:', error);
-    },
   });
 
-  // Мутация для отметки выполнения задачи
-  const completeTaskMutation = useMutation({
+  const completeTask = useMutation({
     mutationFn: taskApi.completeTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
-    },
-    onError: (error: Error) => {
-      console.error('Error completing task:', error);
     },
   });
 
@@ -68,17 +53,12 @@ export const useTasks = () => {
     isLoading,
     error,
     refetch,
-    createTask: createTaskMutation.mutateAsync,
-    updateTask: updateTaskMutation.mutateAsync,
-    deleteTask: deleteTaskMutation.mutateAsync,
-    completeTask: completeTaskMutation.mutateAsync,
-    isCreating: createTaskMutation.isPending,
-    isUpdating: updateTaskMutation.isPending,
-    isDeleting: deleteTaskMutation.isPending,
-    isCompleting: completeTaskMutation.isPending,
-    createError: createTaskMutation.error,
-    updateError: updateTaskMutation.error,
-    deleteError: deleteTaskMutation.error,
-    completeError: completeTaskMutation.error,
+    createTask: createTask.mutateAsync,
+    updateTask: updateTask.mutateAsync,
+    deleteTask: deleteTask.mutateAsync,
+    completeTask: completeTask.mutateAsync,
+    isCreating: createTask.isPending,
+    isUpdating: updateTask.isPending,
+    isDeleting: deleteTask.isPending,
   };
 };

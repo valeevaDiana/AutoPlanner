@@ -1,139 +1,108 @@
 import type { Task } from '../../entities/task/model/types';
 import type { ApiTask, ApiTimeTableResponse } from './types';
 
-const API_BASE_URL = 'http://backend:8080';
+const API_BASE_URL = '/api'; 
 
-// Вспомогательные функции для преобразования форматов
-const formatToISO = (date: string, time: string = '00:00'): string => {
-  if (!date) return '';
-  return `${date}T${time}:00`;
+const formatToISO = (date: string, time: string): string => {
+  const [year, month, day] = date.split('-').map(Number);
+  const [hours, minutes] = time.split(':').map(Number);
+  return new Date(year, month - 1, day, hours, minutes).toISOString();
+};
+
+const parseDuration = (durationStr: string): number => {
+  const days = parseInt(durationStr.match(/(\d+)D/)?.[1] || '0', 10);
+  const hours = parseInt(durationStr.match(/(\d+)H/)?.[1] || '0', 10);
+  const minutes = parseInt(durationStr.match(/(\d+)M/)?.[1] || '0', 10);
+  return days * 24 * 60 + hours * 60 + minutes;
 };
 
 const formatDuration = (days: number, hours: number, minutes: number): string => {
-  return `P${days}DT${hours}H${minutes}M`;
+  const totalHours = days * 24 + hours;
+  return `${String(totalHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
 };
 
-const parseDuration = (duration: string): { days: number; hours: number; minutes: number } => {
-  if (!duration) return { days: 0, hours: 0, minutes: 0 };
-  
-  const dayMatch = duration.match(/(\d+)D/);
-  const hourMatch = duration.match(/(\d+)H/);
-  const minuteMatch = duration.match(/(\d+)M/);
-  
-  return {
-    days: dayMatch ? parseInt(dayMatch[1]) : 0,
-    hours: hourMatch ? parseInt(hourMatch[1]) : 0,
-    minutes: minuteMatch ? parseInt(minuteMatch[1]) : 0,
-  };
-};
-
-const minutesToDuration = (totalMinutes: number) => {
-  const days = Math.floor(totalMinutes / (24 * 60));
-  const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
-  const minutes = totalMinutes % 60;
-  return { days, hours, minutes };
-};
-
-// Преобразование Task в форму для API
-const taskToFormData = (taskData: Partial<Task>, isUpdate: boolean = false): FormData => {
+const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => {
   const formData = new FormData();
-  
+
   if (isUpdate && taskData.id) {
     formData.append('Id', taskData.id);
   }
-  
-  formData.append('Name', taskData.title || taskData.content || '');
-  formData.append('Description', taskData.description || '');
-  formData.append('Priority', String(taskData.priority || 5));
-  
-  if (taskData.startDate) {
+
+  formData.append('Name', taskData.title || 'Без названия');
+  if (taskData.description) formData.append('Description', taskData.description);
+  formData.append('Priority', String(taskData.priority ?? 5));
+
+  if (taskData.startDate && taskData.startTime) {
     formData.append('StartDateTime', formatToISO(taskData.startDate, taskData.startTime));
   }
-  
-  if (taskData.endDate) {
+  if (taskData.endDate && taskData.endTime) {
     formData.append('EndDateTime', formatToISO(taskData.endDate, taskData.endTime));
   }
-  
-  if (taskData.durationMinutes) {
-    const duration = minutesToDuration(taskData.durationMinutes);
-    formData.append('Duration', formatDuration(duration.days, duration.hours, duration.minutes));
-  }
-  
-  // Поля для повторяющихся задач (пока заглушки)
+
+  const totalMinutes = taskData.durationMinutes ?? 60;
+  const days = Math.floor(totalMinutes / (24 * 60));
+  const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+  const minutes = totalMinutes % 60;
+  formData.append('Duration', formatDuration(days, hours, minutes));
+
+  // Пока не реализуем повторения и правила
   formData.append('IsRepit', 'false');
-  formData.append('IsRepitFromStart', 'false');
-  formData.append('CountRepit', '0');
-  
-  // Поля для правил (пока заглушки)
   formData.append('RuleOneTask', 'false');
   formData.append('RuleTwoTask', 'false');
-  
+
   if (isUpdate) {
-    formData.append('IsComplete', String(taskData.completed || false));
+    formData.append('IsComplete', String(Boolean(taskData.completed)));
     if (taskData.completed) {
       formData.append('CompleteDateTime', new Date().toISOString());
     }
   }
-  
+
   return formData;
 };
 
-// Преобразование данных из API в формат фронтенда
 const apiTaskToTask = (apiTask: ApiTask): Task => {
-  const startDate = apiTask.startDateTime ? new Date(apiTask.startDateTime) : null;
-  const endDate = apiTask.endDateTime ? new Date(apiTask.endDateTime) : null;
-  
-  // Вычисляем durationMinutes из поля duration или используем значение по умолчанию
-  let durationMinutes = 60;
-  if (apiTask.duration) {
-    const duration = parseDuration(apiTask.duration);
-    durationMinutes = duration.days * 24 * 60 + duration.hours * 60 + duration.minutes;
-  }
-  
-  // Получаем время в формате HH:MM
-  const getTimeString = (date: Date | null): string => {
-    if (!date) return '00:00';
-    return date.toTimeString().substring(0, 5);
-  };
-  
-  // Получаем дату в формате YYYY-MM-DD
-  const getDateString = (date: Date | null): string | undefined => {
-    if (!date) return undefined;
-    return date.toISOString().split('T')[0];
+    const parseDate = (isoString: string | null | undefined) : { date?: string; time?: string } => {
+    if (!isoString) return {};
+    const date = new Date(isoString);
+    return {
+      date: date.toISOString().split('T')[0],
+      time: date.toTimeString().slice(0, 5),
+    };
   };
 
+  const start = parseDate(apiTask.startDateTime);
+  const end = parseDate(apiTask.endDateTime);
+
+  let durationMinutes = 60;
+  if (apiTask.duration) {
+    durationMinutes = parseDuration(apiTask.duration);
+  }
+
   return {
-    id: apiTask.id.toString(),
-    time: getTimeString(startDate),
-    content: apiTask.name || '',
-    priority: apiTask.priority || 5,
-    durationMinutes,
-    startMinute: 0,
-    completed: apiTask.isComplete || false,
+    id: String(apiTask.id),
     title: apiTask.name || '',
     description: apiTask.description || '',
-    startDate: getDateString(startDate),
-    endDate: getDateString(endDate),
-    startTime: getTimeString(startDate),
-    endTime: getTimeString(endDate),
-    realDate: getDateString(startDate) || new Date().toISOString().split('T')[0],
+    priority: apiTask.priority || 5,
+    startDate: start?.date || undefined,
+    startTime: start?.time || undefined,
+    endDate: end?.date || undefined,
+    endTime: end?.time || undefined,
+    durationMinutes,
+    completed: Boolean(apiTask.isComplete),
+    realDate: start?.date || new Date().toISOString().split('T')[0],
   };
 };
 
-// API методы
+// === API Методы ===
+
 export const taskApi = {
   async getTasks(userId: number): Promise<Task[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/time-table/${userId}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
+      if (!response.ok) throw new Error(`Ошибка загрузки: ${response.status}`);
       const data: ApiTimeTableResponse | ApiTask[] = await response.json();
-      
       let tasks: ApiTask[];
-      
+
       if (Array.isArray(data)) {
         tasks = data;
       } else if (data && 'tasks' in data) {
@@ -142,78 +111,60 @@ export const taskApi = {
         console.warn('Unexpected response format:', data);
         tasks = [];
       }
-      
+
       return tasks.map(apiTaskToTask);
     } catch (error) {
       console.error('Error fetching tasks:', error);
-      throw error;
+      return [];
     }
   },
 
-  // Создание задачи
   async createTask(taskData: Partial<Task>, userId: number): Promise<void> {
     try {
       const formData = taskToFormData(taskData, false);
-      
       const response = await fetch(`${API_BASE_URL}/task?userId=${userId}`, {
         method: 'POST',
         body: formData,
       });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Ошибка создания: ${response.status}`);
     } catch (error) {
       console.error('Error creating task:', error);
       throw error;
     }
   },
 
-  // Обновление задачи
   async updateTask(taskData: Partial<Task>): Promise<void> {
     try {
       const formData = taskToFormData(taskData, true);
-      
       const response = await fetch(`${API_BASE_URL}/task`, {
         method: 'PUT',
         body: formData,
       });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Ошибка обновления: ${response.status}`);
     } catch (error) {
       console.error('Error updating task:', error);
       throw error;
     }
   },
 
-  // Удаление задачи
   async deleteTask(taskId: string): Promise<void> {
     try {
       const response = await fetch(`${API_BASE_URL}/task/${taskId}`, {
         method: 'DELETE',
       });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Ошибка удаления: ${response.status}`);
     } catch (error) {
       console.error('Error deleting task:', error);
       throw error;
     }
   },
 
-  // Отметка задачи как выполненной/невыполненной
   async completeTask(taskId: string): Promise<void> {
     try {
       const response = await fetch(`${API_BASE_URL}/task/complete/${taskId}`, {
         method: 'PUT',
       });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Ошибка завершения: ${response.status}`);
     } catch (error) {
       console.error('Error completing task:', error);
       throw error;

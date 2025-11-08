@@ -1,4 +1,4 @@
-// Типы для данных с бекенда
+// src/shared/api/types.ts
 export interface ApiTask {
   id: number;
   name: string;
@@ -23,7 +23,6 @@ export interface ApiTask {
   relationRangeId?: number;
   dateTimeRange?: string;
   isComplete?: boolean;
-  completeDateTime?: string;
 }
 
 export interface ApiTimeTableResponse {

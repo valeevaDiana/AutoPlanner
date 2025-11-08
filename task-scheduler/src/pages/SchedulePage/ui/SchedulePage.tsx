@@ -58,28 +58,16 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handleDeleteTask = async (task: Task) => {
-    try {
-      await deleteTask(task.id);
-      console.log('Задача удалена:', task.id);
-    } catch (error) {
-      console.error('Ошибка при удалении задачи:', error);
-    }
+    await deleteTask(task.id);
   };
 
   const handleSaveTask = async (taskData: Partial<Task>) => {
-    try {
-      console.log('Сохранение задачи:', taskData);
-
-      if (taskFormMode === 'create') {
-        await createTask(taskData);
-      } else if (taskFormMode === 'edit' && editingTask) {
-        await updateTask({ ...editingTask, ...taskData });
-      }
-
-      setIsTaskFormOpen(false);
-    } catch (error) {
-      console.error('Ошибка при сохранении задачи:', error);
+    if (taskData.id) {
+      await updateTask(taskData);
+    } else {
+      await createTask(taskData);
     }
+    setIsTaskFormOpen(false);
   };
 
   const handleTasksUpdate = async (updatedTasks: Task[]) => {
@@ -87,22 +75,10 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handleTaskComplete = async (task: Task) => {
-    try {
-      await completeTask(task.id);
-    } catch (error) {
-      console.error('Ошибка при изменении статуса задачи:', error);
-    }
+    await completeTask(task.id);
   };
 
-  if (isLoading) {
-    return (
-      <div className="page-container">
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          Загрузка задач...
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <div>Загрузка задач...</div>;
 
   return (
     <div className="page-container">

@@ -1,18 +1,19 @@
 export interface Task {
   id: string;
-  time: string; 
-  content: string;
-  priority: number;
-  durationMinutes: number; 
-  startMinute?: number;
+  title: string;
+  description?: string;
+  priority: number; // 1–10
+  startDate?: string; // YYYY-MM-DD
+  startTime?: string; // HH:mm
+  endDate?: string;
+  endTime?: string;
+  durationMinutes: number;
+  isRepeating?: boolean;
+  repeatCount?: number;
+  startDateTimeRepit?: string;
+  endDateTimeRepit?: string;
   completed: boolean;
-  title?: string; 
-  description?: string; 
-  startDate?: string; 
-  endDate?: string; 
-  startTime?: string; 
-  endTime?: string; 
-  realDate?: string; 
+  realDate: string;
 }
 
 export type TaskAction = 'complete' | 'edit' | 'delete'; 
