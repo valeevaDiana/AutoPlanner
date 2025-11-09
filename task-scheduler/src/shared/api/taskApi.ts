@@ -193,11 +193,22 @@ export const taskApi = {
     }
   },
 
-  async rebuildTimeTable(userId: number): Promise<void> {
+  async rebuildTimeTable(
+    userId: number,
+    startTimeTable: string,
+    endDateTime: string
+  ): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/time-table?userId=${userId}`, {
+      const params = new URLSearchParams({
+        userId: userId.toString(),
+        startTimeTable,
+        endDateTime,
+      });
+
+      const response = await fetch(`${API_BASE_URL}/time-table?${params}`, {
         method: 'POST',
       });
+
       if (!response.ok) throw new Error(`Ошибка перестройки: ${response.status}`);
     } catch (error) {
       console.error('Error rebuilding timetable:', error);

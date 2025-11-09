@@ -3,6 +3,23 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { taskApi } from '../../api/taskApi';
 
 const USER_ID = 1; // захардкожен
+const getWeekRange = () => {
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(now.getDate() - now.getDay() + 1 - 14); // 2 недели назад от понедельника
+
+    const end = new Date(now);
+    end.setDate(now.getDate() - now.getDay() + 1 + 14); // 2 недели вперёд
+
+    // Форматируем в ISO без миллисекунд и с Z
+    const toISOString = (date: Date) => date.toISOString().replace(/\.\d{3}Z$/, 'Z');
+
+    return {
+      startTimeTable: toISOString(start),
+      endDateTime: toISOString(end),
+    };
+  };
+
 
 export const useTasks = () => {
   const queryClient = useQueryClient();
@@ -22,7 +39,8 @@ export const useTasks = () => {
   const createTask = useMutation({
     mutationFn: async (taskData: Parameters<typeof taskApi.createTask>[0]) => {
       await taskApi.createTask(taskData, USER_ID);
-      await taskApi.rebuildTimeTable(USER_ID);
+      const { startTimeTable, endDateTime } = getWeekRange();
+      await taskApi.rebuildTimeTable(USER_ID, startTimeTable, endDateTime);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
@@ -32,7 +50,8 @@ export const useTasks = () => {
   const updateTask = useMutation({
     mutationFn: async (taskData: Parameters<typeof taskApi.updateTask>[0]) => {
       await taskApi.updateTask(taskData);
-      await taskApi.rebuildTimeTable(USER_ID); 
+      const { startTimeTable, endDateTime } = getWeekRange();
+      await taskApi.rebuildTimeTable(USER_ID, startTimeTable, endDateTime);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
@@ -42,7 +61,8 @@ export const useTasks = () => {
   const deleteTask = useMutation({
     mutationFn: async (taskId: string) => {
       await taskApi.deleteTask(taskId);
-      await taskApi.rebuildTimeTable(USER_ID); 
+      const { startTimeTable, endDateTime } = getWeekRange();
+      await taskApi.rebuildTimeTable(USER_ID, startTimeTable, endDateTime);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
@@ -52,7 +72,8 @@ export const useTasks = () => {
   const completeTask = useMutation({
     mutationFn: async (taskId: string) => {
       await taskApi.completeTask(taskId);
-      await taskApi.rebuildTimeTable(USER_ID);
+      const { startTimeTable, endDateTime } = getWeekRange();
+      await taskApi.rebuildTimeTable(USER_ID, startTimeTable, endDateTime);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
