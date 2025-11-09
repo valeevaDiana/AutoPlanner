@@ -14,6 +14,16 @@ export interface Task {
   endDateTimeRepit?: string;
   completed: boolean;
   realDate: string;
+  repeateDurationMinute: number;
+  ruleOneTask?: boolean;
+  startDateTimeRuleOneTask?: string;
+  endDateTimeRuleOneTask?: string;
+  ruleTwoTask?: boolean;
+  timePositionRegardingTaskId?: number;
+  secondTaskId?: number;
+  relationRangeId?: number;
+  dateTimeRange?: string;
+  isComplete?: boolean;
 }
 
 export type TaskAction = 'complete' | 'edit' | 'delete'; 

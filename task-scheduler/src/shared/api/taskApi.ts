@@ -44,9 +44,33 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
   const minutes = totalMinutes % 60;
   formData.append('Duration', formatDuration(days, hours, minutes));
 
-  // Пока не реализуем повторения и правила
-  formData.append('IsRepit', 'false');
-  formData.append('RuleOneTask', 'false');
+  const repitTotalMinutes = taskData.repeateDurationMinute ?? 60;
+  const repitDays = Math.floor(repitTotalMinutes / (24 * 60));
+  const repitHours = Math.floor((repitTotalMinutes % (24 * 60)) / 60);
+  const repitMinutes = repitTotalMinutes % 60;
+  formData.append('RepitTime', formatDuration(repitDays, repitHours, repitMinutes));
+
+  formData.append('IsRepit', String(Boolean(taskData.isRepeating)));
+  formData.append('CountRepit', String(taskData.repeatCount || 1));
+
+  if (taskData.startDateTimeRepit) {
+    formData.append('StartDateTimeRepit', taskData.startDateTimeRepit);
+  }
+  
+  if (taskData.endDateTimeRepit) {
+    formData.append('EndDateTimeRepit', taskData.endDateTimeRepit);
+  }
+
+  formData.append('RuleOneTask', String(Boolean(taskData.ruleOneTask)));
+    
+    if (taskData.ruleOneTask && taskData.startDateTimeRuleOneTask) {
+      formData.append('StartDateTimeRuleOneTask', taskData.startDateTimeRuleOneTask);
+    }
+    
+    if (taskData.ruleOneTask && taskData.endDateTimeRuleOneTask) {
+      formData.append('EndDateTimeRuleOneTask', taskData.endDateTimeRuleOneTask);
+    }
+    
   formData.append('RuleTwoTask', 'false');
 
   if (isUpdate) {
@@ -63,9 +87,16 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
   const parseDate = (isoString: string | null | undefined): { date?: string; time?: string } => {
     if (!isoString) return {};
     const date = new Date(isoString);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
     return {
-      date: date.toISOString().split('T')[0],
-      time: date.toTimeString().slice(0, 5),
+      date: `${year}-${month}-${day}`, 
+      time: `${hours}:${minutes}`,     
     };
   };
 
@@ -76,21 +107,30 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
   if (!apiTask.endDateTime && apiTask.duration && apiTask.startDateTime) {
     const startMs = new Date(apiTask.startDateTime).getTime();
     const durationMatch = apiTask.duration.match(/(\d+):(\d+):(\d+)/);
+    
     if (durationMatch) {
       const hours = parseInt(durationMatch[1], 10);
       const minutes = parseInt(durationMatch[2], 10);
       const seconds = parseInt(durationMatch[3], 10);
+
       const durationMs = (hours * 3600 + minutes * 60 + seconds) * 1000;
       const endMs = startMs + durationMs;
       const endDate = new Date(endMs);
+
+      const year = endDate.getFullYear();
+      const month = String(endDate.getMonth() + 1).padStart(2, '0');
+      const day = String(endDate.getDate()).padStart(2, '0');
+      const endHours = String(endDate.getHours()).padStart(2, '0');
+      const endMinutes = String(endDate.getMinutes()).padStart(2, '0');
+
       end = {
-        date: endDate.toISOString().split('T')[0],
-        time: endDate.toTimeString().slice(0, 5),
+        date: `${year}-${month}-${day}`,
+        time: `${endHours}:${endMinutes}`,
       };
     }
   }
 
-  let durationMinutes = 60;
+  let durationMinutes = 0;
   if (apiTask.duration) {
     const match = apiTask.duration.match(/(\d+):(\d+):(\d+)/);
     if (match) {
@@ -98,7 +138,15 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
       const minutes = parseInt(match[2], 10);
       durationMinutes = hours * 60 + minutes;
     }
+  } else {
+    // ✅ НУЖНО РАССЧИТАТЬ ДЛИТЕЛЬНОСТЬ ИЗ startDateTime и endDateTime!
+    if (apiTask.startDateTime && apiTask.endDateTime) {
+      const start = new Date(apiTask.startDateTime);
+      const end = new Date(apiTask.endDateTime);
+      durationMinutes = Math.round((end.getTime() - start.getTime()) / (1000 * 60));
+    }
   }
+
 
   return {
     id: String(apiTask.id ?? apiTask.myTaskId ?? 'unknown'), 
@@ -150,7 +198,13 @@ export const taskApi = {
       });
       if (!response.ok) throw new Error(`Ошибка создания: ${response.status}`);
     } catch (error) {
-      console.error('Error creating task:', error);
+      console.error('Error creating task:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        taskData: taskData,
+        userId: userId,
+        stack: error instanceof Error ? error.stack : undefined
+      });
+
       throw error;
     }
   },

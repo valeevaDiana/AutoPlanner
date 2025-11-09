@@ -192,16 +192,100 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       parseInt(durationMinutes) || 0
     );
 
+    // АВТОМАТИЧЕСКИ ВЫЧИСЛЯЕМ КОНЕЧНУЮ ДАТУ И ВРЕМЯ
+    let calculatedEndDate = endDate;
+    let calculatedEndTime = endTime;
+
+    if (startDate && startTime) {
+      const startDateTime = new Date(`${startDate}T${startTime}:00`);
+      const endDateTime = new Date(startDateTime.getTime() + totalMinutes * 60 * 1000);
+      
+      // Форматируем конечную дату
+      const endYear = endDateTime.getFullYear();
+      const endMonth = String(endDateTime.getMonth() + 1).padStart(2, '0');
+      const endDay = String(endDateTime.getDate()).padStart(2, '0');
+      calculatedEndDate = `${endYear}-${endMonth}-${endDay}`;
+      
+      // Форматируем конечное время
+      const endHours = String(endDateTime.getHours()).padStart(2, '0');
+      const endMinutes = String(endDateTime.getMinutes()).padStart(2, '0');
+      calculatedEndTime = `${endHours}:${endMinutes}`;
+    }
+
+    // ✅ ПРАВИЛЬНЫЙ РАСЧЕТ ДЛЯ ПОВТОРЯЮЩИХСЯ ЗАДАЧ
+    let calculatedStartDateTimeRepit: string | undefined = undefined;
+    let calculatedEndDateTimeRepit: string | undefined = undefined;
+    let repeatTotalMinutes: number | undefined = undefined;
+    
+    if (isRepeating && startDate && startTime) {
+      // startDateTimeRepit = startDate + startTime (начало первой задачи)
+      calculatedStartDateTimeRepit = `${startDate}T${startTime}:00`;
+
+      // Расчет endDateTimeRepit: конец последней задачи в серии повторений
+      repeatTotalMinutes = durationToMinutes(
+        parseInt(repeatDays) || 0,
+        parseInt(repeatHours) || 0,
+        parseInt(repeatMinutes) || 0
+      );
+      const repeatCountValue = parseInt(repeatCount) || 1;
+
+      if (repeatTotalMinutes > 0) {
+        // ✅ ПРАВИЛЬНЫЙ РАСЧЕТ: 
+        // Каждая задача длится totalMinutes, между задачами интервал repeatTotalMinutes
+        // Общее время = (длительность задачи + интервал) × (количество повторов - 1) + длительность последней задачи
+        const totalDurationForAllRepetitions = 
+          (totalMinutes + repeatTotalMinutes) * (repeatCountValue - 1) + totalMinutes;
+        
+        const startDateTime = new Date(calculatedStartDateTimeRepit);
+        const endRepetitionDateTime = new Date(
+          startDateTime.getTime() + totalDurationForAllRepetitions * 60 * 1000
+        );
+        
+        const endRepYear = endRepetitionDateTime.getFullYear();
+        const endRepMonth = String(endRepetitionDateTime.getMonth() + 1).padStart(2, '0');
+        const endRepDay = String(endRepetitionDateTime.getDate()).padStart(2, '0');
+        const endRepHours = String(endRepetitionDateTime.getHours()).padStart(2, '0');
+        const endRepMinutes = String(endRepetitionDateTime.getMinutes()).padStart(2, '0');
+        
+        calculatedEndDateTimeRepit = `${endRepYear}-${endRepMonth}-${endRepDay}T${endRepHours}:${endRepMinutes}:01`;
+      } else if (repeatStartDate && repeatStartTime && repeatEndDate && repeatEndTime) {
+        // Альтернативный вариант: используем явно указанный период повторения
+        calculatedStartDateTimeRepit = `${repeatStartDate}T${repeatStartTime}:00`;
+        calculatedEndDateTimeRepit = `${repeatEndDate}T${repeatEndTime}:00`;
+      }
+    }
+
+    // ✅ ОБРАБОТКА ДЛЯ RULE ONE TASK (конкретное время)
+    let calculatedStartDateTimeRuleOneTask: string | undefined = undefined;
+    let calculatedEndDateTimeRuleOneTask: string | undefined = undefined;
+    let ruleOneTaskValue: boolean = false;
+
+    if (hasSpecificTime && specificStartTime && specificEndTime && startDate) {
+      ruleOneTaskValue = true;
+      calculatedStartDateTimeRuleOneTask = `${startDate}T${specificStartTime}:00`;
+      calculatedEndDateTimeRuleOneTask = `${startDate}T${specificEndTime}:00`;
+    }
+
     const taskData: Partial<Task> = {
-      id: task?.id, 
+      id: task?.id,
       title: title,
       description,
       startDate: startDate || undefined,
-      endDate: endDate || undefined,
+      endDate: calculatedEndDate || undefined,
       startTime: startTime || undefined,
-      endTime: endTime || undefined,
-      durationMinutes: totalMinutes || 60,
+      endTime: calculatedEndTime || undefined,
+      durationMinutes: totalMinutes || 0,
       priority,
+      // ✅ ДОБАВЛЯЕМ ПОЛЯ ДЛЯ ПОВТОРЕНИЙ
+      isRepeating: isRepeating || undefined,
+      repeatCount: isRepeating ? parseInt(repeatCount) || 1 : undefined,
+      startDateTimeRepit: calculatedStartDateTimeRepit,
+      endDateTimeRepit: calculatedEndDateTimeRepit,
+      repeateDurationMinute: repeatTotalMinutes,
+      // ✅ ДОБАВЛЯЕМ ПОЛЯ ДЛЯ RULE ONE TASK
+      ruleOneTask: ruleOneTaskValue,
+      startDateTimeRuleOneTask: calculatedStartDateTimeRuleOneTask,
+      endDateTimeRuleOneTask: calculatedEndDateTimeRuleOneTask,
     };
 
     onSave(taskData);
@@ -325,7 +409,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             />
           </div>
 
-          {/* Сроки */}
+          {/* Сроки
           <div>
             <label style={{ 
               display: 'block', 
@@ -407,7 +491,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Длительность */}
           <div>
@@ -838,7 +922,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 flexDirection: 'column',
                 gap: '15px'
               }}>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                {/* <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <div style={{ flex: 1 }}>
                     <label style={{ 
                       display: 'block', 
@@ -849,9 +933,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       Время начала:
                     </label>
                     <input
-                      type="time"
+                      type="datetime-local"
                       value={specificStartTime}
-                      onChange={(e) => setSpecificStartTime(e.target.value)}
+                      onChange={(e) => setStartDate(e.target.value)}
                       disabled={isViewMode}
                       style={{
                         width: '100%',
@@ -875,9 +959,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       Время окончания:
                     </label>
                     <input
-                      type="time"
+                      type="datetime-local"
                       value={specificEndTime}
-                      onChange={(e) => setSpecificEndTime(e.target.value)}
+                      onChange={(e) => setEndDate(e.target.value)}
                       disabled={isViewMode}
                       style={{
                         width: '100%',
@@ -891,7 +975,80 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       }}
                     />
                   </div>
+                </div> */}
+                <div className="dates-container">
+                <div>
+                  <div style={{ fontSize: '14px', color: currentTheme.colors.textSecondary, marginBottom: '5px' }}>Начать с:</div>
+                  <div className="date-group">
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: '8px',
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: '4px',
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        color: currentTheme.colors.text
+                      }}
+                    />
+                    <input
+                      type="time"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: '8px',
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: '4px',
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        color: currentTheme.colors.text
+                      }}
+                    />
+                  </div>
                 </div>
+              {/* <div>
+                <div style={{ fontSize: '14px', color: currentTheme.colors.textSecondary, marginBottom: '5px' }}>Закончить до:</div>
+                <div className="date-group">
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    disabled={isViewMode}
+                    style={{
+                      flex: 1,
+                      padding: '8px',
+                      border: `1px solid ${currentTheme.colors.border}`,
+                      borderRadius: '4px',
+                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                      cursor: isViewMode ? 'not-allowed' : 'text',
+                      color: currentTheme.colors.text
+                    }}
+                  />
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    disabled={isViewMode}
+                    style={{
+                      flex: 1,
+                      padding: '8px',
+                      border: `1px solid ${currentTheme.colors.border}`,
+                      borderRadius: '4px',
+                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                      cursor: isViewMode ? 'not-allowed' : 'text',
+                      color: currentTheme.colors.text
+                    }}
+                  />
+                </div>
+              </div> */}
+            </div>
+
               </div>
             )}
           </div>

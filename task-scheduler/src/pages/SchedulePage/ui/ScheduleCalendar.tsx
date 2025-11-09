@@ -37,7 +37,12 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
       const [hours, minutes] = task.startTime.split(':').map(Number);
       taskStart = hours * 60 + minutes; // Начало задачи в минутах
     }
-    const taskEnd = taskStart + task.durationMinutes;
+    let taskEnd = 0;
+    if (task.endTime) {
+      const [hours, minutes] = task.endTime.split(':').map(Number);
+      taskEnd = hours * 60 + minutes; // Начало задачи в минутах
+    }
+    // const taskEnd = taskStart + task.durationMinutes;
 
     let addedToGroup = false;
     
@@ -105,9 +110,19 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   let topOffset = 0;
   if (task.startTime) {
     const [hours, minutes] = task.startTime.split(':').map(Number);
-    topOffset = hours * 60 + minutes; 
+    console.log(hours, minutes);
+    topOffset = (hours * 60 + minutes); 
+    console.log(topOffset, task);
   }
   const isCompleted = task.completed;
+
+  console.log('Task data:', {
+    title: task.title,
+    startTime: task.startTime,
+    durationMinutes: task.durationMinutes,
+    calculatedHeight: totalHeight,
+    calculatedTop: topOffset
+  });
 
   const backgroundColor = getPriorityColor(
     task.priority, 
@@ -150,10 +165,12 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
       style={{
         position: 'absolute',
         //top: `calc(${topOffset}px + 1px)`,
-        top: `${topOffset}px`,
+        top: `1px`,
+        // top: `${topOffset}px`,
         left: left,
         width: width,
         height: `calc(${totalHeight}px - 4px)`,
+        //height: `60px`,
         zIndex: 10,
         opacity: isCompleted ? 0.7 : 0.95,
         minHeight: '15px',

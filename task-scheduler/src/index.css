@@ -147,6 +147,7 @@ body {
 
 .calendar-body {
   min-width: 1000px; 
+  transform: none !important; 
 }
 
 .calendar-row {
@@ -217,6 +218,7 @@ body {
   box-sizing: border-box;
   overflow: hidden;
   transition: background-color 0.3s ease;
+  transform: none !important; 
 }
  
 .task-block.priority-completed {
