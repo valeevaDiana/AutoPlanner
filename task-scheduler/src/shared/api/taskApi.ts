@@ -32,10 +32,10 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
   formData.append('Priority', String(taskData.priority ?? 5));
 
   if (taskData.startDate && taskData.startTime) {
-    formData.append('StartDateTime', formatToISO(taskData.startDate, taskData.startTime));
+    formData.append('StartDateTime', `${taskData.startDate}T${taskData.startTime}:00.000Z`);
   }
   if (taskData.endDate && taskData.endTime) {
-    formData.append('EndDateTime', formatToISO(taskData.endDate, taskData.endTime));
+    formData.append('EndDateTime', `${taskData.endDate}T${taskData.endTime}`);
   }
 
   const totalMinutes = taskData.durationMinutes ?? 60;
@@ -70,13 +70,28 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
     if (taskData.ruleOneTask && taskData.endDateTimeRuleOneTask) {
       formData.append('EndDateTimeRuleOneTask', taskData.endDateTimeRuleOneTask);
     }
-    
-  formData.append('RuleTwoTask', 'false');
 
   if (isUpdate) {
     formData.append('IsComplete', String(Boolean(taskData.completed)));
     if (taskData.completed) {
       formData.append('CompleteDateTime', new Date().toISOString());
+    }
+  }
+
+   formData.append('RuleTwoTask', String(Boolean(taskData.ruleTwoTask)));
+  
+  if (taskData.ruleTwoTask) {
+    if (taskData.secondTaskId !== undefined) {
+      formData.append('SecondTaskId', String(taskData.secondTaskId));
+    }
+    if (taskData.timePositionRegardingTaskId !== undefined) {
+      formData.append('TimePositionRegardingTaskId', String(taskData.timePositionRegardingTaskId));
+    }
+    if (taskData.relationRangeId !== undefined) {
+      formData.append('RelationRangeId', String(taskData.relationRangeId));
+    }
+    if (taskData.dateTimeRange) {
+      formData.append('DateTimeRange', taskData.dateTimeRange);
     }
   }
 
@@ -86,17 +101,14 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
 const apiTaskToTask = (apiTask: ApiTask): Task => {
   const parseDate = (isoString: string | null | undefined): { date?: string; time?: string } => {
     if (!isoString) return {};
-    const date = new Date(isoString);
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
+    
+    // Просто извлекаем части из ISO строки
+    const datePart = isoString.slice(0, 10);  // "2025-11-09"
+    const timePart = isoString.slice(11, 16); // "13:00"
+    
     return {
-      date: `${year}-${month}-${day}`, 
-      time: `${hours}:${minutes}`,     
+      date: datePart,
+      time: timePart,     
     };
   };
 
@@ -139,14 +151,29 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
       durationMinutes = hours * 60 + minutes;
     }
   } else {
-    // ✅ НУЖНО РАССЧИТАТЬ ДЛИТЕЛЬНОСТЬ ИЗ startDateTime и endDateTime!
     if (apiTask.startDateTime && apiTask.endDateTime) {
-      const start = new Date(apiTask.startDateTime);
-      const end = new Date(apiTask.endDateTime);
-      durationMinutes = Math.round((end.getTime() - start.getTime()) / (1000 * 60));
+      durationMinutes = Math.round((new Date(apiTask.endDateTime).getTime() - new Date(apiTask.startDateTime).getTime()) / (1000 * 60));
     }
   }
 
+  // ДОБАВЛЕНО: Расчет repeateDurationMinute из repitTime
+  let repeateDurationMinute = 0;
+  if (apiTask.repitTime) {
+    const repitMatch = apiTask.repitTime.match(/(\d+):(\d+):(\d+)/);
+    if (repitMatch) {
+      const repitHours = parseInt(repitMatch[1], 10);
+      const repitMinutes = parseInt(repitMatch[2], 10);
+      repeateDurationMinute = repitHours * 60 + repitMinutes;
+    }
+  }
+
+  // ДОБАВЛЕНО: Парсинг дат для повторяющихся задач
+  const startRepit = parseDate(apiTask.startDateTimeRepit);
+  const endRepit = parseDate(apiTask.endDateTimeRepit);
+
+  // ДОБАВЛЕНО: Парсинг дат для rule one task
+  const startRuleOne = parseDate(apiTask.startDateTimeRuleOneTask);
+  const endRuleOne = parseDate(apiTask.endDateTimeRuleOneTask);
 
   return {
     id: String(apiTask.id ?? apiTask.myTaskId ?? 'unknown'), 
@@ -160,6 +187,28 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
     durationMinutes,
     completed: Boolean(apiTask.isComplete),
     realDate: start?.date || new Date().toISOString().split('T')[0],
+    
+    // ДОБАВЛЕНО: Поля для повторяющихся задач
+    isRepeating: Boolean(apiTask.isRepit),
+    repeatCount: apiTask.countRepit || 1,
+    startDateTimeRepit: apiTask.startDateTimeRepit || undefined,
+    endDateTimeRepit: apiTask.endDateTimeRepit || undefined,
+    repeateDurationMinute,
+    
+    // ДОБАВЛЕНО: Поля для rule one task (возможное время)
+    ruleOneTask: Boolean(apiTask.ruleOneTask),
+    startDateTimeRuleOneTask: apiTask.startDateTimeRuleOneTask || undefined,
+    endDateTimeRuleOneTask: apiTask.endDateTimeRuleOneTask || undefined,
+    
+    // ДОБАВЛЕНО: Поля для rule two task (зависимости)
+    ruleTwoTask: Boolean(apiTask.ruleTwoTask),
+    timePositionRegardingTaskId: apiTask.timePositionRegardingTaskId,
+    secondTaskId: apiTask.secondTaskId,
+    relationRangeId: apiTask.relationRangeId,
+    dateTimeRange: apiTask.dateTimeRange,
+    
+    // ДОБАВЛЕНО: Дублирующее поле для совместимости
+    isComplete: Boolean(apiTask.isComplete),
   };
 };
 
@@ -267,6 +316,84 @@ export const taskApi = {
     } catch (error) {
       console.error('Error rebuilding timetable:', error);
       throw error;
+    }
+  },
+
+  async getAvailableTasks(userId: number): Promise<Task[]> {
+    try {
+      // Получаем задачи напрямую из эндпоинта /task/{userId}
+      const response = await fetch(`${API_BASE_URL}/task/${userId}`);
+      
+      if (!response.ok) {
+        if (response.status === 400) {
+          throw new Error('Пользователь с таким ID не найден');
+        } else if (response.status === 500) {
+          throw new Error('Ошибка при получении задач');
+        } else {
+          throw new Error(`Ошибка загрузки: ${response.status}`);
+        }
+      }
+      
+      const data = await response.json();
+      
+      // Предполагаем, что ответ содержит массив задач в формате ApiTask
+      let tasks: ApiTask[];
+      
+      if (Array.isArray(data)) {
+        tasks = data;
+      } else if (data && 'tasks' in data) {
+        tasks = data.tasks;
+      } else {
+        console.warn('Unexpected response format from /task endpoint:', data);
+        tasks = [];
+      }
+      
+      // Конвертируем ApiTask в Task и фильтруем
+      const allTasks = tasks.map(apiTaskToTask);
+      
+      // Фильтруем задачи: оставляем только те, у которых startDate не null/undefined и не пустая строка
+      const availableTasks = allTasks.filter(task => 
+        task.startDate && 
+        task.startDate.trim() !== '' && 
+        task.startDate !== 'null' && 
+        task.startDate !== 'undefined'
+      );
+      
+      return availableTasks;
+    } catch (error) {
+      console.error('Error fetching available tasks from /task endpoint:', error);
+      return [];
+    }
+  },
+
+  async getTaskById(taskId: string): Promise<Task | null> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/id/${taskId}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.warn(`Task with ID ${taskId} not found`);
+          return null;
+        } else {
+          throw new Error(`HTTP ${response.status}: Failed to fetch task`);
+        }
+      }
+      
+      const taskData: ApiTask = await response.json();
+      
+      // Конвертируем ApiTask в Task
+      const task = apiTaskToTask(taskData);
+      
+      console.log(`Successfully loaded task: ${task.title} (ID: ${task.id})`);
+      return task;
+      
+    } catch (error) {
+      console.error('Error fetching task by ID:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        taskId: taskId,
+        endpoint: `${API_BASE_URL}/task/id/${taskId}`
+      });
+      return null;
     }
   },
 };

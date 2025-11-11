@@ -37,6 +37,7 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
       const [hours, minutes] = task.startTime.split(':').map(Number);
       taskStart = hours * 60 + minutes; // Начало задачи в минутах
     }
+    console.log("id", task.id, "name", task.title, "start", taskStart);
     let taskEnd = 0;
     if (task.endTime) {
       const [hours, minutes] = task.endTime.split(':').map(Number);
@@ -54,6 +55,7 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
           groupStart = hours * 60 + minutes;
         }
         const groupEnd = groupStart + groupTask.durationMinutes;
+        console.log("group", "id", groupTask.id, "name",  groupTask.title, "startOrigin", groupTask.startTime, "start", groupStart);
         
         return taskStart < groupEnd && taskEnd > groupStart;
       });
@@ -110,9 +112,7 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   let topOffset = 0;
   if (task.startTime) {
     const [hours, minutes] = task.startTime.split(':').map(Number);
-    console.log(hours, minutes);
-    topOffset = (hours * 60 + minutes); 
-    console.log(topOffset, task);
+    topOffset = minutes; 
   }
   const isCompleted = task.completed;
 
@@ -164,8 +164,8 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
       className="task-block"
       style={{
         position: 'absolute',
-        //top: `calc(${topOffset}px + 1px)`,
-        top: `1px`,
+        top: `calc(${topOffset}px + 1px)`,
+        //top: `1px`,
         // top: `${topOffset}px`,
         left: left,
         width: width,

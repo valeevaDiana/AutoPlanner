@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { TaskFormModal } from '../../../features/task-form/ui/TaskFormModal';
 import { ThemeSelector } from '../../../features/theme-selector/ui/ThemeSelector';
 import type { Task } from '../../../entities/task/model/types';
 import { useTasks } from '../../../shared/lib/hooks/useTasks';
+import { taskApi } from '../../../shared/api/taskApi';
 
 export const SchedulePage: React.FC = () => {
   const {
@@ -22,6 +23,40 @@ export const SchedulePage: React.FC = () => {
   const [taskFormMode, setTaskFormMode] = useState<'create' | 'edit' | 'view'>('create');
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [initialDate, setInitialDate] = useState<{ day: number; time: string; date: string } | undefined>();
+  const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
+  const [isLoadingTask, setIsLoadingTask] = useState(false);
+
+  useEffect(() => {
+      if (isTaskFormOpen) {
+        loadAvailableTasks();
+      }
+    }, [isTaskFormOpen]);
+  
+  const loadAvailableTasks = async () => {
+    try {
+      // Предполагаем, что у вас есть currentUserId
+      const currentUserId = 1; // Замените на реальный ID пользователя
+      const tasks = await taskApi.getAvailableTasks(currentUserId);
+      setAvailableTasks(tasks);
+    } catch (error) {
+      console.error('Failed to load available tasks:', error);
+      // В случае ошибки используем существующие tasks как fallback
+      setAvailableTasks(tasks);
+    }
+  };
+
+  const loadTaskById = async (taskId: string): Promise<Task | null> => {
+    try {
+      setIsLoadingTask(true);
+      const task = await taskApi.getTaskById(taskId);
+      return task;
+    } catch (error) {
+      console.error('Failed to load task:', error);
+      return null;
+    } finally {
+      setIsLoadingTask(false);
+    }
+  };
 
   const handleToggleView = () => {
     alert("Переключение режима: неделя → день → месяц");
@@ -41,16 +76,32 @@ export const SchedulePage: React.FC = () => {
     setIsTaskFormOpen(true);
   };
 
-  const handleEditTask = (task: Task) => {
+  const handleEditTask = async (task: Task) => {
     setTaskFormMode('edit');
+    
+    // Сначала показываем форму с базовыми данными
     setEditingTask(task);
     setIsTaskFormOpen(true);
+    
+    // Затем загружаем полные данные через API
+    const fullTask = await loadTaskById(task.id);
+    if (fullTask) {
+      setEditingTask(fullTask);
+    }
   };
 
-  const handleViewTask = (task: Task) => {
+  const handleViewTask = async (task: Task) => {
     setTaskFormMode('view');
+    
+    // Сначала показываем форму с базовыми данными
     setEditingTask(task);
     setIsTaskFormOpen(true);
+    
+    // Затем загружаем полные данные через API
+    const fullTask = await loadTaskById(task.id);
+    if (fullTask) {
+      setEditingTask(fullTask);
+    }
   };
 
   const handleSwitchToEdit = () => {
@@ -117,7 +168,8 @@ export const SchedulePage: React.FC = () => {
         task={editingTask}
         mode={taskFormMode}
         initialDate={initialDate}
-        isSaving={isCreating || isUpdating}
+        isSaving={isCreating || isUpdating || isLoadingTask}
+        availableTasks={availableTasks}
       />
     </div>
   );

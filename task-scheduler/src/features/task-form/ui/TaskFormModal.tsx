@@ -17,6 +17,7 @@ interface TaskFormModalProps {
     date: string;
   };
   isSaving?: boolean;
+  availableTasks?: Task[];
 }
 
 export const TaskFormModal: React.FC<TaskFormModalProps> = ({
@@ -28,6 +29,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   mode = 'create',
   initialDate,
   isSaving = false,
+  availableTasks = [],
 }) => {
   const { currentTheme } = useTheme();
   const [title, setTitle] = useState('');
@@ -118,11 +120,51 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setDurationMinutes(duration.minutes.toString());
         setPriority(task.priority);
         
-        // Сброс новых полей при редактировании существующей задачи
-        setIsRepeating(false);
-        setHasSpecificTime(false);
-        setHasPossibleTime(false);
-        setHasDependency(false);
+        // ОБНОВИТЬ: устанавливаем состояния чекбоксов из данных задачи
+        setIsRepeating(Boolean(task.isRepeating));
+        setHasSpecificTime(Boolean(task.startDate && task.startTime));
+        setHasPossibleTime(Boolean(task.ruleOneTask));
+        setHasDependency(Boolean(task.ruleTwoTask));
+
+        console.log("is rule two task", task.id, Boolean(task.ruleTwoTask));
+        
+        // Если есть данные о повторении, заполняем их
+        if (task.isRepeating) {
+          setIsRepeating(true);
+          setRepeatCount(String(task.repeatCount || '1'));
+          // Можно также установить repeatDays, repeatHours, repeatMinutes если они есть в task
+        }
+
+        if (task.ruleOneTask)
+        {
+          setHasPossibleTime(true);
+        }
+        
+        // Если есть данные о зависимостях, заполняем их
+        if (task.ruleTwoTask) {
+          setDependencyTask(String(task.secondTaskId || ''));
+          setDependencyType(task.timePositionRegardingTaskId === 0 ? 'before' : 'after');
+          
+          // Устанавливаем оператор на основе relationRangeId
+          if (task.relationRangeId === 0) {
+            setDependencyOperator('>');
+          } else if (task.relationRangeId === 1) {
+            setDependencyOperator('=');
+          } else if (task.relationRangeId === 2) {
+            setDependencyOperator('<');
+          }
+          
+          // Парсим dateTimeRange если он есть
+          if (task.dateTimeRange) {
+            const [days, hours, minutes] = task.dateTimeRange.split(':');
+            setDependencyDays(days || '0');
+            setDependencyHours(hours || '0');
+            setDependencyMinutes(minutes || '0');
+            
+          }
+          setHasDependency(true);
+        }
+        
       } else {
         setTitle('');
         setDescription('');
@@ -146,7 +188,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setPriority(5);
         
         // Сброс новых полей при создании новой задачи
-        setIsRepeating(false);
+        
         setHasSpecificTime(false);
         setHasPossibleTime(false);
         setHasDependency(false);
@@ -191,25 +233,29 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       parseInt(durationHours) || 0,
       parseInt(durationMinutes) || 0
     );
+    console.log("minutes", totalMinutes);
+    let startDateForSave: string | undefined = startDate; 
+    let startTimeForSave: string | undefined = startTime;
 
     // АВТОМАТИЧЕСКИ ВЫЧИСЛЯЕМ КОНЕЧНУЮ ДАТУ И ВРЕМЯ
-    let calculatedEndDate = endDate;
-    let calculatedEndTime = endTime;
+    let calculatedEndDate: string | undefined = endDate;
+    let calculatedEndTime: string | undefined = endTime;
 
     if (startDate && startTime) {
-      const startDateTime = new Date(`${startDate}T${startTime}:00`);
+      const startDateTime = new Date(`${startDate}T${startTime}:00.000Z`);
       const endDateTime = new Date(startDateTime.getTime() + totalMinutes * 60 * 1000);
-      
+      console.log("endDateTime", endDateTime);
       // Форматируем конечную дату
-      const endYear = endDateTime.getFullYear();
-      const endMonth = String(endDateTime.getMonth() + 1).padStart(2, '0');
-      const endDay = String(endDateTime.getDate()).padStart(2, '0');
+            // Форматируем конечную дату (UTC)
+      const endYear = endDateTime.getUTCFullYear();
+      const endMonth = String(endDateTime.getUTCMonth() + 1).padStart(2, '0');
+      const endDay = String(endDateTime.getUTCDate()).padStart(2, '0');
       calculatedEndDate = `${endYear}-${endMonth}-${endDay}`;
-      
-      // Форматируем конечное время
-      const endHours = String(endDateTime.getHours()).padStart(2, '0');
-      const endMinutes = String(endDateTime.getMinutes()).padStart(2, '0');
-      calculatedEndTime = `${endHours}:${endMinutes}`;
+
+      // Форматируем конечное время (UTC)
+      const endHours = String(endDateTime.getUTCHours()).padStart(2, '0');
+      const endMinutes = String(endDateTime.getUTCMinutes()).padStart(2, '0');
+      calculatedEndTime = `${endHours}:${endMinutes}:00.000Z`;
     }
 
     // ✅ ПРАВИЛЬНЫЙ РАСЧЕТ ДЛЯ ПОВТОРЯЮЩИХСЯ ЗАДАЧ
@@ -219,7 +265,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     
     if (isRepeating && startDate && startTime) {
       // startDateTimeRepit = startDate + startTime (начало первой задачи)
-      calculatedStartDateTimeRepit = `${startDate}T${startTime}:00`;
+      calculatedStartDateTimeRepit = `${startDate}T${startTime}:00.000Z`;
 
       // Расчет endDateTimeRepit: конец последней задачи в серии повторений
       repeatTotalMinutes = durationToMinutes(
@@ -247,11 +293,11 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         const endRepHours = String(endRepetitionDateTime.getHours()).padStart(2, '0');
         const endRepMinutes = String(endRepetitionDateTime.getMinutes()).padStart(2, '0');
         
-        calculatedEndDateTimeRepit = `${endRepYear}-${endRepMonth}-${endRepDay}T${endRepHours}:${endRepMinutes}:01`;
+        calculatedEndDateTimeRepit = `${endRepYear}-${endRepMonth}-${endRepDay}T${endRepHours}:${endRepMinutes}:00.000Z`;
       } else if (repeatStartDate && repeatStartTime && repeatEndDate && repeatEndTime) {
         // Альтернативный вариант: используем явно указанный период повторения
-        calculatedStartDateTimeRepit = `${repeatStartDate}T${repeatStartTime}:00`;
-        calculatedEndDateTimeRepit = `${repeatEndDate}T${repeatEndTime}:00`;
+        calculatedStartDateTimeRepit = `${repeatStartDate}T${repeatStartTime}:00.000Z`;
+        calculatedEndDateTimeRepit = `${repeatEndDate}T${repeatEndTime}:00.000Z`;
       }
     }
 
@@ -260,32 +306,70 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     let calculatedEndDateTimeRuleOneTask: string | undefined = undefined;
     let ruleOneTaskValue: boolean = false;
 
-    if (hasSpecificTime && specificStartTime && specificEndTime && startDate) {
+    if (hasPossibleTime) {
       ruleOneTaskValue = true;
-      calculatedStartDateTimeRuleOneTask = `${startDate}T${specificStartTime}:00`;
-      calculatedEndDateTimeRuleOneTask = `${startDate}T${specificEndTime}:00`;
+      calculatedStartDateTimeRuleOneTask = `${startDate}T${possibleStartTime}:00.000Z`;
+      calculatedEndDateTimeRuleOneTask = `${startDate}T${possibleEndTime}:00.000Z`;
+      startDateForSave = undefined;
+      startTimeForSave = undefined;
+      calculatedEndDate = undefined;
+      calculatedEndTime = undefined;
+    }
+
+    let timePosition: number | undefined = undefined;
+    let secondTaskIdFrom: number | undefined = undefined; 
+    let relationRangeIdFrom: number | undefined = undefined;
+    let dateTimeRangeFrom: string | undefined = undefined;
+    if (hasDependency)
+    {
+      timePosition = dependencyType == "before" ? 0 : 1;
+      if (dependencyOperator == ">")
+      {
+        relationRangeIdFrom = 0;
+      }
+      else if (dependencyOperator == "=")
+      {
+        relationRangeIdFrom = 1;
+      }
+      else if (dependencyOperator == "<")
+      {
+        relationRangeIdFrom = 2;
+      }
+      dateTimeRangeFrom = `${dependencyDays.padStart(2, '0')}:${dependencyHours.padStart(2, '0')}:${dependencyMinutes.padStart(2, '0')}:00`;
+      const selectedTask = availableTasks.find(t => t.id === dependencyTask);
+      secondTaskIdFrom = selectedTask ? parseInt(selectedTask.id) : undefined;
+      startDateForSave = undefined;
+      startTimeForSave = undefined;
+      calculatedEndDate = undefined;
+      calculatedEndTime = undefined;
     }
 
     const taskData: Partial<Task> = {
       id: task?.id,
       title: title,
-      description,
-      startDate: startDate || undefined,
+      description: description || " ",
+      startDate: startDateForSave || undefined,
       endDate: calculatedEndDate || undefined,
-      startTime: startTime || undefined,
+      startTime: startTimeForSave || undefined,
       endTime: calculatedEndTime || undefined,
       durationMinutes: totalMinutes || 0,
       priority,
-      // ✅ ДОБАВЛЯЕМ ПОЛЯ ДЛЯ ПОВТОРЕНИЙ
+      // повтор
       isRepeating: isRepeating || undefined,
       repeatCount: isRepeating ? parseInt(repeatCount) || 1 : undefined,
       startDateTimeRepit: calculatedStartDateTimeRepit,
       endDateTimeRepit: calculatedEndDateTimeRepit,
       repeateDurationMinute: repeatTotalMinutes,
-      // ✅ ДОБАВЛЯЕМ ПОЛЯ ДЛЯ RULE ONE TASK
+      // rule one task
       ruleOneTask: ruleOneTaskValue,
       startDateTimeRuleOneTask: calculatedStartDateTimeRuleOneTask,
       endDateTimeRuleOneTask: calculatedEndDateTimeRuleOneTask,
+      // rule two task
+      ruleTwoTask: hasDependency,
+      timePositionRegardingTaskId: timePosition,
+      secondTaskId: secondTaskIdFrom,
+      relationRangeId: relationRangeIdFrom,
+      dateTimeRange: dateTimeRangeFrom,
     };
 
     onSave(taskData);
@@ -1189,10 +1273,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     }}
                   >
                     <option value="">Выберите задачу</option>
-                    {/* Здесь будут подгружаться задачи из списка */}
-                    <option value="task1">Задача 1</option>
-                    <option value="task2">Задача 2</option>
-                    <option value="task3">Задача 3</option>
+                    {/* Динамически подгружаем задачи из availableTasks */}
+                    {availableTasks.map((task) => (
+                      <option key={task.id} value={task.id}>
+                        {task.title}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -1272,8 +1358,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       <option value=">">{'>'}</option>
                       <option value="<">{'<'}</option>
                       <option value="=">{'='}</option>
-                      <option value=">=">{'>='}</option>
-                      <option value="<=">{'<='}</option>
                     </select>
                     
                     <div style={{ flex: 1, display: 'flex', gap: '5px', alignItems: 'center' }}>
