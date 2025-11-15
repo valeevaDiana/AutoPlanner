@@ -101,15 +101,23 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
 const apiTaskToTask = (apiTask: ApiTask): Task => {
   const parseDate = (isoString: string | null | undefined): { date?: string; time?: string } => {
     if (!isoString) return {};
-    
-    // Просто извлекаем части из ISO строки
-    const datePart = isoString.slice(0, 10);  // "2025-11-09"
-    const timePart = isoString.slice(11, 16); // "13:00"
-    
-    return {
-      date: datePart,
-      time: timePart,     
-    };
+    console.log('Parsing date:', isoString);
+  
+    try {
+      const date = new Date(isoString);
+      const datePart = date.toISOString().slice(0, 10);  // "2025-11-11"
+      const timePart = date.toISOString().slice(11, 16); // "04:00"
+      
+      console.log('Parsed:', { datePart, timePart });
+      
+      return {
+        date: datePart,
+        time: timePart,    
+      };
+    } catch (error) {
+      console.error('Error parsing date:', isoString, error);
+      return {};
+    }
   };
 
   const start = parseDate(apiTask.startDateTime);
@@ -219,24 +227,32 @@ export const taskApi = {
     try {
       const response = await fetch(`${API_BASE_URL}/time-table/${userId}`);
       if (!response.ok) throw new Error(`Ошибка загрузки: ${response.status}`);
-      const data: ApiTimeTableResponse | ApiTask[] = await response.json();
+      
+      const data = await response.json();
+      console.log('Raw API response:', data); 
+      
       let tasks: ApiTask[];
 
       if (Array.isArray(data)) {
         tasks = data;
       } else if (data && 'tasks' in data) {
         tasks = data.tasks;
+      } else if (data && 'timeTableItems' in data) {
+
+        tasks = data.timeTableItems;
       } else {
         console.warn('Unexpected response format:', data);
         tasks = [];
       }
 
+      console.log('Parsed tasks:', tasks); 
       return tasks.map(apiTaskToTask);
+      
     } catch (error) {
       console.error('Error fetching tasks:', error);
       return [];
     }
-  },
+  },                  
 
   async createTask(taskData: Partial<Task>, userId: number): Promise<void> {
     try {

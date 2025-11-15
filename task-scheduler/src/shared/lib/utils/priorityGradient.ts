@@ -1,4 +1,4 @@
-export const getPriorityColor = (priority: number, startColor: string, endColor: string): string => {
+export const getPriorityColor = (priority: number, lowColor: string, highColor: string): string => {
   const normalizedPriority = Math.max(1, Math.min(10, priority));
   
   const progress = (normalizedPriority - 1) / 9;
@@ -19,8 +19,8 @@ export const getPriorityColor = (priority: number, startColor: string, endColor:
     }).join('');
   };
   
-  const startRgb = hexToRgb(startColor);
-  const endRgb = hexToRgb(endColor);
+  const startRgb = hexToRgb(lowColor);
+  const endRgb = hexToRgb(highColor);
   
   const r = startRgb[0] + (endRgb[0] - startRgb[0]) * progress;
   const g = startRgb[1] + (endRgb[1] - startRgb[1]) * progress;

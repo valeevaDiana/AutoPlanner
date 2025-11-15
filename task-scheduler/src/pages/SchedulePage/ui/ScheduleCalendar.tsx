@@ -29,6 +29,12 @@ interface ScheduleCalendarProps {
 }
 
 const getOverlappingTasks = (tasks: Task[]): Task[][] => {
+  console.log('Analyzing overlapping tasks:', tasks.map(t => ({
+    title: t.title,
+    startTime: t.startTime,
+    duration: t.durationMinutes
+  })));
+
   const groups: Task[][] = [];
   
   tasks.forEach(task => {
@@ -126,8 +132,8 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
 
   const backgroundColor = getPriorityColor(
     task.priority, 
-    currentTheme.colors.priorityHigh, 
-    currentTheme.colors.priorityLow
+    currentTheme.colors.priorityLow, 
+    currentTheme.colors.priorityHigh
   );
 
   const textColor = getContrastColor(backgroundColor);
@@ -239,8 +245,24 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
 
   const getTasksForDate = (date: Date) => {
     const dateString = getISODate(date);
-    return tasks.filter(task => task.realDate === dateString);
+    console.log('Checking date:', dateString);
+    
+    const tasksForDate = tasks.filter(task => {
+      const matches = task.realDate === dateString;
+      if (matches) {
+        console.log('Task matches:', task.title, task.realDate, task.startTime);
+      }
+      return matches;
+    });
+    
+    console.log(`Found ${tasksForDate.length} tasks for ${dateString}`);
+    return tasksForDate;
   };
+
+  // const getTasksForDate = (date: Date) => {
+  //   const dateString = getISODate(date);
+  //   return tasks.filter(task => task.realDate === dateString);
+  // };
 
   const handleTaskClick = (task: Task, event: React.MouseEvent) => {
     setSelectedTask(task);

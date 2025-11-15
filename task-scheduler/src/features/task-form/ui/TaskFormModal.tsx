@@ -686,14 +686,14 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 type="range"
                 min="1"
                 max="10"
-                value={11 - priority}
-                onChange={(e) => !isViewMode && setPriority(11 - parseInt(e.target.value))}
+                value={priority}
+                onChange={(e) => !isViewMode && setPriority(parseInt(e.target.value))}
                 disabled={isViewMode}
                 style={{
                   width: '100%',
                   height: '6px',
                   borderRadius: '3px',
-                  background: `linear-gradient(to right, ${currentTheme.colors.priorityHigh}, ${currentTheme.colors.priorityLow})`,
+                  background: `linear-gradient(to right, ${currentTheme.colors.priorityLow}, ${currentTheme.colors.priorityHigh})`,
                   outline: 'none',
                   cursor: isViewMode ? 'not-allowed' : 'pointer',
                 }}
@@ -705,8 +705,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 fontSize: '12px',
                 color: currentTheme.colors.textSecondary
               }}>
-                <span>10 (Низкий)</span>
-                <span>1 (Высокий)</span>
+                <span>1 (Низкий)</span>
+                <span>10 (Высокий)</span>
               </div>
             </div>
             
@@ -722,7 +722,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 width: '20px',
                 height: '20px',
                 borderRadius: '50%',
-                backgroundColor: getPriorityColor(priority, currentTheme.colors.priorityHigh, currentTheme.colors.priorityLow),
+                backgroundColor: getPriorityColor(priority, currentTheme.colors.priorityLow, currentTheme.colors.priorityHigh),
                 border: `2px solid ${currentTheme.colors.border}`
               }} />
               <span style={{
