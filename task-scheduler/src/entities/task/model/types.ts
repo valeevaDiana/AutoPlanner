@@ -27,3 +27,14 @@ export interface Task {
 }
 
 export type TaskAction = 'complete' | 'edit' | 'delete'; 
+
+export interface PenaltyTask {
+  id: string;
+  title: string;
+  description?: string;
+  priority: number;
+  durationMinutes: number;
+  reason: string; 
+  penaltyScore?: number; 
+  originalTaskData?: Partial<Task>; 
+}

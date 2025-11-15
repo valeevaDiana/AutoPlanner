@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { TaskFormModal } from '../../../features/task-form/ui/TaskFormModal';
+import { PenaltyTasksModal } from '../../../features/penalty-tasks/ui/PenaltyTasksModal';
 import { ThemeSelector } from '../../../features/theme-selector/ui/ThemeSelector';
+import { useTheme } from '../../../shared/lib/contexts';
 import type { Task } from '../../../entities/task/model/types';
+import type { PenaltyTask } from '../../../shared/api/types'; 
 import { useTasks } from '../../../shared/lib/hooks/useTasks';
 import { taskApi } from '../../../shared/api/taskApi';
 
@@ -19,12 +22,28 @@ export const SchedulePage: React.FC = () => {
     isDeleting,
   } = useTasks();
 
+  const { currentTheme } = useTheme();
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [taskFormMode, setTaskFormMode] = useState<'create' | 'edit' | 'view'>('create');
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [initialDate, setInitialDate] = useState<{ day: number; time: string; date: string } | undefined>();
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
   const [isLoadingTask, setIsLoadingTask] = useState(false);
+
+  const [penaltyTasks, setPenaltyTasks] = useState<PenaltyTask[]>([]);
+  const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState(false);
+
+  const USER_ID = 1; 
+
+  useEffect(() => {
+    loadPenaltyTasks();
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      loadPenaltyTasks();
+    }
+  }, [tasks, isLoading]);
 
   useEffect(() => {
       if (isTaskFormOpen) {
@@ -45,6 +64,22 @@ export const SchedulePage: React.FC = () => {
     }
   };
 
+  const loadPenaltyTasks = async () => {
+    try {
+      console.log('Loading penalty tasks...');
+      const response = await fetch(`/api/time-table/${USER_ID}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Penalty tasks data:', data.penaltyTasks);
+        setPenaltyTasks(data.penaltyTasks || []);
+      } else {
+        console.error('Failed to load penalty tasks:', response.status);
+      }
+    } catch (error) {
+      console.error('Error loading penalty tasks:', error);
+    }
+  };
+
   const loadTaskById = async (taskId: string): Promise<Task | null> => {
     try {
       setIsLoadingTask(true);
@@ -60,6 +95,11 @@ export const SchedulePage: React.FC = () => {
 
   const handleToggleView = () => {
     alert("Переключение режима: неделя → день → месяц");
+  };
+
+  const handlePenaltyTasksClick = () => {
+    loadPenaltyTasks();
+    setIsPenaltyModalOpen(true);
   };
 
   const handleAddTaskClick = () => {
@@ -138,6 +178,27 @@ export const SchedulePage: React.FC = () => {
           <ThemeSelector />
           <div className="header-title">Твой план на</div>
           <button className="week-selector" onClick={handleToggleView}>неделю</button>
+
+          {penaltyTasks.length > 0 && (
+            <button
+              onClick={handlePenaltyTasksClick}
+              style={{
+                backgroundColor: currentTheme.colors.error,
+                color: 'white',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              🚫 {penaltyTasks.length}
+            </button>
+          )}
         </div>
         <div className="notification-icon">🔔</div>
       </div>
@@ -170,6 +231,12 @@ export const SchedulePage: React.FC = () => {
         initialDate={initialDate}
         isSaving={isCreating || isUpdating || isLoadingTask}
         availableTasks={availableTasks}
+      />
+
+      <PenaltyTasksModal
+        isOpen={isPenaltyModalOpen}
+        onClose={() => setIsPenaltyModalOpen(false)}
+        penaltyTasks={penaltyTasks}
       />
     </div>
   );

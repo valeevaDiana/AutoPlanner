@@ -25,6 +25,35 @@ export interface ApiTask {
   isComplete?: boolean;
 }
 
-export interface ApiTimeTableResponse {
-  tasks: ApiTask[];
+export interface PenaltyTask {
+  userId: number;
+  myTaskId: number;
+  name: string;
+  description: string;
+  priority: number;
+  startDateTime: string;
+  endDateTime: string;
+  duration: string;
+  countFrom: number;
+  isComplete: boolean;
+  completeDateTime: string | null;
+  startDateTimeRange: string | null;
+  endDateTimeRange: string | null;
+  ruleOneTask: boolean;
+  startDateTimeRuleOneTask: string | null;
+  endDateTimeRuleOneTask: string | null;
+  ruleTwoTask: boolean;
+  timePositionRegardingTaskId: number;
+  secondTaskId: number;
+  relationRangeId: number;
+  dateTimeRange: string | null;
 }
+
+export interface ApiTimeTableResponse {
+  timeTableItems: ApiTask[];
+  penaltyTasks: PenaltyTask[];
+}
+
+// export interface ApiTimeTableResponse {
+//   tasks: ApiTask[];
+// }

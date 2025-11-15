@@ -53,7 +53,7 @@ export const predefinedThemes: Theme[] = [
     colors: {
         primary: '#232849df',
         secondary: '#e96f4a',
-        background: '#e6d5b7',
+        background: '#f7ebd5',
         surface: '#f1e8d7',
         text: '#0f111d',
         textSecondary: '#1e223d',
@@ -126,7 +126,7 @@ export const predefinedThemes: Theme[] = [
     colors: {
         primary: '#ffb25fc0',
         secondary: '#aa5047',
-        background: '#251f18',
+        background: '#12100eff',
         surface: '#322c24',
         text: '#f5f0eb',
         textSecondary: '#e6e1db',

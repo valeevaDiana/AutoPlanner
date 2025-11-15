@@ -376,6 +376,20 @@ body {
   transform: scale(1.1);
 }
 
+.penalty-badge {
+  background-color: var(--color-error);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
 /* АДАПТИВКИ ДЛЯ МОБИЛКИ */
 @media (max-width: 768px) {
   .header-title {
