@@ -372,7 +372,7 @@ export const taskApi = {
         task.startDate && 
         task.startDate.trim() !== '' && 
         task.startDate !== 'null' && 
-        task.startDate !== 'undefined'
+        task.startDate !== 'undefined' && task.isRepeating == false
       );
       
       return availableTasks;
