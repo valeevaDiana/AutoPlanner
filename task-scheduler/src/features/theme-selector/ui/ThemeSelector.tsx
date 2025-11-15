@@ -86,7 +86,7 @@ export const ThemeSelector: React.FC = () => {
           </div>
           
           {allThemes.map((theme) => {
-            const backgroundColor = theme.colors.calendarHeader;
+            const backgroundColor = theme.colors.secondary;
             
             const textColor = getContrastColor(backgroundColor);
             const isSelected = theme.name === currentTheme.name;
@@ -112,8 +112,8 @@ export const ThemeSelector: React.FC = () => {
                   transition: 'all 0.2s ease'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = theme.colors.secondary;
-                  e.currentTarget.style.color = getContrastColor(theme.colors.secondary);
+                  e.currentTarget.style.backgroundColor = theme.colors.calendarHeader;
+                  e.currentTarget.style.color = getContrastColor(theme.colors.calendarHeader);
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = backgroundColor;

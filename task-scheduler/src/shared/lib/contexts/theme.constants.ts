@@ -25,6 +25,30 @@ export const predefinedThemes: Theme[] = [
     }
   },
   {
+    name: 'Розовая',
+    colors: {
+        primary: '#e25b6fc6',
+        secondary: '#ffdbc8',
+        background: '#fff7f7',
+        surface: '#fff0f0',
+        text: '#2b171a', 
+        textSecondary: '#3b1c20', 
+        border: '#c89579', 
+
+        success: '#e3a27f', 
+        error: '#ce3847',
+        edit: '#f580a5' , 
+
+        priorityHigh: '#ff5b6c',    
+        priorityLow: '#ffdcdf',      
+
+        priorityCompleted: '#c3bbbd', 
+        priorityCompletedText: '#28191c', 
+        calendarHeader: '#fdb4bb', 
+        calendarNavigation: '#ffdbc8'
+    }
+  },
+  {
     name: 'Яркая',
     colors: {
         primary: '#232849df',
