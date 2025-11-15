@@ -49,11 +49,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [repeatDays, setRepeatDays] = useState('0');
   const [repeatHours, setRepeatHours] = useState('0');
   const [repeatMinutes, setRepeatMinutes] = useState('0');
-  const [repeatCount, setRepeatCount] = useState('1');
+  const [repeatCount, setRepeatCount] = useState('0');
   const [repeatStartDate, setRepeatStartDate] = useState('');
   const [repeatStartTime, setRepeatStartTime] = useState('');
   const [repeatEndDate, setRepeatEndDate] = useState('');
   const [repeatEndTime, setRepeatEndTime] = useState('');
+
+  const [repeatType, setRepeatType] = useState<'count' | 'period'>('count'); // 'count' или 'period'
   
   // Состояния для конкретного времени начала
   const [hasSpecificTime, setHasSpecificTime] = useState(false);
@@ -128,10 +130,16 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
         console.log("is rule two task", task.id, Boolean(task.ruleTwoTask));
         
+        if (task.isRepeating && task.endDateTimeRepit) {
+          setRepeatType('period');
+        } else {
+          setRepeatType('count');
+        }
+          
         // Если есть данные о повторении, заполняем их
         if (task.isRepeating) {
           setIsRepeating(true);
-          setRepeatCount(String(task.repeatCount || '1'));
+          setRepeatCount(String(task.repeatCount || '0'));
           // Можно также установить repeatDays, repeatHours, repeatMinutes если они есть в task
         }
 
@@ -201,7 +209,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setRepeatDays('0');
         setRepeatHours('0');
         setRepeatMinutes('0');
-        setRepeatCount('1');
+        setRepeatCount('0');
         setRepeatStartDate(getCurrentDate());
         setRepeatEndDate('');
         setRepeatStartTime('09:00');
@@ -216,6 +224,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setDependencyDays('0');
         setDependencyHours('0');
         setDependencyMinutes('0');
+
+        setRepeatType('count');
       }
     }
   }, [isOpen, task, initialDate]);
@@ -279,31 +289,36 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         parseInt(repeatHours) || 0,
         parseInt(repeatMinutes) || 0
       );
-      const repeatCountValue = parseInt(repeatCount) || 1;
 
-      if (repeatTotalMinutes > 0) {
-        // ПРАВИЛЬНЫЙ РАСЧЕТ: 
-        // Каждая задача длится totalMinutes, между задачами интервал repeatTotalMinutes
-        // Общее время = (длительность задачи + интервал) × (количество повторов - 1) + длительность последней задачи
-        const totalDurationForAllRepetitions = 
-          (totalMinutes + repeatTotalMinutes) * (repeatCountValue - 1) + totalMinutes;
-        
-        const startDateTime = new Date(calculatedStartDateTimeRepit);
-        const endRepetitionDateTime = new Date(
-          startDateTime.getTime() + totalDurationForAllRepetitions * 60 * 1000
-        );
-        
-        const endRepYear = endRepetitionDateTime.getFullYear();
-        const endRepMonth = String(endRepetitionDateTime.getMonth() + 1).padStart(2, '0');
-        const endRepDay = String(endRepetitionDateTime.getDate()).padStart(2, '0');
-        const endRepHours = String(endRepetitionDateTime.getHours()).padStart(2, '0');
-        const endRepMinutes = String(endRepetitionDateTime.getMinutes()).padStart(2, '0');
-        
-        calculatedEndDateTimeRepit = `${endRepYear}-${endRepMonth}-${endRepDay}T${endRepHours}:${endRepMinutes}:00.000Z`;
-      } else if (repeatStartDate && repeatStartTime && repeatEndDate && repeatEndTime) {
-        // Альтернативный вариант: используем явно указанный период повторения
-        calculatedStartDateTimeRepit = `${repeatStartDate}T${repeatStartTime}:00.000Z`;
+      if (repeatType === 'period' && repeatEndDate && repeatEndTime) {
         calculatedEndDateTimeRepit = `${repeatEndDate}T${repeatEndTime}:00.000Z`;
+      } else if (repeatType === 'count') {
+        const repeatCountValue = repeatType === 'count' ? parseInt(repeatCount) || 0 : 0;
+
+        if (repeatTotalMinutes > 0) {
+          // ПРАВИЛЬНЫЙ РАСЧЕТ: 
+          // Каждая задача длится totalMinutes, между задачами интервал repeatTotalMinutes
+          // Общее время = (длительность задачи + интервал) × (количество повторов - 1) + длительность последней задачи
+          const totalDurationForAllRepetitions = 
+            (totalMinutes + repeatTotalMinutes) * (repeatCountValue - 1) + totalMinutes;
+          
+          const startDateTime = new Date(calculatedStartDateTimeRepit);
+          const endRepetitionDateTime = new Date(
+            startDateTime.getTime() + totalDurationForAllRepetitions * 60 * 1000
+          );
+          
+          const endRepYear = endRepetitionDateTime.getFullYear();
+          const endRepMonth = String(endRepetitionDateTime.getMonth() + 1).padStart(2, '0');
+          const endRepDay = String(endRepetitionDateTime.getDate()).padStart(2, '0');
+          const endRepHours = String(endRepetitionDateTime.getHours()).padStart(2, '0');
+          const endRepMinutes = String(endRepetitionDateTime.getMinutes()).padStart(2, '0');
+          
+          calculatedEndDateTimeRepit = `${endRepYear}-${endRepMonth}-${endRepDay}T${endRepHours}:${endRepMinutes}:00.000Z`;
+        } else if (repeatStartDate && repeatStartTime && repeatEndDate && repeatEndTime) {
+          // Альтернативный вариант: используем явно указанный период повторения
+          calculatedStartDateTimeRepit = `${repeatStartDate}T${repeatStartTime}:00.000Z`;
+          calculatedEndDateTimeRepit = `${repeatEndDate}T${repeatEndTime}:00.000Z`;
+        }
       }
     }
 
@@ -362,7 +377,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       priority,
       // повтор
       isRepeating: isRepeating || undefined,
-      repeatCount: isRepeating ? parseInt(repeatCount) || 1 : undefined,
+      repeatCount: isRepeating ? parseInt(repeatCount) || 0 : undefined,
       startDateTimeRepit: calculatedStartDateTimeRepit,
       endDateTimeRepit: calculatedEndDateTimeRepit,
       repeateDurationMinute: repeatTotalMinutes,
@@ -774,6 +789,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 flexDirection: 'column',
                 gap: '15px'
               }}>
+                
+                {/* Время начала первой задачи */}
                 <div>
                   <label style={{
                     display: 'block',
@@ -818,16 +835,18 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       }}
                     />
                   </div>
-                </div>  
-                {/* Через какое время повторить задачу */}
+                </div>
+
+                {/* Интервал между задачами (ОБЯЗАТЕЛЬНО) */}
                 <div>
                   <label style={{ 
                     display: 'block', 
                     marginBottom: '8px',
                     fontSize: '14px',
-                    color: currentTheme.colors.text
+                    color: currentTheme.colors.text,
+                    fontWeight: '500'
                   }}>
-                    Через какое время повторить задачу:
+                    Интервал между задачами *:
                   </label>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -898,73 +917,75 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   </div>
                 </div>
 
-                {/* Количество повторений */}
+                {/* Выбор типа повторения */}
                 <div>
                   <label style={{ 
                     display: 'block', 
                     marginBottom: '8px',
                     fontSize: '14px',
-                    color: currentTheme.colors.text
+                    color: currentTheme.colors.text,
+                    fontWeight: '500'
                   }}>
-                    Количество повторений:
+                    Тип повторения:
                   </label>
-                  <input
-                    type="number"
-                    value={repeatCount}
-                    onChange={(e) => setRepeatCount(e.target.value)}
-                    disabled={isViewMode}
-                    min="1"
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: `1px solid ${currentTheme.colors.border}`,
-                      borderRadius: '4px',
-                      fontSize: '14px',
-                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                      cursor: isViewMode ? 'not-allowed' : 'text',
-                      color: currentTheme.colors.text
-                    }}
-                  />
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setRepeatType('count')}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: '10px',
+                        border: `2px solid ${repeatType === 'count' ? currentTheme.colors.primary : currentTheme.colors.border}`,
+                        borderRadius: '4px',
+                        backgroundColor: repeatType === 'count' ? currentTheme.colors.background : currentTheme.colors.surface,
+                        color: currentTheme.colors.text,
+                        cursor: isViewMode ? 'not-allowed' : 'pointer',
+                        fontWeight: repeatType === 'count' ? '600' : '400'
+                      }}
+                    >
+                      По количеству
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRepeatType('period')}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: '10px',
+                        border: `2px solid ${repeatType === 'period' ? currentTheme.colors.primary : currentTheme.colors.border}`,
+                        borderRadius: '4px',
+                        backgroundColor: repeatType === 'period' ? currentTheme.colors.background : currentTheme.colors.surface,
+                        color: currentTheme.colors.text,
+                        cursor: isViewMode ? 'not-allowed' : 'pointer',
+                        fontWeight: repeatType === 'period' ? '600' : '400'
+                      }}
+                    >
+                      По периоду
+                    </button>
+                  </div>
                 </div>
 
-                {/* <div style={{ textAlign: 'center', color: currentTheme.colors.textSecondary, fontSize: '14px', fontWeight: '500' }}>
-                  ИЛИ
-                </div> */}
-
-                {/* Период повторения */}
-                {/* <div>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px',
-                    fontSize: '14px',
-                    color: currentTheme.colors.text
-                  }}>
-                    Начало периода повторения задачи:
-                  </label>
-                  <div style={{ display: 'flex', gap: '10px' }}>
+                {/* Количество повторений (если выбран тип "count") */}
+                {repeatType === 'count' && (
+                  <div>
+                    <label style={{ 
+                      display: 'block', 
+                      marginBottom: '8px',
+                      fontSize: '14px',
+                      color: currentTheme.colors.text
+                    }}>
+                      Количество повторений:
+                    </label>
                     <input
-                      type="date"
-                      value={repeatStartDate}
-                      onChange={(e) => setRepeatStartDate(e.target.value)}
+                      type="number"
+                      value={repeatCount}
+                      onChange={(e) => setRepeatCount(e.target.value)}
                       disabled={isViewMode}
+                      min="0"
+                      placeholder="0"
                       style={{
-                        flex: 1,
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
-                        color: currentTheme.colors.text
-                      }}
-                    />
-                    <input
-                      type="time"
-                      value={repeatStartTime}
-                      onChange={(e) => setRepeatStartTime(e.target.value)}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
+                        width: '100%',
                         padding: '8px',
                         border: `1px solid ${currentTheme.colors.border}`,
                         borderRadius: '4px',
@@ -975,52 +996,102 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       }}
                     />
                   </div>
-                </div> */}
+                )}
 
-                {/* <div>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px',
-                    fontSize: '14px',
-                    color: currentTheme.colors.text
-                  }}>
-                    Конец периода повторения задачи:
-                  </label>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <input
-                      type="date"
-                      value={repeatEndDate}
-                      onChange={(e) => setRepeatEndDate(e.target.value)}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
+                {/* Период повторения (если выбран тип "period") */}
+                {repeatType === 'period' && (
+                  <>
+                    <div>
+                      <label style={{ 
+                        display: 'block', 
+                        marginBottom: '8px',
                         fontSize: '14px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
                         color: currentTheme.colors.text
-                      }}
-                    />
-                    <input
-                      type="time"
-                      value={repeatEndTime}
-                      onChange={(e) => setRepeatEndTime(e.target.value)}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
+                      }}>
+                        Начало периода повторения:
+                      </label>
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <input
+                          type="date"
+                          value={repeatStartDate}
+                          onChange={(e) => setRepeatStartDate(e.target.value)}
+                          disabled={isViewMode}
+                          style={{
+                            flex: 1,
+                            padding: '8px',
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                            cursor: isViewMode ? 'not-allowed' : 'text',
+                            color: currentTheme.colors.text
+                          }}
+                        />
+                        <input
+                          type="time"
+                          value={repeatStartTime}
+                          onChange={(e) => setRepeatStartTime(e.target.value)}
+                          disabled={isViewMode}
+                          style={{
+                            flex: 1,
+                            padding: '8px',
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                            cursor: isViewMode ? 'not-allowed' : 'text',
+                            color: currentTheme.colors.text
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label style={{ 
+                        display: 'block', 
+                        marginBottom: '8px',
                         fontSize: '14px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
                         color: currentTheme.colors.text
-                      }}
-                    />
-                  </div>
-                </div> */}
+                      }}>
+                        Конец периода повторения:
+                      </label>
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <input
+                          type="date"
+                          value={repeatEndDate}
+                          onChange={(e) => setRepeatEndDate(e.target.value)}
+                          disabled={isViewMode}
+                          style={{
+                            flex: 1,
+                            padding: '8px',
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                            cursor: isViewMode ? 'not-allowed' : 'text',
+                            color: currentTheme.colors.text
+                          }}
+                        />
+                        <input
+                          type="time"
+                          value={repeatEndTime}
+                          onChange={(e) => setRepeatEndTime(e.target.value)}
+                          disabled={isViewMode}
+                          style={{
+                            flex: 1,
+                            padding: '8px',
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                            cursor: isViewMode ? 'not-allowed' : 'text',
+                            color: currentTheme.colors.text
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>

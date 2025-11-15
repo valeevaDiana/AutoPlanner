@@ -51,7 +51,7 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
   formData.append('RepitTime', formatDuration(repitDays, repitHours, repitMinutes));
   formData.append('IsRepitFromStart', 'false');
   formData.append('IsRepit', String(Boolean(taskData.isRepeating)));
-  formData.append('CountRepit', String(taskData.repeatCount || 1));
+  formData.append('CountRepit', String(taskData.repeatCount || 0));
 
   if (taskData.startDateTimeRepit) {
     formData.append('StartDateTimeRepit', taskData.startDateTimeRepit);
@@ -198,7 +198,7 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
     
     // ДОБАВЛЕНО: Поля для повторяющихся задач
     isRepeating: Boolean(apiTask.isRepit),
-    repeatCount: apiTask.countRepit || 1,
+    repeatCount: apiTask.countRepit || 0,
     startDateTimeRepit: apiTask.startDateTimeRepit || undefined,
     endDateTimeRepit: apiTask.endDateTimeRepit || undefined,
     repeateDurationMinute,
