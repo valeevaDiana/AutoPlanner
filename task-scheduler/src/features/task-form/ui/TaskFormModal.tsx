@@ -175,11 +175,17 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           setEndDate(date);
           setStartTime(initialDate.time);
           setEndTime(initialDate.time);
+
+          setRepeatStartDate(date);
+          setRepeatStartTime(initialDate.time);
         } else {
           setStartDate('');
           setEndDate('');
           setStartTime('');
           setEndTime('');
+
+          setRepeatStartDate(getCurrentDate());
+          setRepeatStartTime('09:00');
         }
         
         setDurationDays('0');
@@ -258,14 +264,14 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       calculatedEndTime = `${endHours}:${endMinutes}:00.000Z`;
     }
 
-    // ✅ ПРАВИЛЬНЫЙ РАСЧЕТ ДЛЯ ПОВТОРЯЮЩИХСЯ ЗАДАЧ
+    // ПРАВИЛЬНЫЙ РАСЧЕТ ДЛЯ ПОВТОРЯЮЩИХСЯ ЗАДАЧ
     let calculatedStartDateTimeRepit: string | undefined = undefined;
     let calculatedEndDateTimeRepit: string | undefined = undefined;
     let repeatTotalMinutes: number | undefined = undefined;
     
-    if (isRepeating && startDate && startTime) {
+    if (isRepeating && repeatStartDate  && repeatStartTime) {
       // startDateTimeRepit = startDate + startTime (начало первой задачи)
-      calculatedStartDateTimeRepit = `${startDate}T${startTime}:00.000Z`;
+      calculatedStartDateTimeRepit = `${repeatStartDate}T${repeatStartTime}:00.000Z`;
 
       // Расчет endDateTimeRepit: конец последней задачи в серии повторений
       repeatTotalMinutes = durationToMinutes(
@@ -276,7 +282,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       const repeatCountValue = parseInt(repeatCount) || 1;
 
       if (repeatTotalMinutes > 0) {
-        // ✅ ПРАВИЛЬНЫЙ РАСЧЕТ: 
+        // ПРАВИЛЬНЫЙ РАСЧЕТ: 
         // Каждая задача длится totalMinutes, между задачами интервал repeatTotalMinutes
         // Общее время = (длительность задачи + интервал) × (количество повторов - 1) + длительность последней задачи
         const totalDurationForAllRepetitions = 
@@ -301,7 +307,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       }
     }
 
-    // ✅ ОБРАБОТКА ДЛЯ RULE ONE TASK (конкретное время)
+    // ОБРАБОТКА ДЛЯ RULE ONE TASK (конкретное время)
     let calculatedStartDateTimeRuleOneTask: string | undefined = undefined;
     let calculatedEndDateTimeRuleOneTask: string | undefined = undefined;
     let ruleOneTaskValue: boolean = false;
@@ -768,6 +774,51 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 flexDirection: 'column',
                 gap: '15px'
               }}>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    marginBottom: '8px',
+                    fontSize: '14px',
+                    color: currentTheme.colors.text,
+                    fontWeight: '500'
+                  }}>
+                    Время начала первой задачи:
+                  </label>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <input
+                      type="date"
+                      value={repeatStartDate}
+                      onChange={(e) => setRepeatStartDate(e.target.value)}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: '8px',
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        color: currentTheme.colors.text
+                      }}
+                    />
+                    <input
+                      type="time"
+                      value={repeatStartTime}
+                      onChange={(e) => setRepeatStartTime(e.target.value)}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: '8px',
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        color: currentTheme.colors.text
+                      }}
+                    />
+                  </div>
+                </div>  
                 {/* Через какое время повторить задачу */}
                 <div>
                   <label style={{ 
@@ -876,12 +927,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   />
                 </div>
 
-                <div style={{ textAlign: 'center', color: currentTheme.colors.textSecondary, fontSize: '14px', fontWeight: '500' }}>
+                {/* <div style={{ textAlign: 'center', color: currentTheme.colors.textSecondary, fontSize: '14px', fontWeight: '500' }}>
                   ИЛИ
-                </div>
+                </div> */}
 
                 {/* Период повторения */}
-                <div>
+                {/* <div>
                   <label style={{ 
                     display: 'block', 
                     marginBottom: '8px',
@@ -924,9 +975,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       }}
                     />
                   </div>
-                </div>
+                </div> */}
 
-                <div>
+                {/* <div>
                   <label style={{ 
                     display: 'block', 
                     marginBottom: '8px',
@@ -969,7 +1020,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       }}
                     />
                   </div>
-                </div>
+                </div> */}
               </div>
             )}
           </div>

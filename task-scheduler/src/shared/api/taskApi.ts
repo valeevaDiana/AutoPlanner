@@ -36,7 +36,7 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
   }
   if (taskData.endDate && taskData.endTime) {
     formData.append('EndDateTime', `${taskData.endDate}T${taskData.endTime}`);
-  }
+  } 
 
   const totalMinutes = taskData.durationMinutes ?? 60;
   const days = Math.floor(totalMinutes / (24 * 60));
@@ -49,7 +49,7 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
   const repitHours = Math.floor((repitTotalMinutes % (24 * 60)) / 60);
   const repitMinutes = repitTotalMinutes % 60;
   formData.append('RepitTime', formatDuration(repitDays, repitHours, repitMinutes));
-
+  formData.append('IsRepitFromStart', 'false');
   formData.append('IsRepit', String(Boolean(taskData.isRepeating)));
   formData.append('CountRepit', String(taskData.repeatCount || 1));
 
