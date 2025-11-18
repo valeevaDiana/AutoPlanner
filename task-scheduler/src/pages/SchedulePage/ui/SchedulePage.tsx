@@ -175,7 +175,7 @@ export const SchedulePage: React.FC = () => {
       <div className="header-fixed">
         <div className="header-title-wrapper">
           <ThemeSelector />
-          <div className="header-title">Твой план на</div>
+          <div className="header-title">План на</div>
           <button className="week-selector" onClick={handleToggleView}>неделю</button>
 
           {penaltyTasks.length > 0 && (
@@ -195,7 +195,7 @@ export const SchedulePage: React.FC = () => {
                 gap: '8px'
               }}
             >
-              🚫 {penaltyTasks.length}
+              🚫
             </button>
           )}
         </div>

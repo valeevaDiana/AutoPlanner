@@ -430,12 +430,13 @@ body {
   }
 
   .week-selector {
-    font-size: 14px;
+    font-size: 16px;
+    padding: 8px 12px;
   }
 
   .content-wrapper {
-    margin-top: 4vh;
-    margin-bottom: 4vh;
+    margin-top: 5vh;
+    margin-bottom: 6vh;
     height: calc(100vh - 100px); 
   }
   
@@ -445,10 +446,6 @@ body {
 
   .header-fixed {
     padding: 8px 12px;
-  }
-
-  .week-selector {
-    padding: 6px 12px;
   }
 
   .notification-icon {
@@ -558,7 +555,7 @@ body {
   }
 
   .week-selector {
-    padding: 5px 10px;
+    padding: 8px 10px;
   }
 
   .task-form-modal .dates-container {
