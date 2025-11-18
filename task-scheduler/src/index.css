@@ -390,6 +390,39 @@ body {
   margin-left: 8px;
 }
 
+/* Адаптивные поля зависимости */
+.dependency-fields-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.dependency-operator {
+  grid-column: 1 / -1;
+}
+
+.dependency-inputs-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 480px) {
+  .dependency-fields-container {
+    grid-template-columns: 90px 1fr 1fr 1fr;
+  }
+  
+  .dependency-operator {
+    grid-column: 1 / 2;
+  }
+  
+  .dependency-inputs-container {
+    grid-column: 2 / 5;
+  }
+}
+
 /* АДАПТИВКИ ДЛЯ МОБИЛКИ */
 @media (max-width: 768px) {
   .header-title {

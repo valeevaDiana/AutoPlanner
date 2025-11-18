@@ -29,11 +29,6 @@ interface ScheduleCalendarProps {
 }
 
 const getOverlappingTasks = (tasks: Task[]): Task[][] => {
-  console.log('Analyzing overlapping tasks:', tasks.map(t => ({
-    title: t.title,
-    startTime: t.startTime,
-    duration: t.durationMinutes
-  })));
 
   const groups: Task[][] = [];
   
@@ -245,7 +240,6 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
 
   const getTasksForDate = (date: Date) => {
     const dateString = getISODate(date);
-    console.log('Checking date:', dateString);
     
     const tasksForDate = tasks.filter(task => {
       const matches = task.realDate === dateString;
@@ -255,7 +249,6 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
       return matches;
     });
     
-    console.log(`Found ${tasksForDate.length} tasks for ${dateString}`);
     return tasksForDate;
   };
 

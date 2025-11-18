@@ -33,10 +33,15 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
 
   if (taskData.startDate && taskData.startTime) {
     formData.append('StartDateTime', `${taskData.startDate}T${taskData.startTime}:00.000Z`);
+  } else {
+    formData.append('StartDateTime', ''); 
   }
+
   if (taskData.endDate && taskData.endTime) {
     formData.append('EndDateTime', `${taskData.endDate}T${taskData.endTime}`);
-  } 
+  } else {
+    formData.append('EndDateTime', '');
+  }
 
   const totalMinutes = taskData.durationMinutes ?? 60;
   const days = Math.floor(totalMinutes / (24 * 60));
@@ -105,8 +110,8 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
   
     try {
       const date = new Date(isoString);
-      const datePart = date.toISOString().slice(0, 10);  // "2025-11-11"
-      const timePart = date.toISOString().slice(11, 16); // "04:00"
+      const datePart = date.toISOString().slice(0, 10);  
+      const timePart = date.toISOString().slice(11, 16); 
       
       console.log('Parsed:', { datePart, timePart });
       
@@ -245,7 +250,6 @@ export const taskApi = {
         tasks = [];
       }
 
-      console.log('Parsed tasks:', tasks); 
       return tasks.map(apiTaskToTask);
       
     } catch (error) {

@@ -128,7 +128,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setHasPossibleTime(Boolean(task.ruleOneTask));
         setHasDependency(Boolean(task.ruleTwoTask));
 
-        console.log("is rule two task", task.id, Boolean(task.ruleTwoTask));
+        //console.log("is rule two task", task.id, Boolean(task.ruleTwoTask));
         
         if (task.isRepeating && task.endDateTimeRepit) {
           setRepeatType('period');
@@ -230,18 +230,18 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     }
   }, [isOpen, task, initialDate]);
 
-  useEffect(() => {
-    if (hasDependency) {
-      setHasSpecificTime(false);
-      setHasPossibleTime(false);
-    }
-  }, [hasDependency]);
+  // useEffect(() => {
+  //   if (hasDependency) {
+  //     setHasSpecificTime(false);
+  //     setHasPossibleTime(false);
+  //   }
+  // }, [hasDependency]);
 
-  useEffect(() => {
-    if (hasSpecificTime || hasPossibleTime) {
-      setHasDependency(false);
-    }
-  }, [hasSpecificTime, hasPossibleTime]);
+  // useEffect(() => {
+  //   if (hasSpecificTime || hasPossibleTime) {
+  //     setHasDependency(false);
+  //   }
+  // }, [hasSpecificTime, hasPossibleTime]);
 
   const handleSave = () => {
     const totalMinutes = durationToMinutes(
@@ -249,7 +249,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       parseInt(durationHours) || 0,
       parseInt(durationMinutes) || 0
     );
-    console.log("minutes", totalMinutes);
+    //console.log("minutes", totalMinutes);
     let startDateForSave: string | undefined = startDate; 
     let startTimeForSave: string | undefined = startTime;
 
@@ -260,7 +260,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     if (startDate && startTime) {
       const startDateTime = new Date(`${startDate}T${startTime}:00.000Z`);
       const endDateTime = new Date(startDateTime.getTime() + totalMinutes * 60 * 1000);
-      console.log("endDateTime", endDateTime);
+      //console.log("endDateTime", endDateTime);
       // Форматируем конечную дату
             // Форматируем конечную дату (UTC)
       const endYear = endDateTime.getUTCFullYear();
@@ -396,6 +396,25 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     onSave(taskData);
     onClose();
   };
+
+  const handleCheckboxChange = (type: 'repeat' | 'specific' | 'possible' | 'dependency', checked: boolean) => {
+    if (isViewMode) return;
+
+    if (checked) {
+
+      setIsRepeating(type === 'repeat');
+      setHasSpecificTime(type === 'specific');
+      setHasPossibleTime(type === 'possible');
+      setHasDependency(type === 'dependency');
+    } else {
+
+      if (type === 'repeat') setIsRepeating(false);
+      else if (type === 'specific') setHasSpecificTime(false);
+      else if (type === 'possible') setHasPossibleTime(false);
+      else if (type === 'dependency') setHasDependency(false);
+    }
+  };
+
 
   const handleBackgroundClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -769,12 +788,14 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <input
                 type="checkbox"
                 checked={isRepeating}
-                onChange={(e) => !isViewMode && setIsRepeating(e.target.checked)}
-                disabled={isViewMode}
+                //onChange={(e) => !isViewMode && setIsRepeating(e.target.checked)}
+                onChange={(e) => handleCheckboxChange('repeat', e.target.checked)}
+                disabled={isViewMode || (hasSpecificTime || hasPossibleTime || hasDependency) && !isRepeating}
                 style={{
                   width: '18px',
                   height: '18px',
-                  cursor: isViewMode ? 'not-allowed' : 'pointer'
+                  cursor: isViewMode ? 'not-allowed' : 'pointer',
+                  flexShrink: 0 
                 }}
               />
             </div>
@@ -1108,12 +1129,14 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <input
                 type="checkbox"
                 checked={hasSpecificTime}
-                onChange={(e) => !isViewMode && setHasSpecificTime(e.target.checked)}
-                disabled={hasDependency}
+                //onChange={(e) => !isViewMode && setHasSpecificTime(e.target.checked)}
+                onChange={(e) => handleCheckboxChange('specific', e.target.checked)}
+                disabled={isViewMode || (isRepeating || hasPossibleTime || hasDependency) && !hasSpecificTime}
                 style={{
                   width: '18px',
                   height: '18px',
-                  cursor: isViewMode ? 'not-allowed' : 'pointer'
+                  cursor: isViewMode ? 'not-allowed' : 'pointer',
+                  flexShrink: 0 
                 }}
               />
             </div>
@@ -1271,12 +1294,14 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <input
                 type="checkbox"
                 checked={hasPossibleTime}
-                onChange={(e) => !isViewMode && setHasPossibleTime(e.target.checked)}
-                disabled={hasDependency}
+                //onChange={(e) => !isViewMode && setHasPossibleTime(e.target.checked)}
+                onChange={(e) => handleCheckboxChange('possible', e.target.checked)}
+                disabled={isViewMode || (isRepeating || hasSpecificTime || hasDependency) && !hasPossibleTime} 
                 style={{
                   width: '18px',
                   height: '18px',
-                  cursor: isViewMode ? 'not-allowed' : 'pointer'
+                  cursor: isViewMode ? 'not-allowed' : 'pointer',
+                  flexShrink: 0
                 }}
               />
             </div>
@@ -1349,12 +1374,14 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <input
                 type="checkbox"
                 checked={hasDependency}
-                onChange={(e) => !isViewMode && setHasDependency(e.target.checked)}
-                disabled={hasSpecificTime || hasPossibleTime}
+                //onChange={(e) => !isViewMode && setHasDependency(e.target.checked)}
+                onChange={(e) => handleCheckboxChange('dependency', e.target.checked)}
+                disabled={isViewMode || (isRepeating || hasSpecificTime || hasPossibleTime) && !hasDependency}
                 style={{
                   width: '18px',
                   height: '18px',
-                  cursor: isViewMode ? 'not-allowed' : 'pointer'
+                  cursor: isViewMode ? 'not-allowed' : 'pointer',
+                  flexShrink: 0
                 }}
               />
             </div>
@@ -1462,95 +1489,104 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   }}>
                     Через какое время:
                   </label>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <select
-                      value={dependencyOperator}
-                      onChange={(e) => setDependencyOperator(e.target.value)}
-                      disabled={isViewMode}
-                      style={{
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'pointer',
-                        color: currentTheme.colors.text
-                      }}
-                    >
-                      <option value=">">{'>'}</option>
-                      <option value="<">{'<'}</option>
-                      <option value="=">{'='}</option>
-                    </select>
-                    
-                    <div style={{ flex: 1, display: 'flex', gap: '5px', alignItems: 'center' }}>
-                      <input
-                        type="number"
-                        value={dependencyDays}
-                        onChange={(e) => setDependencyDays(e.target.value)}
+                  <div className="dependency-fields-container">
+                    {/* Выпадающий список */}
+                    <div className="dependency-operator">
+                      <select
+                        value={dependencyOperator}
+                        onChange={(e) => setDependencyOperator(e.target.value)}
                         disabled={isViewMode}
-                        min="0"
-                        placeholder="0"
                         style={{
-                          flex: 1,
+                          width: '100%',
                           padding: '8px',
                           border: `1px solid ${currentTheme.colors.border}`,
                           borderRadius: '4px',
                           fontSize: '14px',
                           backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                          cursor: isViewMode ? 'not-allowed' : 'text',
-                          textAlign: 'center',
+                          cursor: isViewMode ? 'not-allowed' : 'pointer',
                           color: currentTheme.colors.text
                         }}
-                      />
-                      <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>дн</span>
+                      >
+                        <option value=">">больше</option>
+                        <option value="<">меньше</option>
+                        <option value="=">равно</option>
+                      </select>
                     </div>
-                    
-                    <div style={{ flex: 1, display: 'flex', gap: '5px', alignItems: 'center' }}>
-                      <input
-                        type="number"
-                        value={dependencyHours}
-                        onChange={(e) => setDependencyHours(e.target.value)}
-                        disabled={isViewMode}
-                        min="0"
-                        max="23"
-                        placeholder="0"
-                        style={{
-                          flex: 1,
-                          padding: '8px',
-                          border: `1px solid ${currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                          cursor: isViewMode ? 'not-allowed' : 'text',
-                          textAlign: 'center',
-                          color: currentTheme.colors.text
-                        }}
-                      />
-                      <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>час</span>
-                    </div>
-                    
-                    <div style={{ flex: 1, display: 'flex', gap: '5px', alignItems: 'center' }}>
-                      <input
-                        type="number"
-                        value={dependencyMinutes}
-                        onChange={(e) => setDependencyMinutes(e.target.value)}
-                        disabled={isViewMode}
-                        min="0"
-                        max="59"
-                        placeholder="0"
-                        style={{
-                          flex: 1,
-                          padding: '8px',
-                          border: `1px solid ${currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                          cursor: isViewMode ? 'not-allowed' : 'text',
-                          textAlign: 'center',
-                          color: currentTheme.colors.text
-                        }}
-                      />
-                      <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>мин</span>
+
+                    <div className="dependency-inputs-container">
+                      {/* Дни */}
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <input
+                          type="number"
+                          value={dependencyDays}
+                          onChange={(e) => setDependencyDays(e.target.value)}
+                          disabled={isViewMode}
+                          min="0"
+                          placeholder="0"
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                            cursor: isViewMode ? 'not-allowed' : 'text',
+                            textAlign: 'center',
+                            color: currentTheme.colors.text
+                          }}
+                        />
+                        <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, minWidth: '25px' }}>дн</span>
+                      </div>
+                      
+                      {/* Часы */}
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <input
+                          type="number"
+                          value={dependencyHours}
+                          onChange={(e) => setDependencyHours(e.target.value)}
+                          disabled={isViewMode}
+                          min="0"
+                          max="23"
+                          placeholder="0"
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                            cursor: isViewMode ? 'not-allowed' : 'text',
+                            textAlign: 'center',
+                            color: currentTheme.colors.text
+                          }}
+                        />
+                        <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, minWidth: '25px' }}>час</span>
+                      </div>
+                      
+                      {/* Минуты */}
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <input
+                          type="number"
+                          value={dependencyMinutes}
+                          onChange={(e) => setDependencyMinutes(e.target.value)}
+                          disabled={isViewMode}
+                          min="0"
+                          max="59"
+                          placeholder="0"
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                            cursor: isViewMode ? 'not-allowed' : 'text',
+                            textAlign: 'center',
+                            color: currentTheme.colors.text
+                          }}
+                        />
+                        <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, minWidth: '25px' }}>мин</span>
+                      </div>
                     </div>
                   </div>
                 </div>

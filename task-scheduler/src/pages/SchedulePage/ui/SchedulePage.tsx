@@ -70,7 +70,6 @@ export const SchedulePage: React.FC = () => {
       const response = await fetch(`/api/time-table/${USER_ID}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('Penalty tasks data:', data.penaltyTasks);
         setPenaltyTasks(data.penaltyTasks || []);
       } else {
         console.error('Failed to load penalty tasks:', response.status);
