@@ -466,6 +466,10 @@ body {
     max-height: calc(100vh - 160px);
   }
 
+  .calendar-navigation .week-range-text {
+    font-size: 16px !important; 
+  }
+
   .calendar-header {
     display: grid;
     grid-template-columns: 80px repeat(7, minmax(150px, 1fr));

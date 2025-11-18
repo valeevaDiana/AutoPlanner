@@ -343,7 +343,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
         </button>
         
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '18px', fontWeight: '600', color: currentTheme.colors.text }}>
+          <div className="week-range-text" style={{ fontSize: '18px', fontWeight: '600', color: currentTheme.colors.text }}>
             {weekRange}
           </div>
           <button
