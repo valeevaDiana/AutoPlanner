@@ -80,6 +80,40 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
     return "Не удалось распределить задачу в расписании из-за конфликта времени или ресурсов";
   };
 
+  const getPenaltyTaskDisplayData = (task: PenaltyTask) => {
+    if (task.startDateTimeRange && task.endDateTimeRange) {
+      return {
+        start: task.startDateTimeRange,
+        end: task.endDateTimeRange,
+        duration: task.duration
+      };
+    }
+    
+    if (task.startDateTime && task.endDateTime) {
+      return {
+        start: task.startDateTime,
+        end: task.endDateTime,
+        duration: task.duration
+      };
+    }
+    
+    return {
+      start: null,
+      end: null,
+      duration: task.duration
+    };
+  };
+
+  const getDisplayText = (task: PenaltyTask) => {
+    const data = getPenaltyTaskDisplayData(task);
+    
+    if (data.start && data.end) {
+      return `Начало: ${formatDate(data.start)} ${formatTime(data.start)}\nКонец: ${formatDate(data.end)} ${formatTime(data.end)}\nДлительность: ${data.duration}`;
+    } else {
+      return `Длительность: ${data.duration}\n(Время не определено)`;
+    }
+  };
+
   return (
     <div
       className="modal-overlay"
@@ -184,18 +218,41 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
                   marginBottom: '10px',
                   fontSize: '14px'
                 }}>
-                  <div>
-                    <span style={{ color: currentTheme.colors.textSecondary }}>Начало: </span>
-                    {formatDate(task.startDateTime)} {formatTime(task.startDateTime)}
-                  </div>
-                  <div>
-                    <span style={{ color: currentTheme.colors.textSecondary }}>Конец: </span>
-                    {formatDate(task.endDateTime)} {formatTime(task.endDateTime)}
-                  </div>
-                  <div>
-                    <span style={{ color: currentTheme.colors.textSecondary }}>Длительность: </span>
-                    {task.duration}
-                  </div>
+                  {(() => {
+                    const data = getPenaltyTaskDisplayData(task);
+                    
+                    if (data.start && data.end) {
+                      return (
+                        <>
+                          <div>
+                            <span style={{ color: currentTheme.colors.textSecondary }}>Начало: </span>
+                            {formatDate(data.start)} {formatTime(data.start)}
+                          </div>
+                          <div>
+                            <span style={{ color: currentTheme.colors.textSecondary }}>Конец: </span>
+                            {formatDate(data.end)} {formatTime(data.end)}
+                          </div>
+                          <div>
+                            <span style={{ color: currentTheme.colors.textSecondary }}>Длительность: </span>
+                            {data.duration}
+                          </div>
+                        </>
+                      );
+                    } else {
+                      return (
+                        <>
+                          <div>
+                            <span style={{ color: currentTheme.colors.textSecondary }}>Длительность: </span>
+                            {data.duration}
+                          </div>
+                          <div>
+                            <span style={{ color: currentTheme.colors.textSecondary }}>Время: </span>
+                            Не определено
+                          </div>
+                        </>
+                      );
+                    }
+                  })()}
                 </div>
 
                 <div style={{
