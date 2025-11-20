@@ -38,7 +38,7 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
       const [hours, minutes] = task.startTime.split(':').map(Number);
       taskStart = hours * 60 + minutes; // Начало задачи в минутах
     }
-    console.log("id", task.id, "name", task.title, "start", taskStart);
+
     let taskEnd = 0;
     if (task.endTime) {
       const [hours, minutes] = task.endTime.split(':').map(Number);
@@ -56,7 +56,7 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
           groupStart = hours * 60 + minutes;
         }
         const groupEnd = groupStart + groupTask.durationMinutes;
-        console.log("group", "id", groupTask.id, "name",  groupTask.title, "startOrigin", groupTask.startTime, "start", groupStart);
+
         
         return taskStart < groupEnd && taskEnd > groupStart;
       });
@@ -117,14 +117,6 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   }
   const isCompleted = task.completed;
 
-  console.log('Task data:', {
-    title: task.title,
-    startTime: task.startTime,
-    durationMinutes: task.durationMinutes,
-    calculatedHeight: totalHeight,
-    calculatedTop: topOffset
-  });
-
   const backgroundColor = getPriorityColor(
     task.priority, 
     currentTheme.colors.priorityLow, 
@@ -133,25 +125,98 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
 
   const textColor = getContrastColor(backgroundColor);
 
-  const getTextSettings = () => {
-    const maxLines = Math.max(1, Math.floor(totalHeight / 20));
+  // const getTextSettings = () => {
+  //   const maxLines = Math.max(1, Math.floor(totalHeight / 20));
   
+  //   switch (taskCount) {
+  //     case 1:
+  //       return { fontSize: '14px', lineClamp: maxLines };
+  //     case 2:
+  //       return { fontSize: '12px', lineClamp: maxLines };
+  //     case 3:
+  //       return { fontSize: '11px', lineClamp: maxLines };
+  //     case 4:
+  //       return { fontSize: '10px', lineClamp: maxLines };
+  //     case 5:
+  //       return { fontSize: '9px', lineClamp: maxLines };
+  //     default:
+  //       return { fontSize: '9px', lineClamp: 1 };
+  //   }
+  // };
+
+  const getTextSettings = () => {
+    // Определяем настройки в зависимости от высоты
+    if (totalHeight <= 15) {
+      return { 
+        fontSize: '8px', 
+        lineClamp: 1,
+        padding: '0px',
+        lineHeight: '1',
+      };
+    } else if (totalHeight <= 25) {
+      return { 
+        fontSize: '9px', 
+        lineClamp: 1,
+        padding: '0px',
+        lineHeight: '1.1'
+      };
+    } else if (totalHeight <= 35) {
+      return { 
+        fontSize: '10px', 
+        lineClamp: 2,
+        padding: '1px',
+        lineHeight: '1.1'
+      };
+    }
+
+    const maxLines = Math.max(1, Math.floor(totalHeight / 15));
+    
+    // Остальная логика для нормальных размеров...
     switch (taskCount) {
       case 1:
-        return { fontSize: '14px', lineClamp: maxLines };
+        return { 
+          fontSize: '14px', 
+          lineClamp: maxLines,
+          padding: '2px',
+          lineHeight: '1.2'
+        };
       case 2:
-        return { fontSize: '12px', lineClamp: maxLines };
+        return { 
+          fontSize: '12px', 
+          lineClamp: maxLines,
+          padding: '1px',
+          lineHeight: '1.2'
+        };
       case 3:
-        return { fontSize: '11px', lineClamp: maxLines };
+        return { 
+          fontSize: '11px', 
+          lineClamp: maxLines,
+          padding: '1px',
+          lineHeight: '1.2'
+        };
       case 4:
-        return { fontSize: '10px', lineClamp: maxLines };
+        return { 
+          fontSize: '10px', 
+          lineClamp: maxLines,
+          padding: '1px',
+          lineHeight: '1.1'
+        };
       case 5:
-        return { fontSize: '9px', lineClamp: maxLines };
+        return { 
+          fontSize: '9px', 
+          lineClamp: maxLines,
+          padding: '1px',
+          lineHeight: '1.1'
+        };
       default:
-        return { fontSize: '9px', lineClamp: 1 };
+        return { 
+          fontSize: '8px', 
+          lineClamp: 1,
+          padding: '0px',
+          lineHeight: '1'
+        };
     }
   };
-
 
   const textSettings = getTextSettings();
 
@@ -188,19 +253,21 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
         className="task-text"
         style={{
           fontSize: textSettings.fontSize,
-          lineHeight: '1.2', 
-          padding: '1px', 
+          lineHeight: textSettings.lineHeight,
+          padding: textSettings.padding,
           overflow: 'hidden',
-          display: '-webkit-box',
+          display: textSettings.display || '-webkit-box',
           WebkitLineClamp: textSettings.lineClamp,
-          WebkitBoxOrient: 'vertical',
+          WebkitBoxOrient: textSettings.display ? 'horizontal' : 'vertical',
           width: '100%',
-          // height: '100%',
-          maxHeight: `calc(${totalHeight - 4 - 2}px)`, 
+          maxHeight: totalHeight <= 20 ? 'none' : `calc(${totalHeight - 4}px)`,
           wordBreak: 'break-word',
-          textOverflow: 'ellipsis ',
+          textOverflow: 'ellipsis',
           textDecoration: isCompleted ? 'line-through' : 'none',
           color: isCompleted ? currentTheme.colors.priorityCompletedText : textColor,
+          minHeight: '10px',
+          alignItems: textSettings.alignItems,
+          justifyContent: textSettings.justifyContent,
         }}
       >
         {task.title}
@@ -243,9 +310,6 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
     
     const tasksForDate = tasks.filter(task => {
       const matches = task.realDate === dateString;
-      if (matches) {
-        console.log('Task matches:', task.title, task.realDate, task.startTime);
-      }
       return matches;
     });
     
