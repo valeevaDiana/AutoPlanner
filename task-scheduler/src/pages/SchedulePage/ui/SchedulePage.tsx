@@ -8,6 +8,7 @@ import type { Task } from '../../../entities/task/model/types';
 import type { PenaltyTask } from '../../../shared/api/types'; 
 import { useTasks } from '../../../shared/lib/hooks/useTasks';
 import { taskApi } from '../../../shared/api/taskApi';
+import { useTaskSplitter } from '../../../shared/lib/hooks/useTaskSplitter';
 
 export const SchedulePage: React.FC = () => {
   const {
@@ -23,6 +24,7 @@ export const SchedulePage: React.FC = () => {
   } = useTasks();
 
   const { currentTheme } = useTheme();
+  const { getOriginalTaskFromPart } = useTaskSplitter();
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [taskFormMode, setTaskFormMode] = useState<'create' | 'edit' | 'view'>('create');
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -116,39 +118,27 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handleEditTask = async (task: Task) => {
+    const taskToEdit = getOriginalTaskFromPart(task, tasks) || task;
     setTaskFormMode('edit');
-    
-    // Сначала показываем форму с базовыми данными
-    setEditingTask(task);
+    setEditingTask(taskToEdit);
     setIsTaskFormOpen(true);
-    
-    // Затем загружаем полные данные через API
-    const fullTask = await loadTaskById(task.id);
-    if (fullTask) {
-      setEditingTask(fullTask);
-    }
   };
 
   const handleViewTask = async (task: Task) => {
+    const taskToView = getOriginalTaskFromPart(task, tasks) || task;
     setTaskFormMode('view');
-    
-    // Сначала показываем форму с базовыми данными
-    setEditingTask(task);
+    setEditingTask(taskToView);
     setIsTaskFormOpen(true);
-    
-    // Затем загружаем полные данные через API
-    const fullTask = await loadTaskById(task.id);
-    if (fullTask) {
-      setEditingTask(fullTask);
-    }
   };
+
 
   const handleSwitchToEdit = () => {
     setTaskFormMode('edit');
   };
 
   const handleDeleteTask = async (task: Task) => {
-    await deleteTask(task.id);
+    const taskToDelete = getOriginalTaskFromPart(task, tasks) || task;
+    await deleteTask(taskToDelete.id);
   };
 
   const handleSaveTask = async (taskData: Partial<Task>) => {
@@ -165,7 +155,8 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handleTaskComplete = async (task: Task) => {
-    await completeTask(task.id);
+    const taskToComplete = getOriginalTaskFromPart(task, tasks) || task;
+    await completeTask(taskToComplete.id);
   };
 
   if (isLoading) return <div>Загрузка задач...</div>;
@@ -188,14 +179,14 @@ export const SchedulePage: React.FC = () => {
                 padding: '8px 16px',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                fontSize: '14px',
+                fontSize: '16px',
                 fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px'
               }}
             >
-              🚫
+              {/* 🚫  */} {penaltyTasks.length}
             </button>
           )}
         </div>
