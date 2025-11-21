@@ -36,6 +36,17 @@ export const useTasks = () => {
     retry: 2,
   });
 
+  const {
+    data: penaltyTasks = [],
+    isLoading: isLoadingPenalty,
+    refetch: refetchPenaltyTasks,
+  } = useQuery({
+    queryKey: ['penaltyTasks', USER_ID],
+    queryFn: () => taskApi.getPenaltyTasks(USER_ID),
+    staleTime: 1000 * 30, 
+    refetchInterval: 1000 * 60 * 5, 
+  });
+
   const createTask = useMutation({
     mutationFn: async (taskData: Parameters<typeof taskApi.createTask>[0]) => {
       await taskApi.createTask(taskData, USER_ID);
@@ -44,6 +55,7 @@ export const useTasks = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
+      queryClient.invalidateQueries({ queryKey: ['penaltyTasks', USER_ID] });
     },
   });
 
@@ -55,6 +67,7 @@ export const useTasks = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
+      queryClient.invalidateQueries({ queryKey: ['penaltyTasks', USER_ID] });
     },
   });
 
@@ -66,6 +79,7 @@ export const useTasks = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
+      queryClient.invalidateQueries({ queryKey: ['penaltyTasks', USER_ID] });
     },
   });
 
@@ -77,14 +91,18 @@ export const useTasks = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
+      queryClient.invalidateQueries({ queryKey: ['penaltyTasks', USER_ID] });
     },
   });
 
   return {
     tasks,
+    penaltyTasks,
     isLoading,
+    isLoadingPenalty,
     error,
     refetch,
+    refetchPenaltyTasks,
     createTask: createTask.mutateAsync,
     updateTask: updateTask.mutateAsync,
     deleteTask: deleteTask.mutateAsync,

@@ -1,5 +1,5 @@
 import type { Task } from '../../entities/task/model/types';
-import type { ApiTask, ApiTimeTableResponse } from './types';
+import type { ApiTask, ApiTimeTableResponse, PenaltyTask } from './types';
 
 const API_BASE_URL = '/api'; 
 
@@ -422,4 +422,17 @@ export const taskApi = {
       return null;
     }
   },
+
+  async getPenaltyTasks(userId: number): Promise<PenaltyTask[]> {
+    try {
+      const response = await fetch(`/api/time-table/${userId}`);
+      if (!response.ok) throw new Error(`Ошибка загрузки: ${response.status}`);
+      
+      const data = await response.json();
+      return data.penaltyTasks || [];
+    } catch (error) {
+      console.error('Error loading penalty tasks:', error);
+      return [];
+    }
+  }
 };

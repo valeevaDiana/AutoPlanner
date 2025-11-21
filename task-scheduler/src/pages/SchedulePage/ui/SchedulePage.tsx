@@ -13,7 +13,9 @@ import { useTaskSplitter } from '../../../shared/lib/hooks/useTaskSplitter';
 export const SchedulePage: React.FC = () => {
   const {
     tasks,
+    penaltyTasks, 
     isLoading,
+    isLoadingPenalty,
     createTask,
     updateTask,
     deleteTask,
@@ -32,20 +34,9 @@ export const SchedulePage: React.FC = () => {
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
   const [isLoadingTask, setIsLoadingTask] = useState(false);
 
-  const [penaltyTasks, setPenaltyTasks] = useState<PenaltyTask[]>([]);
   const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState(false);
 
   const USER_ID = 1; 
-
-  useEffect(() => {
-    loadPenaltyTasks();
-  }, []);
-
-  useEffect(() => {
-    if (!isLoading) {
-      loadPenaltyTasks();
-    }
-  }, [tasks, isLoading]);
 
   useEffect(() => {
       if (isTaskFormOpen) {
@@ -66,20 +57,6 @@ export const SchedulePage: React.FC = () => {
     }
   };
 
-  const loadPenaltyTasks = async () => {
-    try {
-      console.log('Loading penalty tasks...');
-      const response = await fetch(`/api/time-table/${USER_ID}`);
-      if (response.ok) {
-        const data = await response.json();
-        setPenaltyTasks(data.penaltyTasks || []);
-      } else {
-        console.error('Failed to load penalty tasks:', response.status);
-      }
-    } catch (error) {
-      console.error('Error loading penalty tasks:', error);
-    }
-  };
 
   const loadTaskById = async (taskId: string): Promise<Task | null> => {
     try {
@@ -99,7 +76,6 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handlePenaltyTasksClick = () => {
-    loadPenaltyTasks();
     setIsPenaltyModalOpen(true);
   };
 
