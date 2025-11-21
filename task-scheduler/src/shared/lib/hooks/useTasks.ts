@@ -36,6 +36,12 @@ export const useTasks = () => {
     retry: 2,
   });
 
+  const getTaskById = useMutation({
+    mutationFn: async (taskId: string) => {
+      return await taskApi.getTaskById(taskId);
+    },
+  });
+
   const createTask = useMutation({
     mutationFn: async (taskData: Parameters<typeof taskApi.createTask>[0]) => {
       await taskApi.createTask(taskData, USER_ID);
@@ -80,6 +86,17 @@ export const useTasks = () => {
     },
   });
 
+  const completeRepitTask = useMutation({
+    mutationFn: async (params: { taskId: string; countFrom: number }) => {
+      await taskApi.completeRepitTask(params.taskId, params.countFrom);
+      const { startTimeTable, endDateTime } = getWeekRange();
+      await taskApi.rebuildTimeTable(USER_ID, startTimeTable, endDateTime);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
+    },
+  });
+
   return {
     tasks,
     isLoading,
@@ -89,6 +106,8 @@ export const useTasks = () => {
     updateTask: updateTask.mutateAsync,
     deleteTask: deleteTask.mutateAsync,
     completeTask: completeTask.mutateAsync,
+    completeRepitTask: completeRepitTask.mutateAsync,
+    getTaskById: getTaskById,
     isCreating: createTask.isPending,
     isUpdating: updateTask.isPending,
     isDeleting: deleteTask.isPending,

@@ -24,6 +24,7 @@ export interface Task {
   relationRangeId?: number;
   dateTimeRange?: string;
   isComplete?: boolean;
+  countFrom: number;
 }
 
 export type TaskAction = 'complete' | 'edit' | 'delete'; 
