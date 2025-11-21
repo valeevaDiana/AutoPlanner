@@ -159,6 +159,15 @@ export const SchedulePage: React.FC = () => {
     await completeTask(taskToComplete.id);
   };
 
+  const getPenaltyButtonFontSize = (count: number): string => {
+    if (count >= 10000) return '10px';
+    if (count >= 1000) return '12px';
+    if (count >= 100) return '14px';
+    if (count >= 10) return '15px';
+    return '16px';
+  };
+
+
   if (isLoading) return <div>Загрузка задач...</div>;
 
   return (
@@ -169,7 +178,7 @@ export const SchedulePage: React.FC = () => {
           <div className="header-title">План на</div>
           <button className="week-selector" onClick={handleToggleView}>неделю</button>
 
-          {penaltyTasks.length > 0 && (
+          
             <button
               onClick={handlePenaltyTasksClick}
               style={{
@@ -179,7 +188,7 @@ export const SchedulePage: React.FC = () => {
                 padding: '8px 16px',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                fontSize: '16px',
+                fontSize: getPenaltyButtonFontSize(penaltyTasks.length),
                 fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
@@ -188,7 +197,6 @@ export const SchedulePage: React.FC = () => {
             >
               {/* 🚫  */} {penaltyTasks.length}
             </button>
-          )}
         </div>
         <div className="notification-icon">🔔</div>
       </div>
