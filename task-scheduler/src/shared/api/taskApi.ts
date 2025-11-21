@@ -417,3 +417,14 @@ export const taskApi = {
     }
   },
 };
+
+export const telegramApi = {
+  async generateTelegramCode(userId: number): Promise<{ code: string; telegramLink: string }> {
+    const response = await fetch(`/api/telegram/generate-code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId }),
+    });
+    return await response.json();
+  }
+};

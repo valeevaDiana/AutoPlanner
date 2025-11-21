@@ -8,6 +8,7 @@ import type { Task } from '../../../entities/task/model/types';
 import type { PenaltyTask } from '../../../shared/api/types'; 
 import { useTasks } from '../../../shared/lib/hooks/useTasks';
 import { taskApi } from '../../../shared/api/taskApi';
+import { TelegramConnectionModal } from '../../../features/telegram-connection/ui/TelegramConnectionModal';
 
 export const SchedulePage: React.FC = () => {
   const {
@@ -29,6 +30,7 @@ export const SchedulePage: React.FC = () => {
   const [initialDate, setInitialDate] = useState<{ day: number; time: string; date: string } | undefined>();
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
   const [isLoadingTask, setIsLoadingTask] = useState(false);
+  const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
 
   const [penaltyTasks, setPenaltyTasks] = useState<PenaltyTask[]>([]);
   const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState(false);
@@ -199,7 +201,9 @@ export const SchedulePage: React.FC = () => {
             </button>
           )}
         </div>
-        <div className="notification-icon">🔔</div>
+        <div className="notification-icon" onClick={() => setIsTelegramModalOpen(true)} style={{ cursor: 'pointer' }}>
+          🔔
+        </div>
       </div>
 
       <div className="content-wrapper">
@@ -236,6 +240,12 @@ export const SchedulePage: React.FC = () => {
         isOpen={isPenaltyModalOpen}
         onClose={() => setIsPenaltyModalOpen(false)}
         penaltyTasks={penaltyTasks}
+      />
+
+      <TelegramConnectionModal
+        isOpen={isTelegramModalOpen}
+        onClose={() => setIsTelegramModalOpen(false)}
+        userId={USER_ID}
       />
     </div>
   );
