@@ -64,7 +64,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   
   // Состояния для возможного времени
   const [hasPossibleTime, setHasPossibleTime] = useState(false);
+  const [possibleStartDate, setPossibleStartDate] = useState('');
   const [possibleStartTime, setPossibleStartTime] = useState('');
+  const [possibleEndDate, setPossibleEndDate] = useState('');
   const [possibleEndTime, setPossibleEndTime] = useState('');
   
   // Состояния для зависимостей задач
@@ -209,7 +211,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setRepeatEndTime('18:00');
         setSpecificStartTime('09:00');
         setSpecificEndTime('18:00');
+        setPossibleStartDate('');
         setPossibleStartTime('');
+        setPossibleEndDate('');
         setPossibleEndTime('');
         setDependencyTask('');
         setDependencyType('after');
@@ -323,14 +327,14 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     }
 
     // ОБРАБОТКА ДЛЯ RULE ONE TASK (конкретное время)
-    let calculatedStartDateTimeRuleOneTask: string | undefined = undefined;
-    let calculatedEndDateTimeRuleOneTask: string | undefined = undefined;
+    let calculatedStartTimeRuleOneTask: string | undefined = undefined;
+    let calculatedEndTimeRuleOneTask: string | undefined = undefined;
     let ruleOneTaskValue: boolean = false;
 
     if (hasPossibleTime) {
       ruleOneTaskValue = true;
-      calculatedStartDateTimeRuleOneTask = `${startDate}T${possibleStartTime}:00.000Z`;
-      calculatedEndDateTimeRuleOneTask = `${startDate}T${possibleEndTime}:00.000Z`;
+      calculatedStartTimeRuleOneTask = `${possibleStartDate}T${possibleStartTime}:00.000Z`;
+      calculatedEndTimeRuleOneTask = `${possibleEndDate}T${possibleEndTime}:00.000Z`;
       startDateForSave = undefined;
       startTimeForSave = undefined;
       calculatedEndDate = undefined;
@@ -383,8 +387,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       repeateDurationMinute: repeatTotalMinutes,
       // rule one task
       ruleOneTask: ruleOneTaskValue,
-      startDateTimeRuleOneTask: calculatedStartDateTimeRuleOneTask,
-      endDateTimeRuleOneTask: calculatedEndDateTimeRuleOneTask,
+      startDateTimeRuleOneTask: calculatedStartTimeRuleOneTask,
+      endDateTimeRuleOneTask: calculatedEndTimeRuleOneTask,
       // rule two task
       ruleTwoTask: hasDependency,
       timePositionRegardingTaskId: timePosition,
@@ -1347,6 +1351,21 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <div style={{ flex: 1 }}>
                     <input
+                      type="date"
+                      value={possibleStartDate}
+                      onChange={(e) => setPossibleStartDate(e.target.value)}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: '8px',
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: '4px',
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        color: currentTheme.colors.text
+                      }}
+                    />
+                    <input
                       type="time"
                       value={possibleStartTime}
                       onChange={(e) => setPossibleStartTime(e.target.value)}
@@ -1366,6 +1385,21 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     />
                   </div>
                   <div style={{ flex: 1 }}>
+                      <input
+                      type="date"
+                      value={possibleEndDate}
+                      onChange={(e) => setPossibleEndDate(e.target.value)}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: '8px',
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: '4px',
+                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        color: currentTheme.colors.text
+                      }}
+                    />
                     <input
                       type="time"
                       value={possibleEndTime}

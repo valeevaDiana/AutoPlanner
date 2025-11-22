@@ -40,7 +40,6 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
       const [hours, minutes] = task.startTime.split(':').map(Number);
       taskStart = hours * 60 + minutes; // Начало задачи в минутах
     }
-
     let taskEnd = 0;
     if (task.endTime) {
       const [hours, minutes] = task.endTime.split(':').map(Number);
@@ -58,7 +57,6 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
           groupStart = hours * 60 + minutes;
         }
         const groupEnd = groupStart + groupTask.durationMinutes;
-
         
         return taskStart < groupEnd && taskEnd > groupStart;
       });

@@ -24,13 +24,12 @@ export interface Task {
   relationRangeId?: number;
   dateTimeRange?: string;
   isComplete?: boolean;
+  countFrom: number;
   isSplitTask?: boolean;
 
   parentTaskId?: string; 
   splitParts?: string[]; 
   splitIndex?: number; 
-  
-
 }
 
 export type TaskAction = 'complete' | 'edit' | 'delete'; 

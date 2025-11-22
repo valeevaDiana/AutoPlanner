@@ -8,6 +8,7 @@ import type { Task } from '../../../entities/task/model/types';
 import type { PenaltyTask } from '../../../shared/api/types'; 
 import { useTasks } from '../../../shared/lib/hooks/useTasks';
 import { taskApi } from '../../../shared/api/taskApi';
+import { TelegramConnectionModal } from '../../../features/telegram-connection/ui/TelegramConnectionModal';
 import { useTaskSplitter } from '../../../shared/lib/hooks/useTaskSplitter';
 import { AuthModal } from '../../../features/auth/ui/AuthModal';
 import { getContrastColor } from '../../../shared/lib/utils/priorityGradient';
@@ -25,6 +26,8 @@ export const SchedulePage: React.FC = () => {
     updateTask,
     deleteTask,
     completeTask,
+    completeRepitTask,
+    getTaskById,
     isCreating,
     isUpdating,
     isDeleting,
@@ -38,6 +41,7 @@ export const SchedulePage: React.FC = () => {
   const [initialDate, setInitialDate] = useState<{ day: number; time: string; date: string } | undefined>();
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
   const [isLoadingTask, setIsLoadingTask] = useState(false);
+  const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
 
   const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState(false);
 
@@ -154,13 +158,25 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handleTaskComplete = async (task: Task) => {
-    console.log('handleTaskComplete called for task:', task.id);
-    try {
-      await completeTask(task.id);
-    } catch (error) {
-      console.error('Failed to complete task:', error);
-    }
+    const taskFrom = await getTaskById.mutateAsync(task.id);
+    if (taskFrom){
+      console.log("alo", taskFrom.title, taskFrom.isRepeating, taskFrom.id, taskFrom.countFrom);
+      if (taskFrom.isRepeating) {
+        await completeRepitTask({ 
+        taskId: taskFrom.id, 
+        countFrom: task.countFrom 
+      });
+      }
+      else {
 
+        console.log('handleTaskComplete called for task:', task.id);
+        try {
+          await completeTask(task.id);
+        } catch (error) {
+          console.error('Failed to complete task:', error);
+        }
+      }
+    }
   };
 
   const getPenaltyButtonFontSize = (count: number): string => {
@@ -245,6 +261,9 @@ export const SchedulePage: React.FC = () => {
             </button>
           </div>
         </div>
+        <div className="notification-icon" onClick={() => setIsTelegramModalOpen(true)} style={{ cursor: 'pointer' }}>
+          🔔
+        </div>
       </div>
 
       <div className="content-wrapper">
@@ -283,6 +302,10 @@ export const SchedulePage: React.FC = () => {
         penaltyTasks={penaltyTasks}
       />
 
+      <TelegramConnectionModal
+        isOpen={isTelegramModalOpen}
+        onClose={() => setIsTelegramModalOpen(false)}
+        userId={USER_ID}
       <AuthModal 
         isOpen={isAuthModalOpen} 
         onAuthSuccess={handleAuthSuccess} 
