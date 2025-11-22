@@ -315,12 +315,20 @@ export const taskApi = {
       const response = await fetch(`${API_BASE_URL}/task/complete/${taskId}`, {
         method: 'PUT',
       });
-      if (!response.ok) throw new Error(`Ошибка завершения: ${response.status}`);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Ошибка завершения: ${response.status} - ${errorText}`);
+      }      
     } catch (error) {
-      console.error('Error completing task:', error);
+      console.error('Error completing task:', {
+        taskId,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       throw error;
     }
   },
+
 
   async rebuildTimeTable(
     userId: number,

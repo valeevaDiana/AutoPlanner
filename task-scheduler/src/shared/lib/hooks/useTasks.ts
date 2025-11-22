@@ -1,4 +1,3 @@
-// src/shared/lib/hooks/useTasks.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { taskApi } from '../../api/taskApi';
 
@@ -102,6 +101,10 @@ export const useTasks = (userId?: number) => {
       queryClient.invalidateQueries({ queryKey: ['tasks', userId] });
       queryClient.invalidateQueries({ queryKey: ['penaltyTasks', userId] });
     },
+    onError: (error) => {
+      console.error('Error in completeTask mutation:', error);
+    },
+
   });
 
   return {

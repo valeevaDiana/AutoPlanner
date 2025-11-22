@@ -154,8 +154,13 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handleTaskComplete = async (task: Task) => {
-    const taskToComplete = getOriginalTaskFromPart(task, tasks) || task;
-    await completeTask(taskToComplete.id);
+    console.log('handleTaskComplete called for task:', task.id);
+    try {
+      await completeTask(task.id);
+    } catch (error) {
+      console.error('Failed to complete task:', error);
+    }
+
   };
 
   const getPenaltyButtonFontSize = (count: number): string => {
