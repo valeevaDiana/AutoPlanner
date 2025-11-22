@@ -10,6 +10,7 @@ import { useTasks } from '../../../shared/lib/hooks/useTasks';
 import { taskApi } from '../../../shared/api/taskApi';
 import { useTaskSplitter } from '../../../shared/lib/hooks/useTaskSplitter';
 import { AuthModal } from '../../../features/auth/ui/AuthModal';
+import { getContrastColor } from '../../../shared/lib/utils/priorityGradient';
 
 export const SchedulePage: React.FC = () => {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
@@ -158,11 +159,11 @@ export const SchedulePage: React.FC = () => {
   };
 
   const getPenaltyButtonFontSize = (count: number): string => {
-    if (count >= 10000) return '10px';
-    if (count >= 1000) return '12px';
-    if (count >= 100) return '14px';
-    if (count >= 10) return '15px';
-    return '16px';
+    if (count >= 10000) return '12px';
+    if (count >= 1000) return '14px';
+    if (count >= 100) return '16px';
+    if (count >= 10) return '18px';
+    return '20px';
   };
 
 
@@ -171,52 +172,74 @@ export const SchedulePage: React.FC = () => {
   return (
     <div className="page-container">
       <div className="header-fixed">
-        <div className="header-title-wrapper">
-          <ThemeSelector />
-          <div className="header-title">План на</div>
-          <button className="week-selector" onClick={handleToggleView}>неделю</button>
-
+        {/* Первая строка: уведомления, темы, выход */}
+        <div 
+          className="header-top-row"
+          style={{
+            backgroundColor: currentTheme.colors.background
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="notification-icon">🔔</div>
+            <ThemeSelector />
+          </div>
           
+          {/* Кнопка выхода */}
+          <button
+            onClick={() => {
+              localStorage.removeItem('currentUserId');
+              setCurrentUserId(null);
+              setIsAuthModalOpen(true);
+            }}
+            style={{
+              backgroundColor: currentTheme.colors.error,
+              color: 'white',
+              border: 'none',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: '500',
+            }}
+          >
+            Выйти
+          </button>
+        </div>
+
+        {/* Вторая строка: заголовок и штрафные задачи */}
+        <div 
+          className="header-bottom-row"
+          style={{
+            backgroundColor: currentTheme.colors.background
+          }}
+        >
+          <div className="header-title-wrapper">
+            <div className="header-title">План на</div>
+            <button className="week-selector" onClick={handleToggleView}>неделю</button>
+
             <button
               onClick={handlePenaltyTasksClick}
               style={{
                 backgroundColor: currentTheme.colors.error,
                 color: 'white',
                 border: 'none',
-                padding: '8px 16px',
+                padding: '6px 12px',
                 borderRadius: '6px',
                 cursor: 'pointer',
                 fontSize: getPenaltyButtonFontSize(penaltyTasks.length),
                 fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '6px',
+                minWidth: '30px',
+                justifyContent: 'center',
+                marginLeft: '5px'
               }}
             >
-              {/* 🚫  */} {penaltyTasks.length}
+              {penaltyTasks.length}
             </button>
+          </div>
         </div>
-        <div className="notification-icon">🔔</div>
-        
-        {/* Кнопка выхода */}
-        <button
-          onClick={() => {
-            localStorage.removeItem('currentUserId');
-            setCurrentUserId(null);
-            setIsAuthModalOpen(true);
-          }}
-          style={{
-            backgroundColor: currentTheme.colors.textSecondary,
-            color: 'white',
-            border: 'none',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px',
-          }}
-        >
-          Выйти
-        </button>
       </div>
 
       <div className="content-wrapper">
