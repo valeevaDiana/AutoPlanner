@@ -38,7 +38,6 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
       const [hours, minutes] = task.startTime.split(':').map(Number);
       taskStart = hours * 60 + minutes; // Начало задачи в минутах
     }
-    console.log("id", task.id, "name", task.title, "start", taskStart);
     let taskEnd = 0;
     if (task.endTime) {
       const [hours, minutes] = task.endTime.split(':').map(Number);
@@ -56,7 +55,6 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
           groupStart = hours * 60 + minutes;
         }
         const groupEnd = groupStart + groupTask.durationMinutes;
-        console.log("group", "id", groupTask.id, "name",  groupTask.title, "startOrigin", groupTask.startTime, "start", groupStart);
         
         return taskStart < groupEnd && taskEnd > groupStart;
       });
@@ -117,13 +115,13 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   }
   const isCompleted = task.completed;
 
-  console.log('Task data:', {
+  /*console.log('Task data:', {
     title: task.title,
     startTime: task.startTime,
     durationMinutes: task.durationMinutes,
     calculatedHeight: totalHeight,
     calculatedTop: topOffset
-  });
+  });*/
 
   const backgroundColor = getPriorityColor(
     task.priority, 
@@ -244,7 +242,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
     const tasksForDate = tasks.filter(task => {
       const matches = task.realDate === dateString;
       if (matches) {
-        console.log('Task matches:', task.title, task.realDate, task.startTime);
+        //console.log('Task matches:', task.title, task.realDate, task.startTime);
       }
       return matches;
     });
