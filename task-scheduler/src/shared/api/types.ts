@@ -31,8 +31,8 @@ export interface PenaltyTask {
   name: string;
   description: string;
   priority: number;
-  startDateTime: string;
-  endDateTime: string;
+  startDateTime: string | null;
+  endDateTime: string | null;   
   duration: string;
   countFrom: number;
   isComplete: boolean;
@@ -47,6 +47,12 @@ export interface PenaltyTask {
   secondTaskId: number;
   relationRangeId: number;
   dateTimeRange: string | null;
+
+  isRepit?: boolean;
+  countRepit?: number;
+  startDateTimeRepit?: string | null;
+  endDateTimeRepit?: string | null;
+
 }
 
 export interface ApiTimeTableResponse {
