@@ -31,6 +31,7 @@ export const SchedulePage: React.FC = () => {
     isCreating,
     isUpdating,
     isDeleting,
+  
   } = useTasks(currentUserId || undefined);
 
   const { currentTheme } = useTheme();
@@ -201,7 +202,9 @@ export const SchedulePage: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div className="notification-icon">🔔</div>
+            <div className="notification-icon" onClick={() => setIsTelegramModalOpen(true)} style={{ cursor: 'pointer' }}>
+              🔔
+            </div>
             <ThemeSelector />
           </div>
           
@@ -261,9 +264,6 @@ export const SchedulePage: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="notification-icon" onClick={() => setIsTelegramModalOpen(true)} style={{ cursor: 'pointer' }}>
-          🔔
-        </div>
       </div>
 
       <div className="content-wrapper">
@@ -305,9 +305,10 @@ export const SchedulePage: React.FC = () => {
       <TelegramConnectionModal
         isOpen={isTelegramModalOpen}
         onClose={() => setIsTelegramModalOpen(false)}
-        userId={USER_ID}
+        userId={currentUserId}
+      />
       <AuthModal 
-        isOpen={isAuthModalOpen} 
+        isOpen={isAuthModalOpen}
         onAuthSuccess={handleAuthSuccess} 
       />
     </div>

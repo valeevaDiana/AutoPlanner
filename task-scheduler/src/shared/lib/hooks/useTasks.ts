@@ -117,10 +117,11 @@ export const useTasks = (userId?: number) => {
     mutationFn: async (params: { taskId: string; countFrom: number }) => {
       await taskApi.completeRepitTask(params.taskId, params.countFrom);
       const { startTimeTable, endDateTime } = getWeekRange();
-      await taskApi.rebuildTimeTable(USER_ID, startTimeTable, endDateTime);
+      if (userId)
+      await taskApi.rebuildTimeTable(userId, startTimeTable, endDateTime);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks', USER_ID] });
+      queryClient.invalidateQueries({ queryKey: ['tasks', userId] });
     },
   });
 

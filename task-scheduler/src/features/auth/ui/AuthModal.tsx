@@ -46,6 +46,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 setError(isLogin ? 'Ошибка авторизации: ' + errorText : 'Ошибка регистрации: ' + errorText);
             }
         } catch (err) {
+            console.error(err instanceof Error ? err.message : 'Unknown error');
             setError('Ошибка сети: ' + (err instanceof Error ? err.message : 'Unknown error'));
         } finally {
             setIsLoading(false);
