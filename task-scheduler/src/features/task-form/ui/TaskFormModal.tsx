@@ -124,13 +124,11 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setDurationMinutes(duration.minutes.toString());
         setPriority(task.priority);
         
-        // ОБНОВИТЬ: устанавливаем состояния чекбоксов из данных задачи
         setIsRepeating(Boolean(task.isRepeating));
         setHasSpecificTime(Boolean(task.startDate && task.startTime));
         setHasPossibleTime(Boolean(task.ruleOneTask));
         setHasDependency(Boolean(task.ruleTwoTask));
 
-        //console.log("is rule two task", task.id, Boolean(task.ruleTwoTask));
         
         if (task.isRepeating && task.endDateTimeRepit) {
           setRepeatType('period');
@@ -138,11 +136,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           setRepeatType('count');
         }
           
-        // Если есть данные о повторении, заполняем их
         if (task.isRepeating) {
           setIsRepeating(true);
           setRepeatCount(String(task.repeatCount || '0'));
-          // Можно также установить repeatDays, repeatHours, repeatMinutes если они есть в task
         }
 
         if (task.ruleOneTask)
@@ -150,12 +146,10 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           setHasPossibleTime(true);
         }
         
-        // Если есть данные о зависимостях, заполняем их
         if (task.ruleTwoTask) {
           setDependencyTask(String(task.secondTaskId || ''));
           setDependencyType(task.timePositionRegardingTaskId === 0 ? 'before' : 'after');
           
-          // Устанавливаем оператор на основе relationRangeId
           if (task.relationRangeId === 0) {
             setDependencyOperator('>');
           } else if (task.relationRangeId === 1) {
@@ -164,7 +158,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             setDependencyOperator('<');
           }
           
-          // Парсим dateTimeRange если он есть
           if (task.dateTimeRange) {
             const [days, hours, minutes] = task.dateTimeRange.split(':');
             setDependencyDays(days || '0');
@@ -203,7 +196,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setDurationMinutes('0');
         setPriority(5);
         
-        // Сброс новых полей при создании новой задачи
+        // сброс новых полей при создании новой задачи
         
         setHasSpecificTime(false);
         setHasPossibleTime(false);
@@ -248,12 +241,19 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   // }, [hasSpecificTime, hasPossibleTime]);
 
   const handleSave = () => {
+
+    console.log('Description before save:', {
+    original: description,
+    trimmed: description?.trim(),
+    willSend: description?.trim() === '' ? ' ' : description
+  });
+
+
     const totalMinutes = durationToMinutes(
       parseInt(durationDays) || 0,
       parseInt(durationHours) || 0,
       parseInt(durationMinutes) || 0
     );
-    //console.log("minutes", totalMinutes);
     let startDateForSave: string | undefined = startDate; 
     let startTimeForSave: string | undefined = startTime;
 
@@ -264,7 +264,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     if (startDate && startTime) {
       const startDateTime = new Date(`${startDate}T${startTime}:00.000Z`);
       const endDateTime = new Date(startDateTime.getTime() + totalMinutes * 60 * 1000);
-      //console.log("endDateTime", endDateTime);
+
       // Форматируем конечную дату
             // Форматируем конечную дату (UTC)
       const endYear = endDateTime.getUTCFullYear();
@@ -372,7 +372,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     const taskData: Partial<Task> = {
       id: task?.id,
       title: title,
-      description: description || " ",
+      description: description?.trim() === '' ? ' ' : description,
       startDate: startDateForSave || undefined,
       endDate: calculatedEndDate || undefined,
       startTime: startTimeForSave || undefined,
@@ -396,6 +396,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       relationRangeId: relationRangeIdFrom,
       dateTimeRange: dateTimeRangeFrom,
     };
+
+    console.log('Final taskData:', taskData);
+
 
     onSave(taskData);
     onClose();
@@ -635,9 +638,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Дни</div>
                 <input
-                  type="number"
+                  type="text"
                   value={durationDays}
-                  onChange={(e) => setDurationDays(e.target.value)}
+                  onChange={(e) => {
+                    const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                    setDurationDays(onlyNums);
+                  }}
+
                   disabled={isViewMode}
                   min="0"
                   max="365"
@@ -657,9 +664,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Часы</div>
                 <input
-                  type="number"
+                  type="text"
                   value={durationHours}
-                  onChange={(e) => setDurationHours(e.target.value)}
+                  onChange={(e) => {
+                    const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                    setDurationHours(onlyNums);
+                  }}
+
                   disabled={isViewMode}
                   min="0"
                   max="23"
@@ -679,9 +690,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
                 <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Минуты</div>
                 <input
-                  type="number"
+                  type="text"
                   value={durationMinutes}
-                  onChange={(e) => setDurationMinutes(e.target.value)}
+                  onChange={(e) => {
+                    const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                    setDurationMinutes(onlyNums);
+                  }}
+
                   disabled={isViewMode}
                   min="0"
                   max="59"
@@ -877,9 +892,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
                       <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Дни</div>
                       <input
-                        type="number"
+                        type="text"
                         value={repeatDays}
-                        onChange={(e) => setRepeatDays(e.target.value)}
+                        onChange={(e) => {
+                          const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                          setRepeatDays(onlyNums);
+                        }}
+
                         disabled={isViewMode}
                         min="0"
                         style={{
@@ -898,9 +917,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
                       <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Часы</div>
                       <input
-                        type="number"
+                        type="text"
                         value={repeatHours}
-                        onChange={(e) => setRepeatHours(e.target.value)}
+                        onChange={(e) => {
+                          const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                          setRepeatHours(onlyNums);
+                        }}
                         disabled={isViewMode}
                         min="0"
                         max="23"
@@ -920,9 +942,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
                       <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Минуты</div>
                       <input
-                        type="number"
+                        type="text"
                         value={repeatMinutes}
-                        onChange={(e) => setRepeatMinutes(e.target.value)}
+                        onChange={(e) => {
+                          const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                          setRepeatMinutes(onlyNums);
+                        }}
                         disabled={isViewMode}
                         min="0"
                         max="59"
@@ -1003,9 +1028,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       Количество повторений:
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       value={repeatCount}
-                      onChange={(e) => setRepeatCount(e.target.value)}
+                      onChange={(e) => {
+                        const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                        setRepeatCount(onlyNums);
+                      }}
                       disabled={isViewMode}
                       min="0"
                       placeholder="0"
@@ -1438,7 +1466,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     fontSize: '14px',
                     color: currentTheme.colors.text
                   }}>
-                    Что за задача:
+                    Родительская задача:
                   </label>
                   <select
                     value={dependencyTask}
@@ -1465,7 +1493,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                   </select>
                 </div>
 
-                {/* До или после */}
+                {/* раньше или позже */}
                 <div>
                   <label style={{ 
                     display: 'block', 
@@ -1473,7 +1501,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     fontSize: '14px',
                     color: currentTheme.colors.text
                   }}>
-                    До или после:
+                    Поставить задачу РАНЬШЕ или ПОЗЖЕ родительской?
                   </label>
                   <div style={{ display: 'flex', gap: '10px' }}>
                     <button
@@ -1491,7 +1519,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                         fontWeight: dependencyType === 'before' ? '600' : '400'
                       }}
                     >
-                      До
+                      Раньше
                     </button>
                     <button
                       type="button"
@@ -1508,12 +1536,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                         fontWeight: dependencyType === 'after' ? '600' : '400'
                       }}
                     >
-                      После
+                      Позже
                     </button>
                   </div>
                 </div>
 
-                {/* Через какое время */}
+                {/* Временной интервал */}
                 <div>
                   <label style={{ 
                     display: 'block', 
@@ -1521,7 +1549,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     fontSize: '14px',
                     color: currentTheme.colors.text
                   }}>
-                    Через какое время:
+                    {dependencyType === 'before' ? 'На сколько раньше?' : 'На сколько позже?'}
                   </label>
                   <div className="dependency-fields-container">
                     {/* Выпадающий список */}
@@ -1541,9 +1569,19 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                           color: currentTheme.colors.text
                         }}
                       >
-                        <option value=">">больше</option>
-                        <option value="<">меньше</option>
-                        <option value="=">равно</option>
+                        {dependencyType === 'before' ? (
+                          <>
+                            <option value=">">больше чем на</option>
+                            <option value="<">меньше чем на</option>
+                            <option value="=">ровно на</option>
+                          </>
+                        ) : (
+                          <>
+                            <option value=">">больше чем через</option>
+                            <option value="<">меньше чем через</option>
+                            <option value="=">ровно через</option>
+                          </>
+                        )}
                       </select>
                     </div>
 
@@ -1551,9 +1589,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       {/* Дни */}
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <input
-                          type="number"
+                          type="text"
                           value={dependencyDays}
-                          onChange={(e) => setDependencyDays(e.target.value)}
+                          onChange={(e) => {
+                            const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                            setDependencyDays(onlyNums);
+                          }}
                           disabled={isViewMode}
                           min="0"
                           placeholder="0"
@@ -1575,9 +1616,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       {/* Часы */}
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <input
-                          type="number"
+                          type="text"
                           value={dependencyHours}
-                          onChange={(e) => setDependencyHours(e.target.value)}
+                          onChange={(e) => {
+                            const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                            setDependencyHours(onlyNums);
+                          }}
                           disabled={isViewMode}
                           min="0"
                           max="23"
@@ -1600,9 +1644,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       {/* Минуты */}
                       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <input
-                          type="number"
+                          type="text"
                           value={dependencyMinutes}
-                          onChange={(e) => setDependencyMinutes(e.target.value)}
+                          onChange={(e) => {
+                            const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                            setDependencyMinutes(onlyNums);
+                          }}
                           disabled={isViewMode}
                           min="0"
                           max="59"

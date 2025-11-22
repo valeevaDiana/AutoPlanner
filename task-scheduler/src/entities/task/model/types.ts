@@ -25,6 +25,11 @@ export interface Task {
   dateTimeRange?: string;
   isComplete?: boolean;
   countFrom: number;
+  isSplitTask?: boolean;
+
+  parentTaskId?: string; 
+  splitParts?: string[]; 
+  splitIndex?: number; 
 }
 
 export type TaskAction = 'complete' | 'edit' | 'delete'; 

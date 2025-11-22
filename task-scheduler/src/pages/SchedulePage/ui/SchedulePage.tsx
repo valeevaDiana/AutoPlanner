@@ -9,11 +9,19 @@ import type { PenaltyTask } from '../../../shared/api/types';
 import { useTasks } from '../../../shared/lib/hooks/useTasks';
 import { taskApi } from '../../../shared/api/taskApi';
 import { TelegramConnectionModal } from '../../../features/telegram-connection/ui/TelegramConnectionModal';
+import { useTaskSplitter } from '../../../shared/lib/hooks/useTaskSplitter';
+import { AuthModal } from '../../../features/auth/ui/AuthModal';
+import { getContrastColor } from '../../../shared/lib/utils/priorityGradient';
 
 export const SchedulePage: React.FC = () => {
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   const {
     tasks,
+    penaltyTasks, 
     isLoading,
+    isLoadingPenalty,
     createTask,
     updateTask,
     deleteTask,
@@ -23,9 +31,10 @@ export const SchedulePage: React.FC = () => {
     isCreating,
     isUpdating,
     isDeleting,
-  } = useTasks();
+  } = useTasks(currentUserId || undefined);
 
   const { currentTheme } = useTheme();
+  const { getOriginalTaskFromPart } = useTaskSplitter();
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [taskFormMode, setTaskFormMode] = useState<'create' | 'edit' | 'view'>('create');
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -34,54 +43,47 @@ export const SchedulePage: React.FC = () => {
   const [isLoadingTask, setIsLoadingTask] = useState(false);
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
 
-  const [penaltyTasks, setPenaltyTasks] = useState<PenaltyTask[]>([]);
   const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState(false);
-
-  const USER_ID = 1; 
-
-  useEffect(() => {
-    loadPenaltyTasks();
-  }, []);
-
-  useEffect(() => {
-    if (!isLoading) {
-      loadPenaltyTasks();
-    }
-  }, [tasks, isLoading]);
 
   useEffect(() => {
       if (isTaskFormOpen) {
         loadAvailableTasks();
       }
     }, [isTaskFormOpen]);
+
+  useEffect(() => {
+    const savedUserId = localStorage.getItem('currentUserId');
+    if (savedUserId) {
+      const userId = Number(savedUserId);
+      setCurrentUserId(userId);
+    } else {
+      setIsAuthModalOpen(true);
+    }
+
+  }, []);
+
   
   const loadAvailableTasks = async () => {
     try {
-      // Предполагаем, что у вас есть currentUserId
-      const currentUserId = 1; // Замените на реальный ID пользователя
+      if (!currentUserId) return;
       const tasks = await taskApi.getAvailableTasks(currentUserId);
+
       setAvailableTasks(tasks);
     } catch (error) {
       console.error('Failed to load available tasks:', error);
-      // В случае ошибки используем существующие tasks как fallback
       setAvailableTasks(tasks);
     }
   };
 
-  const loadPenaltyTasks = async () => {
-    try {
-      console.log('Loading penalty tasks...');
-      const response = await fetch(`/api/time-table/${USER_ID}`);
-      if (response.ok) {
-        const data = await response.json();
-        setPenaltyTasks(data.penaltyTasks || []);
-      } else {
-        console.error('Failed to load penalty tasks:', response.status);
-      }
-    } catch (error) {
-      console.error('Error loading penalty tasks:', error);
-    }
+  const handleAuthSuccess = (userId: number) => {
+    setCurrentUserId(userId);
+    localStorage.setItem('currentUserId', userId.toString());
+    setIsAuthModalOpen(false);
   };
+
+  if (!currentUserId) {
+    return <AuthModal isOpen={isAuthModalOpen} onAuthSuccess={handleAuthSuccess} />;
+  }
 
   const loadTaskById = async (taskId: string): Promise<Task | null> => {
     try {
@@ -101,7 +103,6 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handlePenaltyTasksClick = () => {
-    loadPenaltyTasks();
     setIsPenaltyModalOpen(true);
   };
 
@@ -120,39 +121,27 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handleEditTask = async (task: Task) => {
+    const taskToEdit = getOriginalTaskFromPart(task, tasks) || task;
     setTaskFormMode('edit');
-    
-    // Сначала показываем форму с базовыми данными
-    setEditingTask(task);
+    setEditingTask(taskToEdit);
     setIsTaskFormOpen(true);
-    
-    // Затем загружаем полные данные через API
-    const fullTask = await loadTaskById(task.id);
-    if (fullTask) {
-      setEditingTask(fullTask);
-    }
   };
 
   const handleViewTask = async (task: Task) => {
+    const taskToView = getOriginalTaskFromPart(task, tasks) || task;
     setTaskFormMode('view');
-    
-    // Сначала показываем форму с базовыми данными
-    setEditingTask(task);
+    setEditingTask(taskToView);
     setIsTaskFormOpen(true);
-    
-    // Затем загружаем полные данные через API
-    const fullTask = await loadTaskById(task.id);
-    if (fullTask) {
-      setEditingTask(fullTask);
-    }
   };
+
 
   const handleSwitchToEdit = () => {
     setTaskFormMode('edit');
   };
 
   const handleDeleteTask = async (task: Task) => {
-    await deleteTask(task.id);
+    const taskToDelete = getOriginalTaskFromPart(task, tasks) || task;
+    await deleteTask(taskToDelete.id);
   };
 
   const handleSaveTask = async (taskData: Partial<Task>) => {
@@ -171,50 +160,106 @@ export const SchedulePage: React.FC = () => {
   const handleTaskComplete = async (task: Task) => {
     const taskFrom = await getTaskById.mutateAsync(task.id);
     if (taskFrom){
-    console.log("alo", taskFrom.title, taskFrom.isRepeating, taskFrom.id, taskFrom.countFrom);
-    if (taskFrom.isRepeating) {
-      await completeRepitTask({ 
-      taskId: taskFrom.id, 
-      countFrom: task.countFrom 
-    });
+      console.log("alo", taskFrom.title, taskFrom.isRepeating, taskFrom.id, taskFrom.countFrom);
+      if (taskFrom.isRepeating) {
+        await completeRepitTask({ 
+        taskId: taskFrom.id, 
+        countFrom: task.countFrom 
+      });
+      }
+      else {
+
+        console.log('handleTaskComplete called for task:', task.id);
+        try {
+          await completeTask(task.id);
+        } catch (error) {
+          console.error('Failed to complete task:', error);
+        }
+      }
     }
-    else {
-      
-      await completeTask(taskFrom.id);
-    }
-  }
   };
+
+  const getPenaltyButtonFontSize = (count: number): string => {
+    if (count >= 10000) return '12px';
+    if (count >= 1000) return '14px';
+    if (count >= 100) return '16px';
+    if (count >= 10) return '18px';
+    return '20px';
+  };
+
 
   if (isLoading) return <div>Загрузка задач...</div>;
 
   return (
     <div className="page-container">
       <div className="header-fixed">
-        <div className="header-title-wrapper">
-          <ThemeSelector />
-          <div className="header-title">План на</div>
-          <button className="week-selector" onClick={handleToggleView}>неделю</button>
+        {/* Первая строка: уведомления, темы, выход */}
+        <div 
+          className="header-top-row"
+          style={{
+            backgroundColor: currentTheme.colors.background
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="notification-icon">🔔</div>
+            <ThemeSelector />
+          </div>
+          
+          {/* Кнопка выхода */}
+          <button
+            onClick={() => {
+              localStorage.removeItem('currentUserId');
+              setCurrentUserId(null);
+              setIsAuthModalOpen(true);
+            }}
+            style={{
+              backgroundColor: currentTheme.colors.error,
+              color: 'white',
+              border: 'none',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: '500',
+            }}
+          >
+            Выйти
+          </button>
+        </div>
 
-          {penaltyTasks.length > 0 && (
+        {/* Вторая строка: заголовок и штрафные задачи */}
+        <div 
+          className="header-bottom-row"
+          style={{
+            backgroundColor: currentTheme.colors.background
+          }}
+        >
+          <div className="header-title-wrapper">
+            <div className="header-title">План на</div>
+            <button className="week-selector" onClick={handleToggleView}>неделю</button>
+
             <button
               onClick={handlePenaltyTasksClick}
               style={{
                 backgroundColor: currentTheme.colors.error,
                 color: 'white',
                 border: 'none',
-                padding: '8px 16px',
+                padding: '6px 12px',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                fontSize: '14px',
+                fontSize: getPenaltyButtonFontSize(penaltyTasks.length),
                 fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '6px',
+                minWidth: '30px',
+                justifyContent: 'center',
+                marginLeft: '5px'
               }}
             >
-              🚫
+              {penaltyTasks.length}
             </button>
-          )}
+          </div>
         </div>
         <div className="notification-icon" onClick={() => setIsTelegramModalOpen(true)} style={{ cursor: 'pointer' }}>
           🔔
@@ -261,6 +306,9 @@ export const SchedulePage: React.FC = () => {
         isOpen={isTelegramModalOpen}
         onClose={() => setIsTelegramModalOpen(false)}
         userId={USER_ID}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onAuthSuccess={handleAuthSuccess} 
       />
     </div>
   );

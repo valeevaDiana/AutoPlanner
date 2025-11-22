@@ -1,10 +1,12 @@
 import { ConfirmDeleteModal } from '../../../features/task-actions/ui/ConfirmDeleteModal'; 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react'; 
 import type { Task, TaskAction } from '../../../entities/task/model/types'; 
 import { TaskActionsModal } from '../../../features/task-actions/ui/TaskActionsModal';
 import { useWeekNavigation } from '../../../shared/lib/hooks/useWeekNavigation';
 import { useTheme } from '../../../shared/lib/contexts';
 import { getContrastColor, getPriorityColor } from '../../../shared/lib/utils/priorityGradient';
+import { useTaskSplitter } from '../../../shared/lib/hooks/useTaskSplitter'; 
+
 
 const DAYS = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
 
@@ -32,7 +34,7 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
 
   const groups: Task[][] = [];
   
-  tasks.forEach(task => {
+  tasks.forEach((task: Task) => {
     let taskStart = 0;
     if (task.startTime) {
       const [hours, minutes] = task.startTime.split(':').map(Number);
@@ -115,14 +117,6 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   }
   const isCompleted = task.completed;
 
-  /*console.log('Task data:', {
-    title: task.title,
-    startTime: task.startTime,
-    durationMinutes: task.durationMinutes,
-    calculatedHeight: totalHeight,
-    calculatedTop: topOffset
-  });*/
-
   const backgroundColor = getPriorityColor(
     task.priority, 
     currentTheme.colors.priorityLow, 
@@ -131,25 +125,98 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
 
   const textColor = getContrastColor(backgroundColor);
 
-  const getTextSettings = () => {
-    const maxLines = Math.max(1, Math.floor(totalHeight / 20));
+  // const getTextSettings = () => {
+  //   const maxLines = Math.max(1, Math.floor(totalHeight / 20));
   
+  //   switch (taskCount) {
+  //     case 1:
+  //       return { fontSize: '14px', lineClamp: maxLines };
+  //     case 2:
+  //       return { fontSize: '12px', lineClamp: maxLines };
+  //     case 3:
+  //       return { fontSize: '11px', lineClamp: maxLines };
+  //     case 4:
+  //       return { fontSize: '10px', lineClamp: maxLines };
+  //     case 5:
+  //       return { fontSize: '9px', lineClamp: maxLines };
+  //     default:
+  //       return { fontSize: '9px', lineClamp: 1 };
+  //   }
+  // };
+
+  const getTextSettings = () => {
+    // Определяем настройки в зависимости от высоты
+    if (totalHeight <= 15) {
+      return { 
+        fontSize: '8px', 
+        lineClamp: 1,
+        padding: '0px',
+        lineHeight: '1',
+      };
+    } else if (totalHeight <= 25) {
+      return { 
+        fontSize: '9px', 
+        lineClamp: 1,
+        padding: '0px',
+        lineHeight: '1.1'
+      };
+    } else if (totalHeight <= 35) {
+      return { 
+        fontSize: '10px', 
+        lineClamp: 2,
+        padding: '1px',
+        lineHeight: '1.1'
+      };
+    }
+
+    const maxLines = Math.max(1, Math.floor(totalHeight / 15));
+    
+    // Остальная логика для нормальных размеров...
     switch (taskCount) {
       case 1:
-        return { fontSize: '14px', lineClamp: maxLines };
+        return { 
+          fontSize: '14px', 
+          lineClamp: maxLines,
+          padding: '2px',
+          lineHeight: '1.2'
+        };
       case 2:
-        return { fontSize: '12px', lineClamp: maxLines };
+        return { 
+          fontSize: '12px', 
+          lineClamp: maxLines,
+          padding: '1px',
+          lineHeight: '1.2'
+        };
       case 3:
-        return { fontSize: '11px', lineClamp: maxLines };
+        return { 
+          fontSize: '11px', 
+          lineClamp: maxLines,
+          padding: '1px',
+          lineHeight: '1.2'
+        };
       case 4:
-        return { fontSize: '10px', lineClamp: maxLines };
+        return { 
+          fontSize: '10px', 
+          lineClamp: maxLines,
+          padding: '1px',
+          lineHeight: '1.1'
+        };
       case 5:
-        return { fontSize: '9px', lineClamp: maxLines };
+        return { 
+          fontSize: '9px', 
+          lineClamp: maxLines,
+          padding: '1px',
+          lineHeight: '1.1'
+        };
       default:
-        return { fontSize: '9px', lineClamp: 1 };
+        return { 
+          fontSize: '8px', 
+          lineClamp: 1,
+          padding: '0px',
+          lineHeight: '1'
+        };
     }
   };
-
 
   const textSettings = getTextSettings();
 
@@ -179,26 +246,32 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
         padding: '1px',
         cursor: 'pointer',
         backgroundColor: isCompleted ? currentTheme.colors.priorityCompleted : backgroundColor,
+        borderLeft: task.isSplitTask && task.splitIndex === 0 ?  `3px solid ${currentTheme.colors.textSecondary}` : 'none',
+        borderRight: task.isSplitTask && (task.splitIndex || 0) > 0 ? `3px solid ${currentTheme.colors.textSecondary}` : 'none',
+
       }}
+      
       onClick={handleClick}
     >
       <div
         className="task-text"
         style={{
           fontSize: textSettings.fontSize,
-          lineHeight: '1.2', 
-          padding: '1px', 
+          lineHeight: textSettings.lineHeight,
+          padding: textSettings.padding,
           overflow: 'hidden',
-          display: '-webkit-box',
+          display: textSettings.display || '-webkit-box',
           WebkitLineClamp: textSettings.lineClamp,
-          WebkitBoxOrient: 'vertical',
+          WebkitBoxOrient: textSettings.display ? 'horizontal' : 'vertical',
           width: '100%',
-          // height: '100%',
-          maxHeight: `calc(${totalHeight - 4 - 2}px)`, 
+          maxHeight: totalHeight <= 20 ? 'none' : `calc(${totalHeight - 4}px)`,
           wordBreak: 'break-word',
-          textOverflow: 'ellipsis ',
+          textOverflow: 'ellipsis',
           textDecoration: isCompleted ? 'line-through' : 'none',
           color: isCompleted ? currentTheme.colors.priorityCompletedText : textColor,
+          minHeight: '10px',
+          alignItems: textSettings.alignItems,
+          justifyContent: textSettings.justifyContent,
         }}
       >
         {task.title}
@@ -228,6 +301,12 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
     getISODate
   } = useWeekNavigation();
 
+  const { splitAllTasks } = useTaskSplitter();
+  const displayTasks = useMemo(() => {
+    return splitAllTasks(tasks);
+  }, [tasks, splitAllTasks]);
+
+
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -238,16 +317,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
 
   const getTasksForDate = (date: Date) => {
     const dateString = getISODate(date);
-    
-    const tasksForDate = tasks.filter(task => {
-      const matches = task.realDate === dateString;
-      if (matches) {
-        //console.log('Task matches:', task.title, task.realDate, task.startTime);
-      }
-      return matches;
-    });
-    
-    return tasksForDate;
+    return displayTasks.filter((task: Task) => task.realDate === dateString);
   };
 
   // const getTasksForDate = (date: Date) => {
@@ -398,11 +468,12 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
 
               {weekDates.map((date, dayIndex) => {
                 const tasksForDate = getTasksForDate(date);
-                const tasksInThisSlot = tasksForDate.filter((task) => {
+                const tasksInThisSlot = tasksForDate.filter((task: Task) => {
                   const taskHour = parseInt(task.startTime?.split(':')[0] || '0', 10);
                   const currentHour = parseInt(time.split(':')[0], 10);
                   return taskHour === currentHour;
                 });
+
 
                 const overlappingGroups = getOverlappingTasks(tasksInThisSlot);
 

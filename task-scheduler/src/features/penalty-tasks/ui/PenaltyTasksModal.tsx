@@ -1,30 +1,7 @@
 import React from 'react';
 import { useTheme } from '../../../shared/lib/contexts';
 import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
-
-interface PenaltyTask {
-  userId: number;
-  myTaskId: number;
-  name: string;
-  description: string;
-  priority: number;
-  startDateTime: string;
-  endDateTime: string;
-  duration: string;
-  countFrom: number;
-  isComplete: boolean;
-  completeDateTime: string | null;
-  startDateTimeRange: string | null;
-  endDateTimeRange: string | null;
-  ruleOneTask: boolean;
-  startDateTimeRuleOneTask: string | null;
-  endDateTimeRuleOneTask: string | null;
-  ruleTwoTask: boolean;
-  timePositionRegardingTaskId: number;
-  secondTaskId: number;
-  relationRangeId: number;
-  dateTimeRange: string | null;
-}
+import type { PenaltyTask } from '../../../shared/api/types'; 
 
 interface PenaltyTasksModalProps {
   isOpen: boolean;
@@ -76,10 +53,6 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
     }
   };
 
-  const getPenaltyReason = (task: PenaltyTask): string => {
-    return "Не удалось распределить задачу в расписании из-за конфликта времени или ресурсов";
-  };
-
   const getPenaltyTaskDisplayData = (task: PenaltyTask) => {
     if (task.startDateTimeRange && task.endDateTimeRange) {
       return {
@@ -112,6 +85,145 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
     } else {
       return `Длительность: ${data.duration}\n(Время не определено)`;
     }
+  };
+
+  const getTaskSpecificInfo = (task: PenaltyTask) => {    
+    // 1. Для зависимых задач (RuleTwoTask = true) 
+    if (task.ruleTwoTask) {
+      const getPositionText = (position: number) => {
+        return position === 0 ? 'ДО' : 'ПОСЛЕ';
+      };
+
+      const getOperatorText = (operator: number) => {
+        switch (operator) {
+          case 0: return 'больше чем';
+          case 1: return 'ровно';
+          case 2: return 'меньше чем';
+          default: return '';
+        }
+      };
+
+      return (
+        <div style={{
+          padding: '8px',
+          backgroundColor: currentTheme.colors.background,
+          borderRadius: '4px',
+          marginBottom: '8px',
+          borderLeft: `3px solid ${currentTheme.colors.secondary}`
+        }}>
+          <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, marginBottom: '4px' }}>
+            🔗 Зависимая задача
+          </div>
+          <div style={{ fontSize: '12px' }}>
+            <strong>Позиция:</strong> {getPositionText(task.timePositionRegardingTaskId)} задачи #{task.secondTaskId}
+          </div>
+          {task.dateTimeRange && (
+            <div style={{ fontSize: '12px' }}>
+              <strong>Временной интервал:</strong> {getOperatorText(task.relationRangeId)} {task.dateTimeRange}
+            </div>
+          )}
+          {task.startDateTimeRange && task.endDateTimeRange && (
+            <div style={{ fontSize: '12px' }}>
+              <strong>Доступный диапазон:</strong> {formatDate(task.startDateTimeRange)} {formatTime(task.startDateTimeRange)} - {formatDate(task.endDateTimeRange)} {formatTime(task.endDateTimeRange)}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // 2. Для задач с возможным временем (RuleOneTask = true)
+    if (task.ruleOneTask) {
+      return (
+        <div style={{
+          padding: '8px',
+          backgroundColor: currentTheme.colors.background,
+          borderRadius: '4px',
+          marginBottom: '8px',
+          borderLeft: `3px solid ${currentTheme.colors.edit}`
+        }}>
+          <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, marginBottom: '4px' }}>
+            🕘 Задача с возможным временем
+          </div>
+          {task.startDateTimeRuleOneTask && (
+            <div style={{ fontSize: '12px' }}>
+              <strong>Возможно начать с:</strong> {formatDate(task.startDateTimeRuleOneTask)} {formatTime(task.startDateTimeRuleOneTask)}
+            </div>
+          )}
+          {task.endDateTimeRuleOneTask && (
+            <div style={{ fontSize: '12px' }}>
+              <strong>Возможно закончить до:</strong> {formatDate(task.endDateTimeRuleOneTask)} {formatTime(task.endDateTimeRuleOneTask)}
+            </div>
+          )}
+          {task.startDateTimeRange && task.endDateTimeRange && (
+            <div style={{ fontSize: '12px' }}>
+              <strong>Диапазон поиска времени:</strong> {formatDate(task.startDateTimeRange)} {formatTime(task.startDateTimeRange)} - {formatDate(task.endDateTimeRange)} {formatTime(task.endDateTimeRange)}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // 3. Для повторяющихся задач (countFrom > 0)
+    if (task.countFrom > 0) {
+      return (
+        <div style={{
+          padding: '8px',
+          backgroundColor: currentTheme.colors.background,
+          borderRadius: '4px',
+          marginBottom: '8px',
+          borderLeft: `3px solid ${currentTheme.colors.primary}`
+        }}>
+          <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, marginBottom: '4px' }}>
+            ♾️ Повторяющаяся задача
+          </div>
+          <div style={{ fontSize: '12px' }}>
+            <strong>Повтор:</strong> {task.countFrom}
+          </div>
+          {task.startDateTimeRepit && (
+            <div style={{ fontSize: '12px' }}>
+              <strong>Начало периода:</strong> {formatDate(task.startDateTimeRepit)} {formatTime(task.startDateTimeRepit)}
+            </div>
+          )}
+          {task.endDateTimeRepit && (
+            <div style={{ fontSize: '12px' }}>
+              <strong>Конец периода:</strong> {formatDate(task.endDateTimeRepit)} {formatTime(task.endDateTimeRepit)}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // 4. Для обычных задач с конкретным временем
+    if (task.startDateTime && task.endDateTime) {
+      return (
+        <div style={{
+          padding: '8px',
+          backgroundColor: currentTheme.colors.background,
+          borderRadius: '4px',
+          marginBottom: '8px',
+          borderLeft: `3px solid ${currentTheme.colors.success}`
+        }}>
+          <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, marginBottom: '4px' }}>
+            🗓 Задача с конкретным временем
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  const getPenaltyReason = (task: PenaltyTask): string => {
+    if (task.ruleTwoTask) {
+      return "Не удалось выполнить условие зависимости от другой задачи";
+    }
+    if (task.ruleOneTask) {
+      return "Не найдено подходящего времени в указанном диапазоне";
+    }
+    if (task.countFrom > 0) {
+      return "Не удалось распределить повторяющуюся задачу из-за конфликта времени";
+    }
+    return "Не удалось распределить задачу в расписании из-за конфликта времени или ресурсов";
   };
 
   return (
@@ -167,7 +279,7 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {penaltyTasks.map((task, index) => (
               <div
-                key={task.myTaskId || index}
+                key={`${task.myTaskId}_${task.countFrom}_${index}`}
                 style={{
                   padding: '15px',
                   backgroundColor: currentTheme.colors.background,
@@ -211,6 +323,9 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
                   </p>
                 )}
 
+                {/* Добавляем специфичную информацию для типа задачи */}
+                {getTaskSpecificInfo(task)}
+
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr',
@@ -218,41 +333,38 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
                   marginBottom: '10px',
                   fontSize: '14px'
                 }}>
-                  {(() => {
-                    const data = getPenaltyTaskDisplayData(task);
-                    
-                    if (data.start && data.end) {
-                      return (
-                        <>
-                          <div>
-                            <span style={{ color: currentTheme.colors.textSecondary }}>Начало: </span>
-                            {formatDate(data.start)} {formatTime(data.start)}
-                          </div>
-                          <div>
-                            <span style={{ color: currentTheme.colors.textSecondary }}>Конец: </span>
-                            {formatDate(data.end)} {formatTime(data.end)}
-                          </div>
-                          <div>
-                            <span style={{ color: currentTheme.colors.textSecondary }}>Длительность: </span>
-                            {data.duration}
-                          </div>
-                        </>
-                      );
-                    } else {
-                      return (
-                        <>
-                          <div>
-                            <span style={{ color: currentTheme.colors.textSecondary }}>Длительность: </span>
-                            {data.duration}
-                          </div>
-                          <div>
-                            <span style={{ color: currentTheme.colors.textSecondary }}>Время: </span>
-                            Не определено
-                          </div>
-                        </>
-                      );
-                    }
-                  })()}
+                  {/* Показываем стандартные поля только если они есть и задача не особого типа */}
+                  {!task.ruleTwoTask && !task.ruleOneTask && !task.isRepit && (
+                    <>
+                      <div>
+                        <span style={{ color: currentTheme.colors.textSecondary }}>Начало: </span>
+                        {task.startDateTime 
+                          ? `${formatDate(task.startDateTime)} ${formatTime(task.startDateTime)}`
+                          : 'Не определено'
+                        }
+                      </div>
+                      <div>
+                        <span style={{ color: currentTheme.colors.textSecondary }}>Конец: </span>
+                        {task.endDateTime 
+                          ? `${formatDate(task.endDateTime)} ${formatTime(task.endDateTime)}`
+                          : 'Не определено'
+                        }
+                      </div>
+                    </>
+                  )}
+                  
+                  <div>
+                    <span style={{ color: currentTheme.colors.textSecondary }}>Длительность: </span>
+                    {task.duration}
+                  </div>
+
+                  {/* Для повторяющихся задач показываем номер повторения */}
+                  {task.isRepit && task.countFrom && (
+                    <div>
+                      <span style={{ color: currentTheme.colors.textSecondary }}>Повторение: </span>
+                      #{task.countFrom}
+                    </div>
+                  )}
                 </div>
 
                 <div style={{

@@ -6,11 +6,11 @@ export const predefinedThemes: Theme[] = [
     colors: {
         primary: '#334f35df',
         secondary: '#90b894',
-        background: '#fffdde',
-        surface: '#fff8e1',
-        text: '#19281aff', 
+        background: '#fff8e1',
+        surface: '#fff4d4',
+        text: '#19281a', 
         textSecondary: '#274129', 
-        border: '#648367ff', 
+        border: '#648367', 
         success: '#74bc7a', 
         error: '#b74c57', 
 

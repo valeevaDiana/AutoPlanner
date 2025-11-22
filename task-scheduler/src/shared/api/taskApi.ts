@@ -1,5 +1,5 @@
 import type { Task } from '../../entities/task/model/types';
-import type { ApiTask, ApiTimeTableResponse } from './types';
+import type { ApiTask, ApiTimeTableResponse, PenaltyTask } from './types';
 
 const API_BASE_URL = '/api'; 
 
@@ -23,12 +23,21 @@ const formatDuration = (days: number, hours: number, minutes: number): string =>
 const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => {
   const formData = new FormData();
 
+    console.log('Task data for form:', {
+    id: taskData.id,
+    title: taskData.title,
+    description: taskData.description,
+    descriptionLength: taskData.description?.length
+  });
+
   if (isUpdate && taskData.id) {
     formData.append('Id', taskData.id);
   }
-
   formData.append('Name', taskData.title || 'Без названия');
-  if (taskData.description) formData.append('Description', taskData.description);
+
+  const descriptionValue = taskData.description?.trim() === '' ? '-' : (taskData.description || '-');
+  formData.append('Description', descriptionValue);
+
   formData.append('Priority', String(taskData.priority ?? 5));
 
   if (taskData.startDate && taskData.startTime) {
@@ -106,15 +115,12 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
 const apiTaskToTask = (apiTask: ApiTask): Task => {
   const parseDate = (isoString: string | null | undefined): { date?: string; time?: string } => {
     if (!isoString) return {};
-    console.log('Parsing date:', isoString);
   
     try {
       const date = new Date(isoString);
       const datePart = date.toISOString().slice(0, 10);  
       const timePart = date.toISOString().slice(11, 16); 
-      
-      console.log('Parsed:', { datePart, timePart });
-      
+
       return {
         date: datePart,
         time: timePart,    
@@ -310,9 +316,16 @@ export const taskApi = {
       const response = await fetch(`${API_BASE_URL}/task/complete/${taskId}`, {
         method: 'PUT',
       });
-      if (!response.ok) throw new Error(`Ошибка завершения: ${response.status}`);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Ошибка завершения: ${response.status} - ${errorText}`);
+      }      
     } catch (error) {
-      console.error('Error completing task:', error);
+      console.error('Error completing task:', {
+        taskId,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       throw error;
     }
   },
@@ -359,7 +372,6 @@ export const taskApi = {
 
   async getAvailableTasks(userId: number): Promise<Task[]> {
     try {
-      // Получаем задачи напрямую из эндпоинта /task/{userId}
       const response = await fetch(`${API_BASE_URL}/task/${userId}`);
       
       if (!response.ok) {
@@ -434,6 +446,18 @@ export const taskApi = {
       return null;
     }
   },
+  async getPenaltyTasks(userId: number): Promise<PenaltyTask[]> {
+    try {
+      const response = await fetch(`/api/time-table/${userId}`);
+      if (!response.ok) throw new Error(`Ошибка загрузки: ${response.status}`);
+      
+      const data = await response.json();
+      return data.penaltyTasks || [];
+    } catch (error) {
+      console.error('Error loading penalty tasks:', error);
+      return [];
+    }
+  }
 };
 
 export const telegramApi = {
