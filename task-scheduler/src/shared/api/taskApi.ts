@@ -222,6 +222,7 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
     
     // ДОБАВЛЕНО: Дублирующее поле для совместимости
     isComplete: Boolean(apiTask.isComplete),
+    countFrom: apiTask.countFrom,
   };
 };
 
@@ -315,6 +316,23 @@ export const taskApi = {
       throw error;
     }
   },
+
+  async completeRepitTask(taskId: string, countFrom: number): Promise<void> {
+    try {
+      const params = new URLSearchParams({
+        taskId: taskId,
+        countFrom: countFrom.toString(),
+      });
+      const response = await fetch(`${API_BASE_URL}/task/complete/repit?${params}`, {
+        method: 'PUT',
+      });
+      if (!response.ok) throw new Error(`Ошибка перестройки: ${response.status}`);
+    } catch (error)
+    {
+      console.error('Error completing repit task:', error);
+      throw error;
+    }
+  }, 
 
   async rebuildTimeTable(
     userId: number,

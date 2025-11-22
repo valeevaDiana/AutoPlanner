@@ -18,6 +18,8 @@ export const SchedulePage: React.FC = () => {
     updateTask,
     deleteTask,
     completeTask,
+    completeRepitTask,
+    getTaskById,
     isCreating,
     isUpdating,
     isDeleting,
@@ -167,7 +169,20 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handleTaskComplete = async (task: Task) => {
-    await completeTask(task.id);
+    const taskFrom = await getTaskById.mutateAsync(task.id);
+    if (taskFrom){
+    console.log("alo", taskFrom.title, taskFrom.isRepeating, taskFrom.id, taskFrom.countFrom);
+    if (taskFrom.isRepeating) {
+      await completeRepitTask({ 
+      taskId: taskFrom.id, 
+      countFrom: task.countFrom 
+    });
+    }
+    else {
+      
+      await completeTask(taskFrom.id);
+    }
+  }
   };
 
   if (isLoading) return <div>Загрузка задач...</div>;
