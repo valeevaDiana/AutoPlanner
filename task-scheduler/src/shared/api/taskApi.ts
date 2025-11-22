@@ -347,7 +347,6 @@ export const taskApi = {
 
   async getAvailableTasks(userId: number): Promise<Task[]> {
     try {
-      // Получаем задачи напрямую из эндпоинта /task/{userId}
       const response = await fetch(`${API_BASE_URL}/task/${userId}`);
       
       if (!response.ok) {

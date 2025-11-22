@@ -3,30 +3,6 @@ import { useTheme } from '../../../shared/lib/contexts';
 import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
 import type { PenaltyTask } from '../../../shared/api/types'; 
 
-// interface PenaltyTask {
-//   userId: number;
-//   myTaskId: number;
-//   name: string;
-//   description: string;
-//   priority: number;
-//   startDateTime: string;
-//   endDateTime: string;
-//   duration: string;
-//   countFrom: number;
-//   isComplete: boolean;
-//   completeDateTime: string | null;
-//   startDateTimeRange: string | null;
-//   endDateTimeRange: string | null;
-//   ruleOneTask: boolean;
-//   startDateTimeRuleOneTask: string | null;
-//   endDateTimeRuleOneTask: string | null;
-//   ruleTwoTask: boolean;
-//   timePositionRegardingTaskId: number;
-//   secondTaskId: number;
-//   relationRangeId: number;
-//   dateTimeRange: string | null;
-// }
-
 interface PenaltyTasksModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -187,7 +163,7 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
       );
     }
 
-    // 3. Для повторяющихся задач (isRepit = true)
+    // 3. Для повторяющихся задач (countFrom > 0)
     if (task.countFrom > 0) {
       return (
         <div style={{

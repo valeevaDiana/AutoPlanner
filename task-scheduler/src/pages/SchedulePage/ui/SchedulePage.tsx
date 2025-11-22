@@ -9,8 +9,12 @@ import type { PenaltyTask } from '../../../shared/api/types';
 import { useTasks } from '../../../shared/lib/hooks/useTasks';
 import { taskApi } from '../../../shared/api/taskApi';
 import { useTaskSplitter } from '../../../shared/lib/hooks/useTaskSplitter';
+import { AuthModal } from '../../../features/auth/ui/AuthModal';
 
 export const SchedulePage: React.FC = () => {
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   const {
     tasks,
     penaltyTasks, 
@@ -23,7 +27,7 @@ export const SchedulePage: React.FC = () => {
     isCreating,
     isUpdating,
     isDeleting,
-  } = useTasks();
+  } = useTasks(currentUserId || undefined);
 
   const { currentTheme } = useTheme();
   const { getOriginalTaskFromPart } = useTaskSplitter();
@@ -36,27 +40,45 @@ export const SchedulePage: React.FC = () => {
 
   const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState(false);
 
-  const USER_ID = 1; 
-
   useEffect(() => {
       if (isTaskFormOpen) {
         loadAvailableTasks();
       }
     }, [isTaskFormOpen]);
+
+  useEffect(() => {
+    const savedUserId = localStorage.getItem('currentUserId');
+    if (savedUserId) {
+      const userId = Number(savedUserId);
+      setCurrentUserId(userId);
+    } else {
+      setIsAuthModalOpen(true);
+    }
+
+  }, []);
+
   
   const loadAvailableTasks = async () => {
     try {
-      // Предполагаем, что у вас есть currentUserId
-      const currentUserId = 1; // Замените на реальный ID пользователя
+      if (!currentUserId) return;
       const tasks = await taskApi.getAvailableTasks(currentUserId);
+
       setAvailableTasks(tasks);
     } catch (error) {
       console.error('Failed to load available tasks:', error);
-      // В случае ошибки используем существующие tasks как fallback
       setAvailableTasks(tasks);
     }
   };
 
+  const handleAuthSuccess = (userId: number) => {
+    setCurrentUserId(userId);
+    localStorage.setItem('currentUserId', userId.toString());
+    setIsAuthModalOpen(false);
+  };
+
+  if (!currentUserId) {
+    return <AuthModal isOpen={isAuthModalOpen} onAuthSuccess={handleAuthSuccess} />;
+  }
 
   const loadTaskById = async (taskId: string): Promise<Task | null> => {
     try {
@@ -175,6 +197,26 @@ export const SchedulePage: React.FC = () => {
             </button>
         </div>
         <div className="notification-icon">🔔</div>
+        
+        {/* Кнопка выхода */}
+        <button
+          onClick={() => {
+            localStorage.removeItem('currentUserId');
+            setCurrentUserId(null);
+            setIsAuthModalOpen(true);
+          }}
+          style={{
+            backgroundColor: currentTheme.colors.textSecondary,
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+          }}
+        >
+          Выйти
+        </button>
       </div>
 
       <div className="content-wrapper">
@@ -211,6 +253,11 @@ export const SchedulePage: React.FC = () => {
         isOpen={isPenaltyModalOpen}
         onClose={() => setIsPenaltyModalOpen(false)}
         penaltyTasks={penaltyTasks}
+      />
+
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onAuthSuccess={handleAuthSuccess} 
       />
     </div>
   );
