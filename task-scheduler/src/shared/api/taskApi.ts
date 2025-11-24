@@ -431,9 +431,7 @@ export const taskApi = {
         }
       }
       
-      const taskData: ApiTask = await response.json();
-      
-      // Конвертируем ApiTask в Task
+      const taskData: ApiTask = await response.json();      
       const task = apiTaskToTask(taskData);
       
       console.log(`Successfully loaded task: ${task.title} (ID: ${task.id})`);

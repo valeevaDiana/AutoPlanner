@@ -3,6 +3,7 @@ import type { Task } from '../../../entities/task/model/types';
 import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
 import { useTheme } from '../../../shared/lib/contexts';
 import { getPriorityColor } from '../../../shared/lib/utils/priorityGradient';
+import { taskApi } from '../../../shared/api/taskApi';
 
 interface TaskFormModalProps {
   isOpen: boolean;
@@ -227,12 +228,13 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     }
   }, [isOpen, task, initialDate]);
 
-  // useEffect(() => {
-  //   if (hasDependency) {
-  //     setHasSpecificTime(false);
-  //     setHasPossibleTime(false);
-  //   }
-  // }, [hasDependency]);
+  useEffect(() => {
+    if (isOpen) {
+      if (task) {
+        loadTaskData(task.id);
+      }
+    }
+  }, [isOpen, task]);
 
   // useEffect(() => {
   //   if (hasSpecificTime || hasPossibleTime) {
@@ -243,10 +245,10 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const handleSave = () => {
 
     console.log('Description before save:', {
-    original: description,
-    trimmed: description?.trim(),
-    willSend: description?.trim() === '' ? ' ' : description
-  });
+      original: description,
+      trimmed: description?.trim(),
+      willSend: description?.trim() === '' ? ' ' : description
+    });
 
 
     const totalMinutes = durationToMinutes(
@@ -428,6 +430,108 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       else if (type === 'possible') setHasPossibleTime(false);
       else if (type === 'dependency') setHasDependency(false);
     }
+  };
+
+  const loadTaskData = async (taskId: string) => {
+    try {
+      const fullTask = await taskApi.getTaskById(taskId);
+      if (fullTask) {
+        const duration = minutesToDuration(fullTask.durationMinutes);
+        
+        setTitle(fullTask.title || '');
+        setDescription(fullTask.description || '');
+        setStartDate(fullTask.startDate || '');
+        setEndDate(fullTask.endDate || '');
+        setStartTime(fullTask.startTime || '');
+        setEndTime(fullTask.endTime || '');
+        setDurationDays(duration.days.toString());
+        setDurationHours(duration.hours.toString());
+        setDurationMinutes(duration.minutes.toString());
+        setPriority(fullTask.priority);
+
+        console.log('Task type detection:', {
+          isRepit: fullTask.isRepeating,
+          ruleOneTask: fullTask.ruleOneTask,
+          ruleTwoTask: fullTask.ruleTwoTask
+        });
+
+        setIsRepeating(false);
+        setHasSpecificTime(false);
+        setHasPossibleTime(false);
+        setHasDependency(false);
+
+        if (fullTask.isRepeating) {
+          setIsRepeating(true);
+          setRepeatCount(String(fullTask.repeatCount || '0'));
+          
+          if (fullTask.endDateTimeRepit) {
+            setRepeatType('period');
+          } else {
+            setRepeatType('count');
+          }
+        } 
+        else if (fullTask.ruleOneTask) {
+          setHasPossibleTime(true);
+          if (fullTask.startDateTimeRuleOneTask) {
+            const [date, time] = fullTask.startDateTimeRuleOneTask.split('T');
+            setPossibleStartDate(date);
+            setPossibleStartTime(time.substring(0, 5));
+          }
+          if (fullTask.endDateTimeRuleOneTask) {
+            const [date, time] = fullTask.endDateTimeRuleOneTask.split('T');
+            setPossibleEndDate(date);
+            setPossibleEndTime(time.substring(0, 5));
+          }
+        }
+        else if (fullTask.ruleTwoTask) {
+          setHasDependency(true);
+          setDependencyTask(String(fullTask.secondTaskId || ''));
+          setDependencyType(fullTask.timePositionRegardingTaskId === 0 ? 'before' : 'after');
+          
+          if (fullTask.relationRangeId === 0) {
+            setDependencyOperator('>');
+          } else if (fullTask.relationRangeId === 1) {
+            setDependencyOperator('=');
+          } else if (fullTask.relationRangeId === 2) {
+            setDependencyOperator('<');
+          }
+          
+          if (fullTask.dateTimeRange) {
+            const [days, hours, minutes] = fullTask.dateTimeRange.split(':');
+            setDependencyDays(days || '0');
+            setDependencyHours(hours || '0');
+            setDependencyMinutes(minutes || '0');
+          }
+        }
+        else {
+          setHasSpecificTime(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading task data:', error);
+      initializeWithExistingData();
+    }
+  };
+
+  const initializeWithExistingData = () => {
+    if (!task) return;
+    
+    const duration = minutesToDuration(task.durationMinutes);
+    setTitle(task.title || '');
+    setDescription(task.description || '');
+    setStartDate(task.startDate || '');
+    setEndDate(task.endDate || '');
+    setStartTime(task.startTime || '');
+    setEndTime(task.endTime || '');
+    setDurationDays(duration.days.toString());
+    setDurationHours(duration.hours.toString());
+    setDurationMinutes(duration.minutes.toString());
+    setPriority(task.priority);
+    
+    setIsRepeating(Boolean(task.isRepeating));
+    setHasSpecificTime(Boolean(task.startDate && task.startTime));
+    setHasPossibleTime(Boolean(task.ruleOneTask));
+    setHasDependency(Boolean(task.ruleTwoTask));
   };
 
 

@@ -9,8 +9,8 @@ const getWeekRange = () => {
     const end = new Date(now);
     end.setDate(now.getDate() - now.getDay() + 1 + 14); // 2 недели вперёд
 
-    // Форматируем в ISO без миллисекунд и с Z
-    const toISOString = (date: Date) => date.toISOString().replace(/\.\d{3}Z$/, 'Z');
+    // Форматируем в ISO без миллисекунд 
+    const toISOString = (date: Date) => date.toISOString().replace(/\.\d{3}Z$/, '');
 
     return {
       startTimeTable: toISOString(start),
@@ -69,6 +69,7 @@ export const useTasks = (userId?: number) => {
       queryClient.invalidateQueries({ queryKey: ['penaltyTasks', userId] });
     },
   });
+
 
   const updateTask = useMutation({
     mutationFn: async (taskData: Parameters<typeof taskApi.updateTask>[0]) => {

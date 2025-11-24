@@ -210,7 +210,7 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
     }
 
     // 3. Для повторяющихся задач (countFrom > 0)
-    if (task.countFrom > 0) {
+    if (task.isRepit) {
       return (
         <div style={{
           padding: '8px',
@@ -223,7 +223,7 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
             ♾️ Повторяющаяся задача
           </div>
           <div style={{ fontSize: '12px' }}>
-            <strong>Повтор:</strong> {task.countFrom}
+            <strong>Повтор:</strong> {task.countRepit || task.countFrom}
           </div>
           {task.startDateTimeRepit && (
             <div style={{ fontSize: '12px' }}>
@@ -266,7 +266,7 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
     if (task.ruleOneTask) {
       return "Не найдено подходящего времени в указанном диапазоне";
     }
-    if (task.countFrom > 0) {
+    if (task.isRepit) {
       return "Не удалось распределить повторяющуюся задачу из-за конфликта времени";
     }
     return "Не удалось распределить задачу в расписании из-за конфликта времени или ресурсов";
@@ -405,10 +405,10 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
                   </div>
 
                   {/* Для повторяющихся задач показываем номер повторения */}
-                  {task.isRepit && task.countFrom && (
+                  {task.isRepit && (task.countRepit || task.countFrom) && (
                     <div>
                       <span style={{ color: currentTheme.colors.textSecondary }}>Повторение: </span>
-                      #{task.countFrom}
+                      #{task.countRepit || task.countFrom}
                     </div>
                   )}
                 </div>
