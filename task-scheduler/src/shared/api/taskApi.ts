@@ -420,7 +420,7 @@ export const taskApi = {
 
   async getTaskById(taskId: string): Promise<Task | null> {
     try {
-      const response = await fetch(`${API_BASE_URL}/id/${taskId}`);
+      const response = await fetch(`${API_BASE_URL}/id/${taskId}`); 
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -443,7 +443,7 @@ export const taskApi = {
       console.error('Error fetching task by ID:', {
         message: error instanceof Error ? error.message : 'Unknown error',
         taskId: taskId,
-        endpoint: `${API_BASE_URL}/task/id/${taskId}`
+        endpoint: `${API_BASE_URL}/id/${taskId}`
       });
       return null;
     }
