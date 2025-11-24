@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '../../../shared/lib/contexts';
 import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
 import type { PenaltyTask } from '../../../shared/api/types'; 
+import { taskApi } from '../../../shared/api/taskApi'; 
 
 interface PenaltyTasksModalProps {
   isOpen: boolean;
@@ -15,9 +16,39 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
   penaltyTasks
 }) => {
   const { currentTheme } = useTheme();
+  const [taskNames, setTaskNames] = useState<Record<number, string>>({});
   
   useEscapeKey(onClose, isOpen);
 
+  useEffect(() => {
+    if (isOpen && penaltyTasks.length > 0) {
+      loadTaskNames();
+    }
+  }, [isOpen, penaltyTasks]);
+
+  const loadTaskNames = async () => {
+    const names: Record<number, string> = {};
+    
+    const taskIds = new Set<number>();
+    penaltyTasks.forEach(task => {
+      if (task.ruleTwoTask && task.secondTaskId) {
+        taskIds.add(task.secondTaskId);
+      }
+    });
+
+    for (const taskId of taskIds) {
+      try {
+        const task = await taskApi.getTaskById(String(taskId));
+        names[taskId] = task?.title || `#${taskId}`;
+      } catch (error) {
+        console.error(`Failed to fetch task ${taskId}:`, error);
+        names[taskId] = `#${taskId}`;
+      }
+    }
+
+    setTaskNames(names);
+  };
+  
   if (!isOpen) return null;
 
   const handleBackgroundClick = (e: React.MouseEvent) => {
@@ -87,6 +118,17 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
     }
   };
 
+  const getTaskName = async (taskId: number): Promise<string> => {
+    try {
+      const task = await taskApi.getTaskById(String(taskId));
+      return task?.title || `#${taskId}`;
+    } catch (error) {
+      console.error(`Failed to fetch task ${taskId}:`, error);
+      return `#${taskId}`;
+    }
+  };
+
+
   const getTaskSpecificInfo = (task: PenaltyTask) => {    
     // 1. Для зависимых задач (RuleTwoTask = true) 
     if (task.ruleTwoTask) {
@@ -103,6 +145,10 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
         }
       };
 
+      const parentTaskName = task.secondTaskId 
+        ? (taskNames[task.secondTaskId] || `#${task.secondTaskId}`)
+        : `#${task.secondTaskId}`;
+
       return (
         <div style={{
           padding: '8px',
@@ -115,7 +161,7 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
             🔗 Зависимая задача
           </div>
           <div style={{ fontSize: '12px' }}>
-            <strong>Позиция:</strong> {getPositionText(task.timePositionRegardingTaskId)} задачи #{task.secondTaskId}
+            <strong>Позиция:</strong> {getPositionText(task.timePositionRegardingTaskId)} задачи "{parentTaskName}"
           </div>
           {task.dateTimeRange && (
             <div style={{ fontSize: '12px' }}>
