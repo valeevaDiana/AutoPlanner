@@ -2,84 +2,62 @@ import { useMemo } from 'react';
 import type { Task } from '../../../entities/task/model/types';
 
 export const useTaskSplitter = () => {
-    const splitTaskByDays = (task: Task): Task[] => {
-        if (!task.startDate || !task.startTime || !task.durationMinutes) {
-            return [task];
-        }
+  const splitTaskByDays = (task: Task): Task[] => {
+    if (!task.startDate || !task.startTime || !task.durationMinutes) {
+      return [task];
+    }
 
-        const startDateTime = new Date(`${task.startDate}T${task.startTime}:00Z`);
-        const endDateTime = new Date(startDateTime.getTime() + task.durationMinutes * 60000);
+    const [startHours, startMinutes] = task.startTime.split(':').map(Number);
+    const startTotalMinutes = startHours * 60 + startMinutes;
+    const endTotalMinutes = startTotalMinutes + task.durationMinutes;
 
-        console.log('Splitting task:', {
-            task: task.title,
-            start: startDateTime.toISOString(),
-            end: endDateTime.toISOString(),
-            duration: task.durationMinutes,
-            startDate: task.startDate,
-            startTime: task.startTime
-        });
+    if (Math.floor(endTotalMinutes / (24 * 60)) === Math.floor(startTotalMinutes / (24 * 60))) {
+      return [task];
+    }
 
-        if (startDateTime.toISOString().split('T')[0] === endDateTime.toISOString().split('T')[0]) {
-            return [task];
-        }
+    const parts: Task[] = [];
+    let currentDate = task.startDate;
+    let remainingMinutes = task.durationMinutes;
+    let currentStartMinutes = startTotalMinutes;
+    let partIndex = 0;
 
-        const parts: Task[] = [];
-        let currentStart = new Date(startDateTime);
-        let remainingMinutes = task.durationMinutes;
-        let partIndex = 0;
 
-        while (remainingMinutes > 0 && partIndex < 10) {
-            const dayEnd = new Date(currentStart);
-            dayEnd.setUTCHours(23, 59, 59, 999);
-            
-            const minutesUntilEndOfDay = Math.floor(
-            (dayEnd.getTime() - currentStart.getTime()) / 60000
-            ) + 1;
+    while (remainingMinutes > 0 && partIndex < 10) {
+      const minutesUntilEndOfDay = (24 * 60) - currentStartMinutes;
+      const partDuration = Math.min(minutesUntilEndOfDay, remainingMinutes);
 
-            const partDuration = Math.min(minutesUntilEndOfDay, remainingMinutes);
-            
-            const partDate = currentStart.toISOString().split('T')[0];
-            const partTime = `${String(currentStart.getUTCHours()).padStart(2, '0')}:${String(currentStart.getUTCMinutes()).padStart(2, '0')}`;
-            
-            const part: Task = {
-            ...task,
-            startDate: partDate,
-            startTime: partTime,
-            durationMinutes: partDuration,
-            isSplitTask: true,
-            parentTaskId: task.id,
-            splitIndex: partIndex,
-            realDate: partDate,
-            };
+      const partHours = Math.floor(currentStartMinutes / 60);
+      const partMinutes = currentStartMinutes % 60;
+      const partTime = `${String(partHours).padStart(2, '0')}:${String(partMinutes).padStart(2, '0')}`;
 
-            console.log(`Part ${partIndex}:`, {
-            date: partDate,
-            time: partTime,
-            duration: partDuration,
-            realDate: part.realDate,
-            utcHours: currentStart.getUTCHours(),
-            utcMinutes: currentStart.getUTCMinutes()
-            });
+      const part: Task = {
+        ...task,
+        startDate: currentDate,
+        startTime: partTime,
+        durationMinutes: partDuration,
+        isSplitTask: true,
+        parentTaskId: task.id,
+        splitIndex: partIndex,
+        realDate: currentDate,
+      };
 
-            parts.push(part);
-            
-            const nextDay = new Date(currentStart);
-            nextDay.setUTCDate(nextDay.getUTCDate() + 1);
-            nextDay.setUTCHours(0, 0, 0, 0);
-            
-            currentStart = nextDay;
-            remainingMinutes -= partDuration;
-            partIndex++;
-        }
+      parts.push(part);
 
-        console.log('Final parts:', parts.map(p => ({
-            date: p.realDate,
-            time: p.startTime,
-            duration: p.durationMinutes
-        })));
+      // Переход к следующему дню
+      const nextDate = new Date(currentDate);
+      nextDate.setDate(nextDate.getDate() + 1);
+      const year = nextDate.getFullYear();
+      const month = String(nextDate.getMonth() + 1).padStart(2, '0');
+      const day = String(nextDate.getDate()).padStart(2, '0');
+      currentDate = `${year}-${month}-${day}`;
+      
+      currentStartMinutes = 0;
+      remainingMinutes -= partDuration;
+      partIndex++;
+    }
 
-        return parts;
-    };
+    return parts;
+  };
 
   const splitAllTasks = (tasks: Task[]): Task[] => {
     return tasks.flatMap(task => {

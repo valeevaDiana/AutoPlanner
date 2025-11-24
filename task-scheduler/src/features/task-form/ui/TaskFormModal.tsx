@@ -261,21 +261,29 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     let calculatedEndDate: string | undefined = endDate;
     let calculatedEndTime: string | undefined = endTime;
 
+
     if (startDate && startTime) {
-      const startDateTime = new Date(`${startDate}T${startTime}:00.000Z`);
-      const endDateTime = new Date(startDateTime.getTime() + totalMinutes * 60 * 1000);
-
-      // Форматируем конечную дату
-            // Форматируем конечную дату (UTC)
-      const endYear = endDateTime.getUTCFullYear();
-      const endMonth = String(endDateTime.getUTCMonth() + 1).padStart(2, '0');
-      const endDay = String(endDateTime.getUTCDate()).padStart(2, '0');
-      calculatedEndDate = `${endYear}-${endMonth}-${endDay}`;
-
-      // Форматируем конечное время (UTC)
-      const endHours = String(endDateTime.getUTCHours()).padStart(2, '0');
-      const endMinutes = String(endDateTime.getUTCMinutes()).padStart(2, '0');
-      calculatedEndTime = `${endHours}:${endMinutes}:00.000Z`;
+      const startDateTimeStr = `${startDate}T${startTime}:00`;
+      
+      const [startHours, startMinutes] = startTime.split(':').map(Number);
+      const totalMinutesFromStart = startHours * 60 + startMinutes + totalMinutes;
+      
+      const endHours = Math.floor(totalMinutesFromStart / 60) % 24;
+      const endMinutes = totalMinutesFromStart % 60;
+      
+      calculatedEndTime = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+      
+      const daysToAdd = Math.floor(totalMinutesFromStart / (24 * 60));
+      if (daysToAdd > 0) {
+        const newDate = new Date(startDate);
+        newDate.setDate(newDate.getDate() + daysToAdd);
+        const year = newDate.getFullYear();
+        const month = String(newDate.getMonth() + 1).padStart(2, '0');
+        const day = String(newDate.getDate()).padStart(2, '0');
+        calculatedEndDate = `${year}-${month}-${day}`;
+      } else {
+        calculatedEndDate = startDate;
+      }
     }
 
     // ПРАВИЛЬНЫЙ РАСЧЕТ ДЛЯ ПОВТОРЯЮЩИХСЯ ЗАДАЧ

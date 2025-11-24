@@ -41,16 +41,17 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
   formData.append('Priority', String(taskData.priority ?? 5));
 
   if (taskData.startDate && taskData.startTime) {
-    formData.append('StartDateTime', `${taskData.startDate}T${taskData.startTime}:00.000Z`);
+    formData.append('StartDateTime', `${taskData.startDate}T${taskData.startTime}:00`);
   } else {
-    formData.append('StartDateTime', ''); 
+    formData.append('StartDateTime', '');
   }
 
   if (taskData.endDate && taskData.endTime) {
-    formData.append('EndDateTime', `${taskData.endDate}T${taskData.endTime}`);
+    formData.append('EndDateTime', `${taskData.endDate}T${taskData.endTime}:00`);
   } else {
     formData.append('EndDateTime', '');
   }
+
 
   const totalMinutes = taskData.durationMinutes ?? 60;
   const days = Math.floor(totalMinutes / (24 * 60));
@@ -115,15 +116,16 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
 const apiTaskToTask = (apiTask: ApiTask): Task => {
   const parseDate = (isoString: string | null | undefined): { date?: string; time?: string } => {
     if (!isoString) return {};
-  
-    try {
-      const date = new Date(isoString);
-      const datePart = date.toISOString().slice(0, 10);  
-      const timePart = date.toISOString().slice(11, 16); 
 
+    try {
+      const [datePart, timePart] = isoString.split('T');
+      if (!datePart || !timePart) return {};
+      
+      const time = timePart.substring(0, 5);
+      
       return {
         date: datePart,
-        time: timePart,    
+        time: time,
       };
     } catch (error) {
       console.error('Error parsing date:', isoString, error);
