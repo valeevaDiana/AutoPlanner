@@ -232,15 +232,11 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     if (isOpen) {
       if (task) {
         loadTaskData(task.id);
+      } else {
+        resetAllCheckboxes();
       }
     }
   }, [isOpen, task]);
-
-  // useEffect(() => {
-  //   if (hasSpecificTime || hasPossibleTime) {
-  //     setHasDependency(false);
-  //   }
-  // }, [hasSpecificTime, hasPossibleTime]);
 
   const handleSave = () => {
 
@@ -534,6 +530,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     setHasDependency(Boolean(task.ruleTwoTask));
   };
 
+  const resetAllCheckboxes = () => {
+    setIsRepeating(false);
+    setHasSpecificTime(false);
+    setHasPossibleTime(false);
+    setHasDependency(false);
+  };
 
   const handleBackgroundClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
