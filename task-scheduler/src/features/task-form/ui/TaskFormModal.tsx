@@ -136,10 +136,32 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         } else {
           setRepeatType('count');
         }
-          
+        
+        console.log("is repit?", task.isRepeating);
         if (task.isRepeating) {
           setIsRepeating(true);
           setRepeatCount(String(task.repeatCount || '0'));
+          if(task.repeateDurationMinute)
+          {
+            const repitDuration = minutesToDuration(task.repeateDurationMinute);
+            setRepeatDays(repitDuration.days.toString());
+            setRepeatHours(repitDuration.hours.toString());
+            setRepeatMinutes(repitDuration.minutes.toString());
+          }
+          
+          if(task.startDateTimeRepit)
+          {
+            const [startRepitDate, startRepitTimes] = task.startDateTimeRepit.split('T');
+            setRepeatStartDate(startRepitDate || '');
+            setRepeatStartTime(startRepitTimes || '');
+          }
+          if(task.endDateTimeRepit)
+          {
+            const [endRepitDate, endRepitTimes] = task.endDateTimeRepit.split('T');
+            console.log("a", task.endDateTimeRepit, endRepitDate, endRepitTimes);
+            setRepeatEndDate(endRepitDate || '');
+            setRepeatEndTime(endRepitTimes || '');
+          }
         }
 
         if (task.ruleOneTask)
@@ -160,11 +182,23 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           }
           
           if (task.dateTimeRange) {
-            const [days, hours, minutes] = task.dateTimeRange.split(':');
-            setDependencyDays(days || '0');
-            setDependencyHours(hours || '0');
-            setDependencyMinutes(minutes || '0');
-            
+            const parts = task.dateTimeRange.split(':');
+  
+            if (parts.length === 4) {
+              // Формат: дни:часы:минуты:секунды
+              const [days, hours, minutes, seconds] = parts;
+              console.log("range 4 parts:", task.dateTimeRange, days, hours, minutes, seconds);
+              setDependencyDays(days || '0');
+              setDependencyHours(hours || '0');
+              setDependencyMinutes(minutes || '0');
+            } else if (parts.length === 3) {
+              // Формат: дни:часы:минуты
+              const [hours, minutes, seconds] = parts;
+              console.log("range 3 parts:", task.dateTimeRange, hours, minutes, seconds);
+              setDependencyDays('0');
+              setDependencyHours(hours || '0');
+              setDependencyMinutes(minutes || '0');
+            } 
           }
           setHasDependency(true);
         }
@@ -207,9 +241,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setRepeatMinutes('0');
         setRepeatCount('0');
         setRepeatStartDate(getCurrentDate());
-        setRepeatEndDate('');
-        setRepeatStartTime('09:00');
-        setRepeatEndTime('18:00');
+        setRepeatEndDate(getCurrentDate());
+        setRepeatStartTime('09:00:00');
+        setRepeatEndTime('18:00:00');
         setSpecificStartTime('09:00');
         setSpecificEndTime('18:00');
         setPossibleStartDate('');
@@ -237,6 +271,27 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       }
     }
   }, [isOpen, task]);
+
+  const formatTimeForBackend = (timeString: string): string => {
+  if (!timeString) return '00:00:00';
+  
+  // Убираем возможные пробелы
+  const cleanTime = timeString.trim();
+  
+  // Проверяем формат hh:mm:ss
+  if (/^\d{1,2}:\d{1,2}:\d{1,2}$/.test(cleanTime)) {
+    return cleanTime;
+  }
+  
+  // Проверяем формат hh:mm
+  if (/^\d{1,2}:\d{1,2}$/.test(cleanTime)) {
+    return `${cleanTime}:00`;
+  }
+  
+  // Если формат непонятный, возвращаем по умолчанию
+  console.warn('Invalid time format, using default:', cleanTime);
+  return '00:00:00';
+};
 
   const handleSave = () => {
 
@@ -290,8 +345,10 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     let repeatTotalMinutes: number | undefined = undefined;
     
     if (isRepeating && repeatStartDate  && repeatStartTime) {
+      console.log("repeatStartTime", repeatStartTime);
       // startDateTimeRepit = startDate + startTime (начало первой задачи)
-      calculatedStartDateTimeRepit = `${repeatStartDate}T${repeatStartTime}:00.000Z`;
+      const formattedStartTime = formatTimeForBackend(repeatStartTime);
+      calculatedStartDateTimeRepit = `${repeatStartDate}T${formattedStartTime}`;
 
       // Расчет endDateTimeRepit: конец последней задачи в серии повторений
       repeatTotalMinutes = durationToMinutes(
@@ -301,7 +358,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       );
 
       if (repeatType === 'period' && repeatEndDate && repeatEndTime) {
-        calculatedEndDateTimeRepit = `${repeatEndDate}T${repeatEndTime}:00.000Z`;
+        const formattedEndTime = formatTimeForBackend(repeatEndTime);
+        calculatedEndDateTimeRepit = `${repeatEndDate}T${formattedEndTime}`;
       } else if (repeatType === 'count') {
         const repeatCountValue = repeatType === 'count' ? parseInt(repeatCount) || 0 : 0;
 
@@ -323,11 +381,11 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           const endRepHours = String(endRepetitionDateTime.getHours()).padStart(2, '0');
           const endRepMinutes = String(endRepetitionDateTime.getMinutes()).padStart(2, '0');
           
-          calculatedEndDateTimeRepit = `${endRepYear}-${endRepMonth}-${endRepDay}T${endRepHours}:${endRepMinutes}:00.000Z`;
+          calculatedEndDateTimeRepit = `${endRepYear}-${endRepMonth}-${endRepDay}T${endRepHours}:${endRepMinutes}`;
         } else if (repeatStartDate && repeatStartTime && repeatEndDate && repeatEndTime) {
           // Альтернативный вариант: используем явно указанный период повторения
-          calculatedStartDateTimeRepit = `${repeatStartDate}T${repeatStartTime}:00.000Z`;
-          calculatedEndDateTimeRepit = `${repeatEndDate}T${repeatEndTime}:00.000Z`;
+          calculatedStartDateTimeRepit = `${repeatStartDate}T${formatTimeForBackend(repeatStartTime)}`;
+          calculatedEndDateTimeRepit = `${repeatEndDate}T${formatTimeForBackend(repeatEndTime)}`;
         }
       }
     }
@@ -339,8 +397,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
     if (hasPossibleTime) {
       ruleOneTaskValue = true;
-      calculatedStartTimeRuleOneTask = `${possibleStartDate}T${possibleStartTime}:00.000Z`;
-      calculatedEndTimeRuleOneTask = `${possibleEndDate}T${possibleEndTime}:00.000Z`;
+      calculatedStartTimeRuleOneTask = `${possibleStartDate}T${possibleStartTime}:00`;
+      calculatedEndTimeRuleOneTask = `${possibleEndDate}T${possibleEndTime}:00`;
       startDateForSave = undefined;
       startTimeForSave = undefined;
       calculatedEndDate = undefined;
@@ -383,7 +441,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       endDate: calculatedEndDate || undefined,
       startTime: startTimeForSave || undefined,
       endTime: calculatedEndTime || undefined,
-      durationMinutes: totalMinutes || 0,
+      duration: `${durationDays}:${durationHours}:${durationMinutes}:00`,
       priority,
       // повтор
       isRepeating: isRepeating || undefined,
@@ -493,10 +551,25 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           }
           
           if (fullTask.dateTimeRange) {
-            const [days, hours, minutes] = fullTask.dateTimeRange.split(':');
-            setDependencyDays(days || '0');
-            setDependencyHours(hours || '0');
-            setDependencyMinutes(minutes || '0');
+            if (fullTask.dateTimeRange) {
+              const parts = fullTask.dateTimeRange.split(':');
+    
+              if (parts.length === 4) {
+                // Формат: дни:часы:минуты:секунды
+                const [days, hours, minutes, seconds] = parts;
+                console.log("range 4 parts:", fullTask.dateTimeRange, days, hours, minutes, seconds);
+                setDependencyDays(days || '0');
+                setDependencyHours(hours || '0');
+                setDependencyMinutes(minutes || '0');
+              } else if (parts.length === 3) {
+                // Формат: дни:часы:минуты
+                const [hours, minutes, seconds] = parts;
+                console.log("range 3 parts:", fullTask.dateTimeRange, hours, minutes, seconds);
+                setDependencyDays('0');
+                setDependencyHours(hours || '0');
+                setDependencyMinutes(minutes || '0');
+              } 
+            }
           }
         }
         else {

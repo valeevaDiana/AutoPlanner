@@ -122,17 +122,23 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handleEditTask = async (task: Task) => {
-    const taskToEdit = getOriginalTaskFromPart(task, tasks) || task;
-    setTaskFormMode('edit');
-    setEditingTask(taskToEdit);
-    setIsTaskFormOpen(true);
+    const taskFrom = await getTaskById.mutateAsync(task.id);
+    if (taskFrom)
+    {
+      setTaskFormMode('edit');
+      setEditingTask(taskFrom);
+      setIsTaskFormOpen(true);
+    }
   };
 
   const handleViewTask = async (task: Task) => {
-    const taskToView = getOriginalTaskFromPart(task, tasks) || task;
-    setTaskFormMode('view');
-    setEditingTask(taskToView);
-    setIsTaskFormOpen(true);
+    const taskFrom = await getTaskById.mutateAsync(task.id);
+    if (taskFrom)
+    {
+      setTaskFormMode('view');
+      setEditingTask(taskFrom);
+      setIsTaskFormOpen(true);
+    }
   };
 
 

@@ -205,7 +205,7 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
     startTime: start?.time || undefined,
     endDate: end?.date || undefined,
     endTime: end?.time || undefined,
-    durationMinutes,
+    duration: apiTask.duration || "",
     completed: Boolean(apiTask.isComplete),
     realDate: start?.date || new Date().toISOString().split('T')[0],
     

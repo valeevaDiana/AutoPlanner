@@ -7,7 +7,7 @@ export interface Task {
   startTime?: string; // HH:mm
   endDate?: string;
   endTime?: string;
-  durationMinutes: number;
+  duration: string;
   isRepeating?: boolean;
   repeatCount?: number;
   startDateTimeRepit?: string;
