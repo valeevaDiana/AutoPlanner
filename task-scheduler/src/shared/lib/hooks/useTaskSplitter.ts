@@ -3,13 +3,44 @@ import type { Task } from '../../../entities/task/model/types';
 
 export const useTaskSplitter = () => {
   const splitTaskByDays = (task: Task): Task[] => {
-    if (!task.startDate || !task.startTime || !task.durationMinutes) {
+    if (!task.startDate || !task.startTime) {
+      console.log("lolo", task.duration);
       return [task];
     }
 
+    const partss = task.duration.split(':');
+    
+    let day = 0;
+    let hour = 0;
+    let minute = 0;
+    if (partss.length === 4) {
+      // Формат: дни:часы:минуты:секунды
+      const [days, hours, minutes, seconds] = partss;
+      day =  parseInt(days);
+      hour = parseInt(hours);
+      minute = parseInt(minutes);
+    } else if (partss.length === 3) {
+      // Формат: дни:часы:минуты
+      const [hours, minutes, seconds] = partss;
+      hour = parseInt(hours);
+      minute = parseInt(minutes);
+    } 
+    let dur = day * 24 * 60 + hour * 60 + minute;
+
+    if (dur == 0)
+    {
+      const startDateTime: Date = new Date(`${task.startDate}T${task.startTime}`);
+      const endDateTime: Date = new Date(`${task.endDate}T${task.endTime}`);
+      
+      // Расчет длительности в минутах
+      const durationMs: number = endDateTime.getTime() - startDateTime.getTime();
+      dur = Math.floor(durationMs / (1000 * 60));
+    }
+    console.log("ajlsba", task.duration, dur, partss);
+
     const [startHours, startMinutes] = task.startTime.split(':').map(Number);
     const startTotalMinutes = startHours * 60 + startMinutes;
-    const endTotalMinutes = startTotalMinutes + task.durationMinutes;
+    const endTotalMinutes = startTotalMinutes + dur;
 
     if (Math.floor(endTotalMinutes / (24 * 60)) === Math.floor(startTotalMinutes / (24 * 60))) {
       return [task];
@@ -17,7 +48,7 @@ export const useTaskSplitter = () => {
 
     const parts: Task[] = [];
     let currentDate = task.startDate;
-    let remainingMinutes = task.durationMinutes;
+    let remainingMinutes = dur;
     let currentStartMinutes = startTotalMinutes;
     let partIndex = 0;
 
@@ -30,11 +61,20 @@ export const useTaskSplitter = () => {
       const partMinutes = currentStartMinutes % 60;
       const partTime = `${String(partHours).padStart(2, '0')}:${String(partMinutes).padStart(2, '0')}`;
 
+      const minutesInDay = 24 * 60; // 1440 минут в дне
+      const minutesInHour = 60;     // 60 минут в часе
+
+      const days = Math.floor(partDuration / minutesInDay);
+      const remainingMinutesAfterDays = partDuration % minutesInDay;
+      
+      const hours = Math.floor(remainingMinutesAfterDays / minutesInHour);
+      const minutes = remainingMinutesAfterDays % minutesInHour;
+
       const part: Task = {
         ...task,
         startDate: currentDate,
         startTime: partTime,
-        durationMinutes: partDuration,
+        duration: `${days}:${hours}:${minutes}:00`,
         isSplitTask: true,
         parentTaskId: task.id,
         splitIndex: partIndex,

@@ -56,7 +56,25 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
           const [hours, minutes] = groupTask.startTime.split(':').map(Number);
           groupStart = hours * 60 + minutes;
         }
-        const groupEnd = groupStart + groupTask.durationMinutes;
+        const parts = task.duration.split(':');
+        console.log('aaaaaaaaa', task.duration, parts);
+        let day = 0;
+        let hour = 0;
+        let minute = 0;
+        if (parts.length === 4) {
+          // Формат: дни:часы:минуты:секунды
+          const [days, hours, minutes, seconds] = parts;
+          day =  parseInt(days);
+          hour = parseInt(hours);
+          minute = parseInt(minutes);
+        } else if (parts.length === 3) {
+          // Формат: дни:часы:минуты
+          const [hours, minutes, seconds] = parts;
+          hour = parseInt(hours);
+          minute = parseInt(minutes);
+        } 
+        const dur = day * 24 * 60 + hour * 60 + minute;
+        const groupEnd = groupStart + dur;
         
         return taskStart < groupEnd && taskEnd > groupStart;
       });
@@ -108,8 +126,34 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   onTaskClick 
 }) => {
   const { currentTheme } = useTheme();
-
-  const totalHeight = task.durationMinutes;
+  const parts = task.duration.split(':');
+  let day = 0;
+  let hour = 0;
+  let minute = 0;
+  if (parts.length === 4) {
+    // Формат: дни:часы:минуты:секунды
+    const [days, hours, minutes, seconds] = parts;
+    day =  parseInt(days);
+    hour = parseInt(hours);
+    minute = parseInt(minutes);
+  } else if (parts.length === 3) {
+    // Формат: дни:часы:минуты
+    const [hours, minutes, seconds] = parts;
+    hour = parseInt(hours);
+    minute = parseInt(minutes);
+  } 
+  let dur = day * 24 * 60 + hour * 60 + minute;
+  console.log("durr", dur, task.duration, parts);
+  if (dur == 0)
+  {
+    const startDateTime: Date = new Date(`${task.startDate}T${task.startTime}`);
+    const endDateTime: Date = new Date(`${task.startDate}T${task.endTime}`);
+    
+    // Расчет длительности в минутах
+    const durationMs: number = endDateTime.getTime() - startDateTime.getTime();
+    dur = Math.floor(durationMs / (1000 * 60));
+  }
+  const totalHeight = dur;
   let topOffset = 0;
   if (task.startTime) {
     const [hours, minutes] = task.startTime.split(':').map(Number);

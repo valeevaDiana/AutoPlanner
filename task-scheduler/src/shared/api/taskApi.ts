@@ -52,12 +52,15 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
     formData.append('EndDateTime', '');
   }
 
-
-  const totalMinutes = taskData.durationMinutes ?? 60;
-  const days = Math.floor(totalMinutes / (24 * 60));
-  const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
-  const minutes = totalMinutes % 60;
-  formData.append('Duration', formatDuration(days, hours, minutes));
+  if(taskData.duration)
+  {
+    const l =  taskData.duration.split(':').map(part => part.padStart(2, '0'))
+    .join(':')
+    .padEnd(11, ':00') // гарантирует формат DD:HH:MM:SS
+    .slice(0, 11);
+    console.log("hello", l);
+    formData.append('Duration', l);
+  }
 
   const repitTotalMinutes = taskData.repeateDurationMinute ?? 60;
   const repitDays = Math.floor(repitTotalMinutes / (24 * 60));
@@ -160,20 +163,6 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
         date: `${year}-${month}-${day}`,
         time: `${endHours}:${endMinutes}`,
       };
-    }
-  }
-
-  let durationMinutes = 0;
-  if (apiTask.duration) {
-    const match = apiTask.duration.match(/(\d+):(\d+):(\d+)/);
-    if (match) {
-      const hours = parseInt(match[1], 10);
-      const minutes = parseInt(match[2], 10);
-      durationMinutes = hours * 60 + minutes;
-    }
-  } else {
-    if (apiTask.startDateTime && apiTask.endDateTime) {
-      durationMinutes = Math.round((new Date(apiTask.endDateTime).getTime() - new Date(apiTask.startDateTime).getTime()) / (1000 * 60));
     }
   }
 

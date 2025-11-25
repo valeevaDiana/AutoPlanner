@@ -112,17 +112,34 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       if (task) {
-        const duration = minutesToDuration(task.durationMinutes);
-        
+        if (task.duration) {
+          const parts = task.duration.split(':');
+
+          if (parts.length === 4) {
+            // Формат: дни:часы:минуты:секунды
+            const [days, hours, minutes, seconds] = parts;
+            console.log("range 4 parts:", task.dateTimeRange, days, hours, minutes, seconds);
+            setDurationDays(days);
+            setDurationHours(hours);
+            setDurationMinutes(minutes);
+          } else if (parts.length === 3) {
+            // Формат: дни:часы:минуты
+            const [hours, minutes, seconds] = parts;
+            console.log("range 3 parts:", task.dateTimeRange, hours, minutes, seconds);
+            setDurationDays('0');
+            setDurationHours(hours);
+            setDurationMinutes(minutes);
+          } 
+        }
+
+
         setTitle(task.title || '');
         setDescription(task.description || '');
         setStartDate(task.startDate || '');
         setEndDate(task.endDate || '');
         setStartTime(task.startTime || '');
         setEndTime(task.endTime || '');
-        setDurationDays(duration.days.toString());
-        setDurationHours(duration.hours.toString());
-        setDurationMinutes(duration.minutes.toString());
+        
         setPriority(task.priority);
         
         setIsRepeating(Boolean(task.isRepeating));
@@ -490,17 +507,31 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     try {
       const fullTask = await taskApi.getTaskById(taskId);
       if (fullTask) {
-        const duration = minutesToDuration(fullTask.durationMinutes);
-        
+        if (fullTask.duration) {
+          const parts = fullTask.duration.split(':');
+
+          if (parts.length === 4) {
+            // Формат: дни:часы:минуты:секунды
+            const [days, hours, minutes, seconds] = parts;
+            console.log("range 4 parts:", fullTask.dateTimeRange, days, hours, minutes, seconds);
+            setDurationDays(days);
+            setDurationHours(hours);
+            setDurationMinutes(minutes);
+          } else if (parts.length === 3) {
+            // Формат: дни:часы:минуты
+            const [hours, minutes, seconds] = parts;
+            console.log("range 3 parts:", fullTask.dateTimeRange, hours, minutes, seconds);
+            setDurationDays('0');
+            setDurationHours(hours);
+            setDurationMinutes(minutes);
+          } 
+        }
         setTitle(fullTask.title || '');
         setDescription(fullTask.description || '');
         setStartDate(fullTask.startDate || '');
         setEndDate(fullTask.endDate || '');
         setStartTime(fullTask.startTime || '');
         setEndTime(fullTask.endTime || '');
-        setDurationDays(duration.days.toString());
-        setDurationHours(duration.hours.toString());
-        setDurationMinutes(duration.minutes.toString());
         setPriority(fullTask.priority);
 
         console.log('Task type detection:', {
@@ -585,16 +616,31 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const initializeWithExistingData = () => {
     if (!task) return;
     
-    const duration = minutesToDuration(task.durationMinutes);
+    if (task.duration) {
+      const parts = task.duration.split(':');
+
+      if (parts.length === 4) {
+        // Формат: дни:часы:минуты:секунды
+        const [days, hours, minutes, seconds] = parts;
+        console.log("range 4 parts:", task.dateTimeRange, days, hours, minutes, seconds);
+        setDurationDays(days);
+        setDurationHours(hours);
+        setDurationMinutes(minutes);
+      } else if (parts.length === 3) {
+        // Формат: дни:часы:минуты
+        const [hours, minutes, seconds] = parts;
+        console.log("range 3 parts:", task.dateTimeRange, hours, minutes, seconds);
+        setDurationDays('0');
+        setDurationHours(hours);
+        setDurationMinutes(minutes);
+      } 
+    }
     setTitle(task.title || '');
     setDescription(task.description || '');
     setStartDate(task.startDate || '');
     setEndDate(task.endDate || '');
     setStartTime(task.startTime || '');
     setEndTime(task.endTime || '');
-    setDurationDays(duration.days.toString());
-    setDurationHours(duration.hours.toString());
-    setDurationMinutes(duration.minutes.toString());
     setPriority(task.priority);
     
     setIsRepeating(Boolean(task.isRepeating));
