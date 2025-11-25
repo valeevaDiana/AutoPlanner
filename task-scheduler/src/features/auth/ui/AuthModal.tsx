@@ -42,16 +42,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 const userId = await response.json();
                 onAuthSuccess(userId);
             } else {
-                const errorText = await response.text();
-                setError(isLogin ? 'Ошибка авторизации: ' + errorText : 'Ошибка регистрации: ' + errorText);
-            }
-        } catch (err) {
-            console.error(err instanceof Error ? err.message : 'Unknown error');
-            setError('Ошибка сети: ' + (err instanceof Error ? err.message : 'Unknown error'));
-        } finally {
-            setIsLoading(false);
-        }
-    };
+                    if (isLogin && (response.status === 401 || response.status === 400)) {
+                        setError('Неверный логин или пароль');
+                    } 
+                    else if (!isLogin && (response.status === 400 || response.status === 409)) {
+                        setError('Пользователь с таким ником уже существует');
+                    } else {
+                        setError(isLogin ? 'Ошибка авторизации' : 'Ошибка регистрации');
+                    }
+                }
+                } catch (err) {
+                    console.error('Auth error:', err);
+                    setError('Ошибка сети: ' + (err instanceof Error ? err.message : 'Unknown error'));
+                } finally {
+                    setIsLoading(false);
+                }
+            };
 
     const resetForm = () => {
         setNickname('');
