@@ -59,30 +59,33 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
 
   const formatDate = (dateString: string) => {
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('ru-RU', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        timeZone: 'UTC'  
-      });
+      const normalizedDate = dateString.replace('Z', '').split('.')[0];
+      const [datePart, timePart] = normalizedDate.split('T');
+      
+      if (!datePart) return dateString;
+      
+      const [year, month, day] = datePart.split('-');
+      return `${day}.${month}.${year}`;
     } catch {
       return dateString;
     }
   };
 
+
   const formatTime = (dateString: string) => {
     try {
-      const date = new Date(dateString);
-      return date.toLocaleTimeString('ru-RU', {
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'UTC'  
-      });
+      const normalizedDate = dateString.replace('Z', '').split('.')[0];
+      const [_, timePart] = normalizedDate.split('T');
+      
+      if (!timePart) return dateString;
+      
+      const [hours, minutes] = timePart.split(':');
+      return `${hours}:${minutes}`;
     } catch {
       return dateString;
     }
   };
+
 
   const getPenaltyTaskDisplayData = (task: PenaltyTask) => {
     if (task.startDateTimeRange && task.endDateTimeRange) {
@@ -209,8 +212,10 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
       );
     }
 
-    // 3. Для повторяющихся задач (countFrom > 0)
-    if (task.isRepit) {
+    // 3. Для повторяющихся задач 
+
+    //if (task.isRepit) {
+    if (task.countFrom > 0) {
       return (
         <div style={{
           padding: '8px',
