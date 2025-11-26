@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Task } from '../../../entities/task/model/types';
 import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
 import { useTheme } from '../../../shared/lib/contexts';
+import { taskApi } from '../../../shared/api/taskApi';
+import { useModalPosition } from '../../../shared/lib/hooks/useModalPosition';
 
 interface ConfirmDeleteModalProps {
   task: Task;
@@ -19,8 +21,35 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   position
 }) => {
   const { currentTheme } = useTheme();
+  const [fullTask, setFullTask] = useState<Task | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
   useEscapeKey(onClose, isOpen);
+
+  useEffect(() => {
+    const loadTaskDetails = async () => {
+      if (isOpen && task.id) {
+        setIsLoading(true);
+        try {
+          const taskDetails = await taskApi.getTaskById(task.id);
+          setFullTask(taskDetails);
+        } catch (error) {
+          console.error('Error loading task details:', error);
+          setFullTask(task); 
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadTaskDetails();
+  }, [isOpen, task]);
+
+  const adjustedPosition = useModalPosition({
+    position,
+    modalWidth: 300, // ширина модального окна
+    modalHeight: 200 // примерная высота
+  });
 
   if (!isOpen) return null;
 
@@ -34,6 +63,23 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
     onConfirm(task);
     onClose();
   };
+
+  const getModalText = () => {
+    const currentTask = fullTask || task;
+    if (currentTask .isRepeating) {
+      return {
+        title: 'Удалить задачу?',
+        description: 'При удалении повторяющейся задачи удалятся все её дубликаты',
+      };
+    } else {
+      return {
+        title: 'Удалить задачу?',
+        description: '',
+      };
+    }
+  };
+
+  const modalText = getModalText();
 
   return (
     <div
@@ -61,10 +107,12 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           minWidth: '300px',
           position: 'absolute',
-          top: `${position.top}px`,
-          left: `${position.left}px`,
+          top: `${adjustedPosition.top}px`, 
+          left: `${adjustedPosition.left}px`,
           transform: 'translate(-50%, -50%)',
           border: `1px solid ${currentTheme.colors.border}`,
+          maxWidth: 'calc(100vw - 20px)', 
+          maxHeight: 'calc(100vh - 20px)',
         }}
       >
         <h3 style={{
@@ -72,8 +120,20 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
           textAlign: 'center',
           color: currentTheme.colors.text
         }}>
-          Удалить задачу?
+          {modalText.title}
         </h3>   
+
+        {modalText.description && (
+              <p style={{
+                marginBottom: '20px',
+                textAlign: 'center',
+                color: currentTheme.colors.textSecondary,
+                fontSize: '14px',
+                lineHeight: '1.4'
+              }}>
+                {modalText.description}
+              </p>
+            )}
        
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
           {/* Кнопка Нет */}

@@ -2,6 +2,7 @@ import React from 'react';
 import type { Task, TaskAction } from '../../../entities/task/model/types';
 import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
 import { useTheme } from '../../../shared/lib/contexts';
+import { useModalPosition } from '../../../shared/lib/hooks/useModalPosition'; 
 
 interface TaskActionsModalProps {
   task: Task;
@@ -29,6 +30,12 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
   const { currentTheme } = useTheme();
   useEscapeKey(onClose, isOpen);
   
+  const adjustedPosition = useModalPosition({
+    position,
+    modalWidth: 250, 
+    modalHeight: 300 
+  });
+
   if (!isOpen) return null;
 
   const handleBackgroundClick = (e: React.MouseEvent) => {
@@ -127,10 +134,12 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           minWidth: '250px',
           position: 'absolute',
-          top: `${position.top}px`,
-          left: `${position.left}px`,
+          top: `${adjustedPosition.top}px`, 
+          left: `${adjustedPosition.left}px`, 
           transform: 'translate(-50%, -50%)',
           border: `1px solid ${currentTheme.colors.border}`,
+          maxWidth: 'calc(100vw - 20px)', 
+          maxHeight: 'calc(100vh - 20px)'
         }}
       >
         <h3 style={{ 
