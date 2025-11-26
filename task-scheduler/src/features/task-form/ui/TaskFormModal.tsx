@@ -69,6 +69,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [possibleStartTime, setPossibleStartTime] = useState('');
   const [possibleEndDate, setPossibleEndDate] = useState('');
   const [possibleEndTime, setPossibleEndTime] = useState('');
+
+  const [formError, setFormError] = useState<string>('');
+
   
   // Состояния для зависимостей задач
   const [hasDependency, setHasDependency] = useState(false);
@@ -312,11 +315,42 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
   const handleSave = () => {
 
+    setFormError('');
+
     console.log('Description before save:', {
       original: description,
       trimmed: description?.trim(),
       willSend: description?.trim() === '' ? ' ' : description
     });
+
+    if (isRepeating && repeatType === 'period') {
+      if (!repeatStartDate || !repeatEndDate) {
+        setFormError('Заполните даты начала и конца периода повторения');
+        return;
+      }
+
+      const startDateTime = new Date(`${repeatStartDate}T${repeatStartTime}`);
+      const endDateTime = new Date(`${repeatEndDate}T${repeatEndTime}`);
+
+      if (endDateTime <= startDateTime) {
+        setFormError('Конец периода повторения не может быть раньше или равен началу периода');
+        return;
+      }
+    }
+    if (hasPossibleTime) {
+      if (!possibleStartDate || !possibleStartTime || !possibleEndDate || !possibleEndTime) {
+        setFormError('Заполните даты начала и конца возможной задачи');
+        return;
+      }
+
+      const startDateTime = new Date(`${possibleStartDate}T${possibleStartTime}`);
+      const endDateTime = new Date(`${possibleEndDate}T${possibleEndTime}`);
+
+      if (endDateTime <= startDateTime) {
+        setFormError('Конец возможной задачи не может быть раньше или равен началу');
+        return;
+      }
+    }
 
 
     const totalMinutes = durationToMinutes(
@@ -1347,6 +1381,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                           value={repeatEndDate}
                           onChange={(e) => setRepeatEndDate(e.target.value)}
                           disabled={isViewMode}
+                          min={repeatStartDate} 
                           style={{
                             flex: 1,
                             padding: '8px',
@@ -1363,6 +1398,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                           value={repeatEndTime}
                           onChange={(e) => setRepeatEndTime(e.target.value)}
                           disabled={isViewMode}
+                          min={repeatStartDate === repeatEndDate ? repeatStartTime : undefined} 
                           style={{
                             flex: 1,
                             padding: '8px',
@@ -1908,6 +1944,23 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             )}
           </div>
 
+          {formError && (
+            <div style={{
+              padding: '12px',
+              backgroundColor: currentTheme.colors.error + '20',
+              color: currentTheme.colors.error,
+              borderRadius: '6px',
+              fontSize: '14px',
+              border: `1px solid ${currentTheme.colors.error}`,
+              marginBottom: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <span style={{ fontSize: '16px' }}>⚠️</span>
+              {formError}
+            </div>
+          )}
           {/* Кнопки действий */}
           {!isViewMode && (
             <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
