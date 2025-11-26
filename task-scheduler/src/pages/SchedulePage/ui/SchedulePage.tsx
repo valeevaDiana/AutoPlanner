@@ -100,7 +100,7 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handleToggleView = () => {
-    alert("Переключение режима: неделя → день → месяц");
+    // alert("Переключение режима: неделя → день → месяц");
   };
 
   const handlePenaltyTasksClick = () => {

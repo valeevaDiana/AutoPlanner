@@ -39,7 +39,7 @@ body {
 .page-container {
   max-width: 100%;
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 0 16px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -55,7 +55,7 @@ body {
   background: var(--color-background);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  /* gap: 8px; */
   z-index: 1000;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   transition: background-color 0.3s ease;
@@ -66,6 +66,7 @@ body {
   justify-content: space-between;
   align-items: center; 
   width: 100%;
+  height: 6vh; 
   padding: 8px 16px;
   border-bottom: 1px solid var(--color-border); 
 }
@@ -75,6 +76,7 @@ body {
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  height: 6vh;
   padding: 8px 16px;
 }
 
@@ -119,11 +121,11 @@ body {
 /*КАЛЕНДАРЬ*/
 
 .content-wrapper {
-  margin-top: 11vh;
-  margin-bottom: 5vh;
-  overflow-y: auto;
-  padding: 12px 0;
-  height: calc(100vh - 165px); 
+  margin-top: 13vh;
+  margin-bottom: 9vh;
+  overflow-y: hidden;
+  padding: 0;
+  height: calc(100vh - 22vh); 
 }
 
 .calendar-container {
@@ -135,6 +137,8 @@ body {
   margin: 0 auto;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
   height: 100%; 
+  display: flex;
+  flex-direction: column; 
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
@@ -142,7 +146,8 @@ body {
 .calendar-scroll-container {
   overflow-x: auto;
   overflow-y: auto;
-  height: calc(100% - 74px);
+  height: 100%; 
+  flex: 1; 
 }
 
 .calendar-header {
@@ -369,6 +374,7 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
+  height: 8vh;
   background: var(--color-primary);
   padding: 12px 16px;
   display: flex;
@@ -384,11 +390,12 @@ body {
   border: none;
   padding: 12px 24px;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   cursor: pointer;
   width: 100%;
   max-width: 400px;
+  min-height: 40px;
   text-align: center;
   transition: all 0.3s ease;
 }
@@ -440,19 +447,29 @@ body {
     font-size: 16px;
     padding: 8px 12px;
   }
+  
+  .header-top-row {
+    height: 7vh; 
+    padding: 6px 12px; 
+  }
+
+  .header-bottom-row {
+    height: 7vh; 
+    padding: 6px 12px; 
+  }
 
   .content-wrapper {
-    margin-top: 14vh;
-    margin-bottom: 6vh;
-    height: calc(100vh - 170px); 
+    margin-top: 15vh;
+    margin-bottom: 10vh; 
+    height: calc(100vh - 25vh); /
   }
   
   .page-container {
-    padding: 8px 12px;
+    padding: 0 12px;
   }
 
   .header-fixed {
-    padding: 8px 12px;
+    padding: 0 12px;
   }
 
   .notification-icon {
@@ -470,7 +487,8 @@ body {
 
   /* ОСНОВНЫЕ ИЗМЕНЕНИЯ ДЛЯ КАЛЕНДАРЯ */
   .calendar-scroll-container {
-    max-height: calc(100vh - 160px);
+    max-height: none; 
+    height: 100%;
   }
 
   .calendar-navigation .week-range-text {
@@ -489,8 +507,8 @@ body {
   }
 
   .calendar-header > div {
-    padding: 8px 4px;
-    font-size: 14px;
+    padding: 6px 3px;
+    font-size: 13px;
   }
 
   .calendar-body {
@@ -505,7 +523,7 @@ body {
 
   .time-cell {
     width: 80px;
-    padding: 8px 4px;
+    padding: 6px 3px;
     font-size: 16px;
     height: 60px;
     position: sticky;
@@ -535,12 +553,13 @@ body {
 
   /* Подвал */
   .footer-fixed {
+    height: 9vh; 
     padding: 8px 12px;
   }
 
   .add-button {
     padding: 10px 20px;
-    font-size: 14px;
+    font-size: 18px;
   }
 }
 
@@ -554,6 +573,24 @@ body {
 
   .calendar-body {
     min-width: 1100px;
+  }
+
+  .header-top-row {
+    height: 7vh; 
+  }
+
+  .header-bottom-row {
+    height: 7vh; 
+  }
+
+  .content-wrapper {
+    margin-top: 15vh; 
+    margin-bottom: 11vh; 
+    height: calc(100vh - 26vh); 
+  }
+  
+  .footer-fixed {
+    height: 10vh; 
   }
 
   .time-cell {
