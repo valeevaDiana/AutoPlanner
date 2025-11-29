@@ -114,6 +114,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      setFormError('');
       if (task) {
         if (task.duration) {
           const parts = task.duration.split(':');
@@ -163,10 +164,23 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           setRepeatCount(String(task.repeatCount || '0'));
           if(task.repeateDurationMinute)
           {
-            const repitDuration = minutesToDuration(task.repeateDurationMinute);
-            setRepeatDays(repitDuration.days.toString());
-            setRepeatHours(repitDuration.hours.toString());
-            setRepeatMinutes(repitDuration.minutes.toString());
+            const parts = task.repeateDurationMinute.split(':');
+  
+            if (parts.length === 4) {
+              // Формат: дни:часы:минуты:секунды
+              const [days, hours, minutes, seconds] = parts;
+              console.log("range 4 parts:", task.repeateDurationMinute, days, hours, minutes, seconds);
+              setRepeatDays(days || '0');
+              setRepeatHours(hours || '0');
+              setRepeatMinutes(minutes || '0');
+            } else if (parts.length === 3) {
+              // Формат: дни:часы:минуты
+              const [hours, minutes, seconds] = parts;
+              console.log("range 3 parts:", task.repeateDurationMinute, hours, minutes, seconds);
+              setRepeatDays('0');
+              setRepeatHours(hours || '0');
+              setRepeatMinutes(minutes || '0');
+            } 
           }
           
           if(task.startDateTimeRepit)
@@ -418,6 +432,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           // ПРАВИЛЬНЫЙ РАСЧЕТ: 
           // Каждая задача длится totalMinutes, между задачами интервал repeatTotalMinutes
           // Общее время = (длительность задачи + интервал) × (количество повторов - 1) + длительность последней задачи
+          
           const totalDurationForAllRepetitions = 
             (totalMinutes + repeatTotalMinutes) * (repeatCountValue - 1) + totalMinutes;
           
@@ -499,7 +514,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       repeatCount: isRepeating ? parseInt(repeatCount) || 0 : undefined,
       startDateTimeRepit: calculatedStartDateTimeRepit,
       endDateTimeRepit: calculatedEndDateTimeRepit,
-      repeateDurationMinute: repeatTotalMinutes,
+      repeateDurationMinute: `${repeatDays.padStart(2, '0')}:${repeatHours.padStart(2, '0')}:${repeatMinutes.padStart(2, '0')}:00`,
       // rule one task
       ruleOneTask: ruleOneTaskValue,
       startDateTimeRuleOneTask: calculatedStartTimeRuleOneTask,
@@ -547,14 +562,14 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           if (parts.length === 4) {
             // Формат: дни:часы:минуты:секунды
             const [days, hours, minutes, seconds] = parts;
-            console.log("range 4 parts:", fullTask.dateTimeRange, days, hours, minutes, seconds);
+            console.log("range 4 parts:", fullTask.duration, days, hours, minutes, seconds);
             setDurationDays(days);
             setDurationHours(hours);
             setDurationMinutes(minutes);
           } else if (parts.length === 3) {
             // Формат: дни:часы:минуты
             const [hours, minutes, seconds] = parts;
-            console.log("range 3 parts:", fullTask.dateTimeRange, hours, minutes, seconds);
+            console.log("range 3 parts:", fullTask.duration, hours, minutes, seconds);
             setDurationDays('0');
             setDurationHours(hours);
             setDurationMinutes(minutes);

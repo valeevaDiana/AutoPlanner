@@ -14,7 +14,7 @@ export interface Task {
   endDateTimeRepit?: string;
   completed: boolean;
   realDate: string;
-  repeateDurationMinute: number;
+  repeateDurationMinute?: string;
   ruleOneTask?: boolean;
   startDateTimeRuleOneTask?: string;
   endDateTimeRuleOneTask?: string;

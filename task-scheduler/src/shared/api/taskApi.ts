@@ -62,11 +62,10 @@ const taskToFormData = (taskData: Partial<Task>, isUpdate = false): FormData => 
     formData.append('Duration', l);
   }
 
-  const repitTotalMinutes = taskData.repeateDurationMinute ?? 60;
-  const repitDays = Math.floor(repitTotalMinutes / (24 * 60));
-  const repitHours = Math.floor((repitTotalMinutes % (24 * 60)) / 60);
-  const repitMinutes = repitTotalMinutes % 60;
-  formData.append('RepitTime', formatDuration(repitDays, repitHours, repitMinutes));
+  if(taskData.repeateDurationMinute)
+  {
+    formData.append('RepitTime', taskData.repeateDurationMinute);
+  }
   formData.append('IsRepitFromStart', 'false');
   formData.append('IsRepit', String(Boolean(taskData.isRepeating)));
   formData.append('CountRepit', String(taskData.repeatCount || 0));
@@ -166,17 +165,6 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
     }
   }
 
-  // ДОБАВЛЕНО: Расчет repeateDurationMinute из repitTime
-  let repeateDurationMinute = 0;
-  if (apiTask.repitTime) {
-    const repitMatch = apiTask.repitTime.match(/(\d+):(\d+):(\d+)/);
-    if (repitMatch) {
-      const repitHours = parseInt(repitMatch[1], 10);
-      const repitMinutes = parseInt(repitMatch[2], 10);
-      repeateDurationMinute = repitHours * 60 + repitMinutes;
-    }
-  }
-
   // ДОБАВЛЕНО: Парсинг дат для повторяющихся задач
   const startRepit = parseDate(apiTask.startDateTimeRepit);
   const endRepit = parseDate(apiTask.endDateTimeRepit);
@@ -203,7 +191,7 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
     repeatCount: apiTask.countRepit || 0,
     startDateTimeRepit: apiTask.startDateTimeRepit || undefined,
     endDateTimeRepit: apiTask.endDateTimeRepit || undefined,
-    repeateDurationMinute,
+    repeateDurationMinute: apiTask.repitTime,
     
     // ДОБАВЛЕНО: Поля для rule one task (возможное время)
     ruleOneTask: Boolean(apiTask.ruleOneTask),
