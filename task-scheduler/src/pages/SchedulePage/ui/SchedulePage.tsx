@@ -266,7 +266,7 @@ export const SchedulePage: React.FC = () => {
                 marginLeft: '5px'
               }}
             >
-              {penaltyTasks.length}
+              🚫{penaltyTasks.length}
             </button>
           </div>
         </div>

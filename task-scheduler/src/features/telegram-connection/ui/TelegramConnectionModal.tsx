@@ -39,25 +39,42 @@ export const TelegramConnectionModal: React.FC<TelegramConnectionModalProps> = (
         width: '90%',
         textAlign: 'center',
       }}>
-        <h2>Привязать Telegram</h2>
+        <h2 style={{ marginBottom: '20px' }}>Привязать Telegram</h2>
         
         {!generatedLink ? (
           <div>
-            <p>Привяжите Telegram для уведомлений</p>
+            <p style={{ 
+              marginBottom: '20px', 
+              fontSize: '16px'
+            }}>
+              Привяжите Telegram для уведомлений</p>
             <button onClick={generateLink} style={{
               padding: '10px 20px',
               backgroundColor: currentTheme.colors.primary,
-              color: 'white',
+              color: currentTheme.colors.text,
               border: 'none',
               borderRadius: '6px',
               cursor: 'pointer',
-            }}>
+              fontSize: '16px', 
+              transition: 'all 0.3s ease',
+            }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
+            >
               Получить ссылку
             </button>
           </div>
         ) : (
           <div>
-            <p>Нажмите на ссылку чтобы привязать Telegram:</p>
+            <p style={{ 
+              marginBottom: '15px',
+              fontSize: '16px'
+            }}>
+              Нажмите на ссылку чтобы привязать Telegram:</p>
             <a 
               href={generatedLink.telegramLink} 
               target="_blank" 
@@ -69,7 +86,14 @@ export const TelegramConnectionModal: React.FC<TelegramConnectionModalProps> = (
                 borderRadius: '6px',
                 color: currentTheme.colors.primary,
                 textDecoration: 'none',
+                fontSize: '16px',
                 margin: '10px 0',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = currentTheme.colors.secondary;
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = currentTheme.colors.background;
               }}
             >
               🔗 Открыть Telegram
@@ -82,8 +106,11 @@ export const TelegramConnectionModal: React.FC<TelegramConnectionModalProps> = (
           padding: '8px 16px',
           backgroundColor: currentTheme.colors.background,
           border: `1px solid ${currentTheme.colors.border}`,
+          color: currentTheme.colors.text,
           borderRadius: '4px',
           cursor: 'pointer',
+          fontSize: '16px', 
+          transition: 'all 0.3s ease',
         }}>
           Закрыть
         </button>
