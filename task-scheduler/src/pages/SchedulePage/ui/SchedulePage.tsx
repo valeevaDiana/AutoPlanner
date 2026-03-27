@@ -10,12 +10,10 @@ import { useTasks } from '../../../shared/lib/hooks/useTasks';
 import { taskApi } from '../../../shared/api/taskApi';
 import { TelegramConnectionModal } from '../../../features/telegram-connection/ui/TelegramConnectionModal';
 import { useTaskSplitter } from '../../../shared/lib/hooks/useTaskSplitter';
-import { AuthModal } from '../../../features/auth/ui/AuthModal';
+//import { AuthModal } from '../../../features/auth/ui/AuthModal';
 import { getContrastColor } from '../../../shared/lib/utils/priorityGradient';
 
 export const SchedulePage: React.FC = () => {
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const {
     tasks,
@@ -32,7 +30,7 @@ export const SchedulePage: React.FC = () => {
     isUpdating,
     isDeleting,
   
-  } = useTasks(currentUserId || undefined);
+  } = useTasks();
 
   const { currentTheme } = useTheme();
   const { getOriginalTaskFromPart } = useTaskSplitter();
@@ -52,39 +50,16 @@ export const SchedulePage: React.FC = () => {
       }
     }, [isTaskFormOpen]);
 
-  useEffect(() => {
-    const savedUserId = localStorage.getItem('currentUserId');
-    if (savedUserId) {
-      const userId = Number(savedUserId);
-      setCurrentUserId(userId);
-    } else {
-      setIsAuthModalOpen(true);
-    }
-
-  }, []);
-
   
-  const loadAvailableTasks = async () => {
-    try {
-      if (!currentUserId) return;
-      const tasks = await taskApi.getAvailableTasks(currentUserId);
-
-      setAvailableTasks(tasks);
-    } catch (error) {
-      console.error('Failed to load available tasks:', error);
-      setAvailableTasks(tasks);
-    }
-  };
-
-  const handleAuthSuccess = (userId: number) => {
-    setCurrentUserId(userId);
-    localStorage.setItem('currentUserId', userId.toString());
-    setIsAuthModalOpen(false);
-  };
-
-  if (!currentUserId) {
-    return <AuthModal isOpen={isAuthModalOpen} onAuthSuccess={handleAuthSuccess} />;
-  }
+    const loadAvailableTasks = async () => {
+      try {
+          const tasks = await taskApi.getAvailableTasks();
+          setAvailableTasks(tasks);
+      } catch (error) {
+          console.error('Failed to load available tasks:', error);
+          setAvailableTasks([]);
+      }
+    };
 
   const loadTaskById = async (taskId: string): Promise<Task | null> => {
     try {
@@ -214,7 +189,7 @@ export const SchedulePage: React.FC = () => {
             <ThemeSelector />
           </div>
           
-          {/* Кнопка выхода */}
+          {/* Кнопка выхода
           <button
             onClick={() => {
               localStorage.removeItem('currentUserId');
@@ -233,7 +208,7 @@ export const SchedulePage: React.FC = () => {
             }}
           >
             Выйти
-          </button>
+          </button> */}
         </div>
 
         {/* Вторая строка: заголовок и штрафные задачи */}
@@ -311,11 +286,6 @@ export const SchedulePage: React.FC = () => {
       <TelegramConnectionModal
         isOpen={isTelegramModalOpen}
         onClose={() => setIsTelegramModalOpen(false)}
-        userId={currentUserId}
-      />
-      <AuthModal 
-        isOpen={isAuthModalOpen}
-        onAuthSuccess={handleAuthSuccess} 
       />
     </div>
   );

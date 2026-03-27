@@ -5,19 +5,17 @@ import { telegramApi } from '../../../shared/api/taskApi';
 interface TelegramConnectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userId: number;
 }
 
 export const TelegramConnectionModal: React.FC<TelegramConnectionModalProps> = ({
   isOpen,
   onClose,
-  userId
 }) => {
   const { currentTheme } = useTheme();
   const [generatedLink, setGeneratedLink] = useState<{ telegramLink: string } | null>(null);
 
   const generateLink = async () => {
-    const linkData = await telegramApi.generateTelegramCode(userId);
+    const linkData = await telegramApi.generateTelegramCode();
     setGeneratedLink(linkData);
   };
 

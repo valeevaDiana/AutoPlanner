@@ -509,6 +509,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       endTime: calculatedEndTime || undefined,
       duration: `${durationDays}:${durationHours}:${durationMinutes}:00`,
       priority,
+      realDate: startDateForSave || new Date().toISOString().split('T')[0],
       // повтор
       isRepeating: isRepeating || undefined,
       repeatCount: isRepeating ? parseInt(repeatCount) || 0 : undefined,

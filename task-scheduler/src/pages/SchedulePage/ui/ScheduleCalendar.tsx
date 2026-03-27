@@ -143,7 +143,6 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
     minute = parseInt(minutes);
   } 
   let dur = day * 24 * 60 + hour * 60 + minute;
-  console.log("durr", dur, task.duration, parts);
   if (dur == 0)
   {
     const startDateTime: Date = new Date(`${task.startDate}T${task.startTime}`);
@@ -361,7 +360,10 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
 
   const getTasksForDate = (date: Date) => {
     const dateString = getISODate(date);
-    return displayTasks.filter((task: Task) => task.realDate === dateString);
+    return displayTasks.filter((task: Task) => {
+      const taskRealDate = task.realDate || task.startDate || '';
+      return taskRealDate === dateString;
+    });
   };
 
   // const getTasksForDate = (date: Date) => {

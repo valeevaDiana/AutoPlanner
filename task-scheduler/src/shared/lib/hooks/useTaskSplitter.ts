@@ -4,7 +4,6 @@ import type { Task } from '../../../entities/task/model/types';
 export const useTaskSplitter = () => {
   const splitTaskByDays = (task: Task): Task[] => {
     if (!task.startDate || !task.startTime) {
-      console.log("lolo", task.duration);
       return [task];
     }
 
@@ -36,7 +35,6 @@ export const useTaskSplitter = () => {
       const durationMs: number = endDateTime.getTime() - startDateTime.getTime();
       dur = Math.floor(durationMs / (1000 * 60));
     }
-    console.log("ajlsba", task.duration, dur, partss);
 
     const [startHours, startMinutes] = task.startTime.split(':').map(Number);
     const startTotalMinutes = startHours * 60 + startMinutes;
