@@ -30,6 +30,8 @@ export interface Task {
   parentTaskId?: string; 
   splitParts?: string[]; 
   splitIndex?: number; 
+
+  tagIds?: string[];
 }
 
 export type TaskAction = 'complete' | 'edit' | 'delete'; 

@@ -1,6 +1,17 @@
 import type { Task } from '../../entities/task/model/types';
 import type { ApiTask, ApiTimeTableResponse, PenaltyTask } from './types';
 
+const preserveTagsFromOldTasks = (newTasks: Task[], oldTasks: Task[]): Task[] => {
+  const oldTasksMap = new Map(oldTasks.map(t => [t.id, t]));
+  return newTasks.map(task => {
+    const oldTask = oldTasksMap.get(task.id);
+    if (oldTask?.tagIds) {
+      task.tagIds = oldTask.tagIds;
+    }
+    return task;
+  });
+};
+
 const API_BASE_URL = '/api';
 const STORAGE_KEY = 'autoplanner_tasks';
 const STORAGE_KEY_PENALTY = 'autoplanner_penalty_tasks';
@@ -244,6 +255,7 @@ const apiTaskToTask = (apiTask: ApiTask): Task => {
     dateTimeRange: apiTask.dateTimeRange,
     isComplete: Boolean(apiTask.isComplete),
     countFrom: apiTask.countFrom,
+    tagIds: apiTask.tagIds,
   };
 };
 
@@ -268,13 +280,16 @@ export const taskApi = {
       if (response.ok) {
         const data = await response.json();
         if (data.timeTableItems) {
-          const plannedTasks = data.timeTableItems.map((item: ApiTask) => {
+          const convertedTasks = data.timeTableItems.map((item: ApiTask) => {
             const task = apiTaskToTask(item);
             task.realDate = item.startDateTime 
-            ? item.startDateTime.split('T')[0] 
-            : task.realDate;
+              ? item.startDateTime.split('T')[0] 
+              : task.realDate;
             return task;
           });
+          
+          const plannedTasks = preserveTagsFromOldTasks(convertedTasks, localTasks);
+          
           localStorageApi.saveTasks(plannedTasks);
           return plannedTasks;
         }
@@ -294,6 +309,7 @@ export const taskApi = {
       id: taskData.id || Date.now().toString(),
       completed: taskData.completed ?? false,
       realDate: taskData.startDate || new Date().toISOString().split('T')[0], 
+      tagIds: taskData.tagIds,
     };
 
     currentTasks.push(newTask);
@@ -320,6 +336,7 @@ export const taskApi = {
         ...currentTasks[index], 
         ...taskData,
         realDate: taskData.startDate || currentTasks[index].realDate,
+        tagIds: taskData.tagIds !== undefined ? taskData.tagIds : currentTasks[index].tagIds,
       } as Task;
       localStorageApi.saveTasks(currentTasks);
     }
@@ -427,17 +444,18 @@ export const taskApi = {
       const data = await response.json();
       
       if (data.timeTableItems) {
-        const plannedTasks = data.timeTableItems.map((item: any) => {
+        const convertedTasks = data.timeTableItems.map((item: ApiTask) => {
           const task = apiTaskToTask(item);
-          task.realDate = item.startDateTime 
-            ? item.startDateTime.split('T')[0] 
+          task.realDate = item.startDateTime
+            ? item.startDateTime.split('T')[0]
             : task.realDate;
           return task;
         });
-        localStorageApi.saveTasks(plannedTasks);
-        console.log(`[DEBUG] Saved ${plannedTasks.length} planned tasks to localStorage`);
-      }
       
+        const plannedTasks = preserveTagsFromOldTasks(convertedTasks, currentTasks);
+        
+        localStorageApi.saveTasks(plannedTasks);
+      }
       if (data.penaltyTasks) {
         localStorageApi.savePenaltyTasks(data.penaltyTasks);
       }

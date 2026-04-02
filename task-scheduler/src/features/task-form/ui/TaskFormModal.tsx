@@ -4,6 +4,9 @@ import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
 import { useTheme } from '../../../shared/lib/contexts';
 import { getPriorityColor } from '../../../shared/lib/utils/priorityGradient';
 import { taskApi } from '../../../shared/api/taskApi';
+import { TagSelector } from '../../tag-selector/ui/TagSelector';
+import { TagManagerModal } from '../../tag-manager/ui/TagManagerModal';
+
 
 interface TaskFormModalProps {
   isOpen: boolean;
@@ -82,6 +85,10 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [dependencyHours, setDependencyHours] = useState('0');
   const [dependencyMinutes, setDependencyMinutes] = useState('0');
 
+  const [tagIds, setTagIds] = useState<string[]>([]);
+  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
+
+
   useEscapeKey(onClose, isOpen);
 
   const minutesToDuration = (totalMinutes: number) => {
@@ -150,6 +157,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setHasSpecificTime(Boolean(task.startDate && task.startTime));
         setHasPossibleTime(Boolean(task.ruleOneTask));
         setHasDependency(Boolean(task.ruleTwoTask));
+
+        if (task.tagIds) {
+          setTagIds(task.tagIds);
+        } else {
+          setTagIds([]);  
+        }
 
         
         if (task.isRepeating && task.endDateTimeRepit) {
@@ -292,6 +305,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         setDependencyMinutes('0');
 
         setRepeatType('count');
+        setTagIds([]);
       }
     }
   }, [isOpen, task, initialDate]);
@@ -526,11 +540,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       secondTaskId: secondTaskIdFrom,
       relationRangeId: relationRangeIdFrom,
       dateTimeRange: dateTimeRangeFrom,
+      tagIds: tagIds.length > 0 ? tagIds : undefined,
     };
 
     console.log('Final taskData:', taskData);
 
-
+    console.log('Final taskData:', taskData);  
     onSave(taskData);
     onClose();
   };
@@ -1076,8 +1091,25 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               </span>
             </div>
           </div>
-          </div>
 
+          {/* Теги */}
+          <div>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '500',
+              color: currentTheme.colors.text
+            }}>
+              Теги:
+            </label>
+            <TagSelector
+              selectedTagIds={tagIds}
+              onChange={setTagIds}
+              onManageTags={() => setIsTagManagerOpen(true)}
+              disabled={isViewMode}
+            />
+          </div>
+        </div>
           {/* Задача повторяется? */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -2085,6 +2117,14 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               </button>
             </div>
           )}
+          <TagManagerModal
+            isOpen={isTagManagerOpen}
+            onClose={() => {
+              setIsTagManagerOpen(false);
+              setTagIds([...tagIds]);
+            }}
+            onTagsChange={() => {}}
+          />
         </div>
       </div>
   );

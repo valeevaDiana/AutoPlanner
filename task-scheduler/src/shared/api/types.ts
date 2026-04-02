@@ -23,7 +23,8 @@ export interface ApiTask {
   relationRangeId?: number;
   dateTimeRange?: string;
   isComplete?: boolean;
-  countFrom: number,
+  countFrom: number;
+  tagIds?: string[];
 }
 
 export interface PenaltyTask {
