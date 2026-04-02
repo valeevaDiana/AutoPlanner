@@ -15,6 +15,59 @@ const preserveTagsFromOldTasks = (newTasks: Task[], oldTasks: Task[]): Task[] =>
 const API_BASE_URL = '/api';
 const STORAGE_KEY = 'autoplanner_tasks';
 const STORAGE_KEY_PENALTY = 'autoplanner_penalty_tasks';
+const STORAGE_KEY_TASK_TAGS = 'autoplanner_task_tags';
+
+export const taskTagStorage = {
+  getTaskTags: (taskId: string): string[] => {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY_TASK_TAGS);
+      const allTags = data ? JSON.parse(data) : {};
+      return allTags[taskId] || [];
+    } catch {
+      return [];
+    }
+  },
+  
+  setTaskTags: (taskId: string, tagIds: string[]): void => {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY_TASK_TAGS);
+      const allTags = data ? JSON.parse(data) : {};
+      allTags[taskId] = tagIds;
+      localStorage.setItem(STORAGE_KEY_TASK_TAGS, JSON.stringify(allTags));
+    } catch (error) {
+      console.error('Error saving task tags:', error);
+    }
+  },
+  
+  removeTaskTags: (taskId: string): void => {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY_TASK_TAGS);
+      const allTags = data ? JSON.parse(data) : {};
+      delete allTags[taskId];
+      localStorage.setItem(STORAGE_KEY_TASK_TAGS, JSON.stringify(allTags));
+    } catch (error) {
+      console.error('Error removing task tags:', error);
+    }
+  },
+  
+  getAllTaskTags: (): Record<string, string[]> => {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY_TASK_TAGS);
+      return data ? JSON.parse(data) : {};
+    } catch {
+      return {};
+    }
+  },
+  
+  restoreTagsToTasks: (tasks: Task[]): Task[] => {
+    const allTags = taskTagStorage.getAllTaskTags();
+    return tasks.map(task => ({
+      ...task,
+      tagIds: allTags[task.id] || [],
+    }));
+  },
+};
+
 
 //локальные функции
 export const localStorageApi = {
@@ -302,32 +355,108 @@ export const taskApi = {
   },
   
   async createTask(taskData: Partial<Task>): Promise<void> {
-    const currentTasks = localStorageApi.getTasks();
+    // Временный ID для локального отображения (опционально)
+    const tempId = Date.now().toString();
+    let finalTaskId: string | null = null;
     
-    const newTask: Task = {
-      ...taskData as Task,
-      id: taskData.id || Date.now().toString(),
-      completed: taskData.completed ?? false,
-      realDate: taskData.startDate || new Date().toISOString().split('T')[0], 
-      tagIds: taskData.tagIds,
-    };
-
-    currentTasks.push(newTask);
-    localStorageApi.saveTasks(currentTasks);
-
+    // Сохраняем теги с временным ID (на случай, если бэкенд не вернёт ID)
+    if (taskData.tagIds && taskData.tagIds.length > 0) {
+      taskTagStorage.setTaskTags(tempId, taskData.tagIds);
+      console.log('📝 Temporarily saved tags with temp ID:', tempId, taskData.tagIds);
+    }
+    
     try {
       const formData = taskToFormData(taskData, false);
-      await fetch(`${API_BASE_URL}/task`, {
+      const response = await fetch(`${API_BASE_URL}/task`, {
         method: 'POST',
         body: formData,
       });
+      
+      console.log('📥 Create task response status:', response.status);
+      
+      if (response.ok) {
+        // Получаем ID из ответа бэкенда
+        const responseText = await response.text();
+        console.log('📥 Backend response:', responseText);
+        
+        // Парсим ответ (может быть число или JSON)
+        if (responseText && !isNaN(Number(responseText))) {
+          finalTaskId = responseText;
+          console.log('✅ Got task ID from backend:', finalTaskId);
+        } else {
+          // Если ответ в формате JSON с полем id
+          try {
+            const jsonResponse = JSON.parse(responseText);
+            if (jsonResponse.id) {
+              finalTaskId = String(jsonResponse.id);
+            } else if (jsonResponse.taskId) {
+              finalTaskId = String(jsonResponse.taskId);
+            }
+          } catch {
+            // Не JSON, оставляем как есть
+          }
+        }
+        
+        // Перестраиваем расписание, чтобы получить актуальные данные
+        await this.rebuildTimeTable();
+        
+        // Если получили ID от бэкенда, переносим теги
+        if (finalTaskId) {
+          const savedTags = taskTagStorage.getTaskTags(tempId);
+          if (savedTags.length > 0) {
+            // Сохраняем теги для правильного ID
+            taskTagStorage.setTaskTags(finalTaskId, savedTags);
+            // Удаляем временные теги
+            taskTagStorage.removeTaskTags(tempId);
+            console.log('✅ Migrated tags to real ID:', finalTaskId, savedTags);
+            
+            // Обновляем задачу в localStorage с правильными тегами
+            const updatedTasks = localStorageApi.getTasks();
+            const taskToUpdate = updatedTasks.find(t => t.id === finalTaskId);
+            if (taskToUpdate) {
+              taskToUpdate.tagIds = savedTags;
+              localStorageApi.saveTasks(updatedTasks);
+              console.log('✅ Updated task in localStorage with tags:', finalTaskId, savedTags);
+            }
+          }
+        } else {
+          // Если не получили ID, пытаемся найти задачу по названию и времени
+          console.log('⚠️ No ID from backend, trying to find task by title and date');
+          
+          // Ждём немного, чтобы задачи успели обновиться
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          const updatedTasks = localStorageApi.getTasks();
+          const newTask = updatedTasks.find(t => 
+            t.title === taskData.title && 
+            t.startDate === taskData.startDate &&
+            t.startTime === taskData.startTime
+          );
+          
+          if (newTask && taskData.tagIds && taskData.tagIds.length > 0) {
+            taskTagStorage.setTaskTags(newTask.id, taskData.tagIds);
+            newTask.tagIds = taskData.tagIds;
+            localStorageApi.saveTasks(updatedTasks);
+            console.log('✅ Tags saved after finding task by title:', newTask.id, taskData.tagIds);
+          }
+        }
+      } else {
+        console.error('Backend create failed:', response.status);
+      }
     } catch (error) {
-      console.warn('Backend save failed, but local save OK:', error);
+      console.warn('Backend save failed:', error);
     }
-    await this.rebuildTimeTable(currentTasks); 
   },
   
   async updateTask(taskData: Partial<Task>): Promise<void> {
+    // 🔑 Обновляем теги в отдельном хранилище
+    if (taskData.id) {
+      if (taskData.tagIds) {
+        taskTagStorage.setTaskTags(taskData.id, taskData.tagIds);
+        console.log('✅ Tags updated in separate storage:', taskData.tagIds);
+      }
+    }
+    
     const currentTasks = localStorageApi.getTasks();
     const index = currentTasks.findIndex(t => t.id === taskData.id);
     
@@ -339,6 +468,7 @@ export const taskApi = {
         tagIds: taskData.tagIds !== undefined ? taskData.tagIds : currentTasks[index].tagIds,
       } as Task;
       localStorageApi.saveTasks(currentTasks);
+      console.log('✅ Task updated with tags:', currentTasks[index].tagIds);
     }
     
     try {
@@ -355,6 +485,9 @@ export const taskApi = {
   },
   
   async deleteTask(taskId: string): Promise<void> {
+    // 🔑 Удаляем теги задачи
+    taskTagStorage.removeTaskTags(taskId);
+    
     const currentTasks = localStorageApi.getTasks();
     const filteredTasks = currentTasks.filter(t => t.id !== taskId);
     localStorageApi.saveTasks(filteredTasks);
@@ -417,7 +550,7 @@ export const taskApi = {
   async rebuildTimeTable(tasksOverride?: Task[]): Promise<void> {
     const currentTasks = tasksOverride || localStorageApi.getTasks();
 
-    console.log(`[DEBUG Frontend] Rebuilding timetable with ${currentTasks.length} tasks`); 
+    console.log(`[DEBUG Frontend] Rebuilding timetable with ${currentTasks.length} tasks`);
 
     if (currentTasks.length === 0) {
       console.warn('[WARN] No tasks to plan!');
@@ -451,11 +584,15 @@ export const taskApi = {
             : task.realDate;
           return task;
         });
-      
-        const plannedTasks = preserveTagsFromOldTasks(convertedTasks, currentTasks);
         
-        localStorageApi.saveTasks(plannedTasks);
+        // 🔑 ВОССТАНАВЛИВАЕМ ТЕГИ из отдельного хранилища
+        const tasksWithRestoredTags = taskTagStorage.restoreTagsToTasks(convertedTasks);
+        
+        console.log('✅ Tags restored after rebuild:', tasksWithRestoredTags.map(t => ({ id: t.id, tagIds: t.tagIds })));
+        
+        localStorageApi.saveTasks(tasksWithRestoredTags);
       }
+      
       if (data.penaltyTasks) {
         localStorageApi.savePenaltyTasks(data.penaltyTasks);
       }
@@ -477,8 +614,20 @@ export const taskApi = {
   
   async getTaskById(taskId: string): Promise<Task | null> {
     const allTasks = localStorageApi.getTasks();
-    return allTasks.find(t => t.id === taskId) || null;
+    const task = allTasks.find(t => t.id === taskId) || null;
+    
+    // 🔑 Восстанавливаем теги из отдельного хранилища, если их нет в задаче
+    if (task) {
+      const savedTags = taskTagStorage.getTaskTags(taskId);
+      if (savedTags.length > 0 && (!task.tagIds || task.tagIds.length === 0)) {
+        task.tagIds = savedTags;
+        console.log('✅ Tags restored in getTaskById:', savedTags);
+      }
+    }
+    
+    return task;
   },
+
   
   async getPenaltyTasks(): Promise<PenaltyTask[]> {
     return localStorageApi.getPenaltyTasks();

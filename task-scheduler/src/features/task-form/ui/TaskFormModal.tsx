@@ -311,6 +311,11 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   }, [isOpen, task, initialDate]);
 
   useEffect(() => {
+      console.log('=== TaskFormModal OPEN DEBUG ===');
+  console.log('isOpen:', isOpen);
+  console.log('task prop:', task);
+  console.log('task.id:', task?.id);
+  console.log('task.tagIds from prop:', task?.tagIds);
     if (isOpen) {
       if (task) {
         loadTaskData(task.id);
@@ -569,8 +574,14 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   };
 
   const loadTaskData = async (taskId: string) => {
+    console.log('=== loadTaskData DEBUG ===');
+  console.log('Loading task with ID:', taskId);
+
     try {
       const fullTask = await taskApi.getTaskById(taskId);
+      console.log('Full task from API:', fullTask);
+    console.log('tagIds from API:', fullTask?.tagIds);
+
       if (fullTask) {
         if (fullTask.duration) {
           const parts = fullTask.duration.split(':');
@@ -671,6 +682,9 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         else {
           setHasSpecificTime(true);
         }
+        console.log('Setting tagIds to state:', fullTask.tagIds);
+        setTagIds(fullTask.tagIds || []);
+
       }
     } catch (error) {
       console.error('Error loading task data:', error);
