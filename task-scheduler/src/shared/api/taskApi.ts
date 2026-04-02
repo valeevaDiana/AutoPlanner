@@ -173,7 +173,8 @@ const taskToPlanningFormat = (task: Task) => ({
   SecondTaskId: task.secondTaskId ?? 0,
   TimePositionRegardingTaskId: task.timePositionRegardingTaskId ?? 0,
   RelationRangeId: task.relationRangeId ?? 0,
-  DateTimeRange: task.dateTimeRange || null,
+  
+  DateTimeRangeString: task.dateTimeRange || null, 
 });
 
 const apiTaskToTask = (apiTask: ApiTask): Task => {

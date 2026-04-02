@@ -57,7 +57,6 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
           groupStart = hours * 60 + minutes;
         }
         const parts = task.duration.split(':');
-        console.log('aaaaaaaaa', task.duration, parts);
         let day = 0;
         let hour = 0;
         let minute = 0;
