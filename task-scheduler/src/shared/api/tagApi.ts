@@ -2,13 +2,10 @@ import type { Tag } from '../../entities/tag/model/types';
 
 const STORAGE_KEY_TAGS = 'autoplanner_tags';
 
-// Начальные теги для примера
 const DEFAULT_TAGS: Tag[] = [
   { id: '1', name: 'Работа', color: '#4CAF50', createdAt: new Date().toISOString() },
   { id: '2', name: 'Учеба', color: '#2196F3', createdAt: new Date().toISOString() },
   { id: '3', name: 'Личное', color: '#FF9800', createdAt: new Date().toISOString() },
-  { id: '4', name: 'Концерт', color: '#9C27B0', createdAt: new Date().toISOString() },
-  { id: '5', name: 'Магазин', color: '#F44336', createdAt: new Date().toISOString() },
 ];
 
 export const tagApi = {

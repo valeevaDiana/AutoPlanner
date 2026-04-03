@@ -46,7 +46,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [durationHours, setDurationHours] = useState('1');
   const [durationMinutes, setDurationMinutes] = useState('0');
   const [priority, setPriority] = useState<number>(5);
-  // const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   
   // Новые состояния для повторяющихся задач
   const [isRepeating, setIsRepeating] = useState(false);
@@ -423,7 +422,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       }
     }
 
-    // ПРАВИЛЬНЫЙ РАСЧЕТ ДЛЯ ПОВТОРЯЮЩИХСЯ ЗАДАЧ
     let calculatedStartDateTimeRepit: string | undefined = undefined;
     let calculatedEndDateTimeRepit: string | undefined = undefined;
     let repeatTotalMinutes: number | undefined = undefined;
@@ -447,11 +445,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       } else if (repeatType === 'count') {
         const repeatCountValue = repeatType === 'count' ? parseInt(repeatCount) || 0 : 0;
 
-        if (repeatTotalMinutes > 0) {
-          // ПРАВИЛЬНЫЙ РАСЧЕТ: 
-          // Каждая задача длится totalMinutes, между задачами интервал repeatTotalMinutes
-          // Общее время = (длительность задачи + интервал) × (количество повторов - 1) + длительность последней задачи
-          
+        if (repeatTotalMinutes > 0) { 
           const totalDurationForAllRepetitions = 
             (totalMinutes + repeatTotalMinutes) * (repeatCountValue - 1) + totalMinutes;
           
@@ -468,14 +462,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           
           calculatedEndDateTimeRepit = `${endRepYear}-${endRepMonth}-${endRepDay}T${endRepHours}:${endRepMinutes}`;
         } else if (repeatStartDate && repeatStartTime && repeatEndDate && repeatEndTime) {
-          // Альтернативный вариант: используем явно указанный период повторения
           calculatedStartDateTimeRepit = `${repeatStartDate}T${formatTimeForBackend(repeatStartTime)}`;
           calculatedEndDateTimeRepit = `${repeatEndDate}T${formatTimeForBackend(repeatEndTime)}`;
         }
       }
     }
 
-    // ОБРАБОТКА ДЛЯ RULE ONE TASK (конкретное время)
     let calculatedStartTimeRuleOneTask: string | undefined = undefined;
     let calculatedEndTimeRuleOneTask: string | undefined = undefined;
     let ruleOneTaskValue: boolean = false;
@@ -545,7 +537,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       secondTaskId: secondTaskIdFrom,
       relationRangeId: relationRangeIdFrom,
       dateTimeRange: dateTimeRangeFrom,
-      tagIds: tagIds.length > 0 ? tagIds : undefined,
+      tagIds: tagIds,
     };
 
     console.log('Final taskData:', taskData);
@@ -852,90 +844,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             />
           </div>
 
-          {/* Сроки
-          <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '12px',
-              fontWeight: '500',
-              color: currentTheme.colors.text
-            }}>
-              Сроки:
-            </label>
-            <div className="dates-container">
-              <div>
-                <div style={{ fontSize: '14px', color: currentTheme.colors.textSecondary, marginBottom: '5px' }}>Начать с:</div>
-                <div className="date-group">
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    disabled={isViewMode}
-                    style={{
-                      flex: 1,
-                      padding: '8px',
-                      border: `1px solid ${currentTheme.colors.border}`,
-                      borderRadius: '4px',
-                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                      cursor: isViewMode ? 'not-allowed' : 'text',
-                      color: currentTheme.colors.text
-                    }}
-                  />
-                  <input
-                    type="time"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    disabled={isViewMode}
-                    style={{
-                      flex: 1,
-                      padding: '8px',
-                      border: `1px solid ${currentTheme.colors.border}`,
-                      borderRadius: '4px',
-                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                      cursor: isViewMode ? 'not-allowed' : 'text',
-                      color: currentTheme.colors.text
-                    }}
-                  />
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '14px', color: currentTheme.colors.textSecondary, marginBottom: '5px' }}>Закончить до:</div>
-                <div className="date-group">
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    disabled={isViewMode}
-                    style={{
-                      flex: 1,
-                      padding: '8px',
-                      border: `1px solid ${currentTheme.colors.border}`,
-                      borderRadius: '4px',
-                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                      cursor: isViewMode ? 'not-allowed' : 'text',
-                      color: currentTheme.colors.text
-                    }}
-                  />
-                  <input
-                    type="time"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                    disabled={isViewMode}
-                    style={{
-                      flex: 1,
-                      padding: '8px',
-                      border: `1px solid ${currentTheme.colors.border}`,
-                      borderRadius: '4px',
-                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                      cursor: isViewMode ? 'not-allowed' : 'text',
-                      color: currentTheme.colors.text
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div> */}
-
           {/* Длительность */}
           <div>
             <label style={{ 
@@ -1136,7 +1044,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               <input
                 type="checkbox"
                 checked={isRepeating}
-                //onChange={(e) => !isViewMode && setIsRepeating(e.target.checked)}
                 onChange={(e) => handleCheckboxChange('repeat', e.target.checked)}
                 disabled={isViewMode || (hasSpecificTime || hasPossibleTime || hasDependency) && !isRepeating}
                 style={{
@@ -1514,60 +1421,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 flexDirection: 'column',
                 gap: '15px'
               }}>
-                {/* <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ 
-                      display: 'block', 
-                      marginBottom: '5px',
-                      fontSize: '14px',
-                      color: currentTheme.colors.text
-                    }}>
-                      Время начала:
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={specificStartTime}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      disabled={isViewMode}
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
-                        color: currentTheme.colors.text
-                      }}
-                    />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ 
-                      display: 'block', 
-                      marginBottom: '5px',
-                      fontSize: '14px',
-                      color: currentTheme.colors.text
-                    }}>
-                      Время окончания:
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={specificEndTime}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      disabled={isViewMode}
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
-                        color: currentTheme.colors.text
-                      }}
-                    />
-                  </div>
-                </div> */}
                 <div className="dates-container">
                 <div>
                   <div style={{ fontSize: '14px', color: currentTheme.colors.textSecondary, marginBottom: '5px' }}>Начать с:</div>
@@ -1604,41 +1457,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     />
                   </div>
                 </div>
-              {/* <div>
-                <div style={{ fontSize: '14px', color: currentTheme.colors.textSecondary, marginBottom: '5px' }}>Закончить до:</div>
-                <div className="date-group">
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    disabled={isViewMode}
-                    style={{
-                      flex: 1,
-                      padding: '8px',
-                      border: `1px solid ${currentTheme.colors.border}`,
-                      borderRadius: '4px',
-                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                      cursor: isViewMode ? 'not-allowed' : 'text',
-                      color: currentTheme.colors.text
-                    }}
-                  />
-                  <input
-                    type="time"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                    disabled={isViewMode}
-                    style={{
-                      flex: 1,
-                      padding: '8px',
-                      border: `1px solid ${currentTheme.colors.border}`,
-                      borderRadius: '4px',
-                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                      cursor: isViewMode ? 'not-allowed' : 'text',
-                      color: currentTheme.colors.text
-                    }}
-                  />
-                </div>
-              </div> */}
             </div>
 
               </div>

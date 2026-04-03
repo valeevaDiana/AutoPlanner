@@ -61,7 +61,3 @@ export interface ApiTimeTableResponse {
   timeTableItems: ApiTask[];
   penaltyTasks: PenaltyTask[];
 }
-
-// export interface ApiTimeTableResponse {
-//   tasks: ApiTask[];
-// }
