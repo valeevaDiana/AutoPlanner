@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ScheduleCalendar } from './ScheduleCalendar';
 import { TaskFormModal } from '../../../features/task-form/ui/TaskFormModal';
 import { PenaltyTasksModal } from '../../../features/penalty-tasks/ui/PenaltyTasksModal';
@@ -12,6 +12,9 @@ import { TelegramConnectionModal } from '../../../features/telegram-connection/u
 import { useTaskSplitter } from '../../../shared/lib/hooks/useTaskSplitter';
 //import { AuthModal } from '../../../features/auth/ui/AuthModal';
 import { getContrastColor } from '../../../shared/lib/utils/priorityGradient';
+import { TagFilter } from '../../../features/tag-filter/ui/TagFilter';
+import { tagApi } from '../../../shared/api/tagApi';
+
 
 export const SchedulePage: React.FC = () => {
 
@@ -41,25 +44,46 @@ export const SchedulePage: React.FC = () => {
   const [availableTasks, setAvailableTasks] = useState<Task[]>([]);
   const [isLoadingTask, setIsLoadingTask] = useState(false);
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
-
   const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState(false);
+  const [filterTagIds, setFilterTagIds] = useState<string[]>([]);
 
   useEffect(() => {
-      if (isTaskFormOpen) {
-        loadAvailableTasks();
-      }
-    }, [isTaskFormOpen]);
+    if (isTaskFormOpen) {
+      loadAvailableTasks();
+    }
+  }, [isTaskFormOpen]);
 
-  
-    const loadAvailableTasks = async () => {
-      try {
-          const tasks = await taskApi.getAvailableTasks();
-          setAvailableTasks(tasks);
-      } catch (error) {
-          console.error('Failed to load available tasks:', error);
-          setAvailableTasks([]);
+  useEffect(() => {
+    const existingTags = tagApi.getTags().map(t => t.id);
+    const validFilterIds = filterTagIds.filter(id => existingTags.includes(id));
+    
+    if (validFilterIds.length !== filterTagIds.length) {
+      setFilterTagIds(validFilterIds);
+    }
+  }, [tasks]);
+
+  const loadAvailableTasks = async () => {
+    try {
+        const tasks = await taskApi.getAvailableTasks();
+        setAvailableTasks(tasks);
+    } catch (error) {
+        console.error('Failed to load available tasks:', error);
+        setAvailableTasks([]);
+    }
+  };
+
+  const filteredTasks = useMemo(() => {
+    if (filterTagIds.length === 0) {
+      return tasks;
+    }
+    
+    return tasks.filter(task => {
+      if (!task.tagIds || task.tagIds.length === 0) {
+        return false;
       }
-    };
+      return task.tagIds.some(tagId => filterTagIds.includes(tagId));
+    });
+  }, [tasks, filterTagIds]);
 
   const loadTaskById = async (taskId: string): Promise<Task | null> => {
     try {
@@ -75,7 +99,7 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handleToggleView = () => {
-    // alert("Переключение режима: неделя → день → месяц");
+    // alert("Переключение режима: неделя → месяц");
   };
 
   const handlePenaltyTasksClick = () => {
@@ -115,7 +139,6 @@ export const SchedulePage: React.FC = () => {
       setIsTaskFormOpen(true);
     }
   };
-
 
   const handleSwitchToEdit = () => {
     setTaskFormMode('edit');
@@ -183,6 +206,7 @@ export const SchedulePage: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <TagFilter selectedTagIds={filterTagIds} onChange={setFilterTagIds} />
             <div className="notification-icon" onClick={() => setIsTelegramModalOpen(true)} style={{ cursor: 'pointer' }}>
               🔔
             </div>
@@ -254,7 +278,8 @@ export const SchedulePage: React.FC = () => {
           onViewTask={handleViewTask}
           onDeleteTask={handleDeleteTask}
           onCompleteTask={handleTaskComplete}
-          tasks={tasks}
+          //tasks={tasks}
+          tasks={filteredTasks}
           onTasksUpdate={handleTasksUpdate}
         />
       </div>

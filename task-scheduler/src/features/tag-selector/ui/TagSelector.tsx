@@ -21,6 +21,10 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
   const [tags, setTags] = useState<Tag[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const loadTags = () => {
+    setTags(tagApi.getTags());
+  };
+
   useEffect(() => {
     loadTags();
   }, []);
@@ -36,10 +40,6 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
-
-  const loadTags = () => {
-    setTags(tagApi.getTags());
-  };
 
   const handleTagToggle = (tagId: string) => {
     if (disabled) return;

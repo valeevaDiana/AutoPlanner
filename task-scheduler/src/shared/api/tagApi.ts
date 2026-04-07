@@ -2,11 +2,7 @@ import type { Tag } from '../../entities/tag/model/types';
 
 const STORAGE_KEY_TAGS = 'autoplanner_tags';
 
-const DEFAULT_TAGS: Tag[] = [
-  { id: '1', name: 'Работа', color: '#4CAF50', createdAt: new Date().toISOString() },
-  { id: '2', name: 'Учеба', color: '#2196F3', createdAt: new Date().toISOString() },
-  { id: '3', name: 'Личное', color: '#FF9800', createdAt: new Date().toISOString() },
-];
+const DEFAULT_TAGS: Tag[] = [];
 
 export const tagApi = {
   // Получить все теги
