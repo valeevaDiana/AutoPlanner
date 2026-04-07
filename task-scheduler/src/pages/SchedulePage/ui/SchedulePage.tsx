@@ -46,6 +46,7 @@ export const SchedulePage: React.FC = () => {
   const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
   const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState(false);
   const [filterTagIds, setFilterTagIds] = useState<string[]>([]);
+  const [tagsRefreshTrigger, setTagsRefreshTrigger] = useState(0);
 
   useEffect(() => {
     if (isTaskFormOpen) {
@@ -61,6 +62,22 @@ export const SchedulePage: React.FC = () => {
       setFilterTagIds(validFilterIds);
     }
   }, [tasks]);
+
+  useEffect(() => {
+    const handleTagsUpdate = () => {
+      setTagsRefreshTrigger(prev => prev + 1);
+    };
+    
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'autoplanner_tags') {
+        handleTagsUpdate();
+      }
+    });
+    
+    return () => {
+      window.removeEventListener('storage', handleTagsUpdate);
+    };
+  }, []);
 
   const loadAvailableTasks = async () => {
     try {
@@ -206,7 +223,11 @@ export const SchedulePage: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <TagFilter selectedTagIds={filterTagIds} onChange={setFilterTagIds} />
+            <TagFilter 
+              selectedTagIds={filterTagIds} 
+              onChange={setFilterTagIds}
+              refreshTrigger={tagsRefreshTrigger}
+            />
             <div className="notification-icon" onClick={() => setIsTelegramModalOpen(true)} style={{ cursor: 'pointer' }}>
               🔔
             </div>

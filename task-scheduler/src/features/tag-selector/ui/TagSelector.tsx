@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTheme } from '../../../shared/lib/contexts';
 import { tagApi } from '../../../shared/api/tagApi';
 import type { Tag } from '../../../entities/tag/model/types';
@@ -8,6 +8,7 @@ interface TagSelectorProps {
   onChange: (tagIds: string[]) => void;
   onManageTags?: () => void;
   disabled?: boolean;
+  refreshTrigger?: number;
 }
 
 export const TagSelector: React.FC<TagSelectorProps> = ({
@@ -15,20 +16,38 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
   onChange,
   onManageTags,
   disabled = false,
+  refreshTrigger = 0,
 }) => {
   const { currentTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const loadTags = () => {
-    setTags(tagApi.getTags());
-  };
+  const loadTags = useCallback(() => {
+    const freshTags = tagApi.getTags();
+    setTags(freshTags);
+  }, []);
 
   useEffect(() => {
     loadTags();
-  }, []);
+  }, [loadTags]);
 
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      loadTags();
+    }
+  }, [refreshTrigger, loadTags]);
+
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'autoplanner_tags') {
+        loadTags();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [loadTags]);
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {

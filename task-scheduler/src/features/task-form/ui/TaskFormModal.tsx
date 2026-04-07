@@ -6,6 +6,7 @@ import { getPriorityColor } from '../../../shared/lib/utils/priorityGradient';
 import { taskApi } from '../../../shared/api/taskApi';
 import { TagSelector } from '../../tag-selector/ui/TagSelector';
 import { TagManagerModal } from '../../tag-manager/ui/TagManagerModal';
+import { tagApi } from '../../../shared/api/tagApi';
 
 
 interface TaskFormModalProps {
@@ -73,7 +74,6 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   const [possibleEndTime, setPossibleEndTime] = useState('');
 
   const [formError, setFormError] = useState<string>('');
-
   
   // Состояния для зависимостей задач
   const [hasDependency, setHasDependency] = useState(false);
@@ -86,7 +86,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
-
+  const [tagsRefreshTrigger, setTagsRefreshTrigger] = useState(0);
 
   useEscapeKey(onClose, isOpen);
 
@@ -116,6 +116,10 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     targetDate.setDate(today.getDate() + diff);
     
     return targetDate.toISOString().split('T')[0];
+  };
+
+  const handleOpenTagManager = () => {
+    setIsTagManagerOpen(true);
   };
 
   useEffect(() => {
@@ -1029,6 +1033,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               onChange={setTagIds}
               onManageTags={() => setIsTagManagerOpen(true)}
               disabled={isViewMode}
+              refreshTrigger={tagsRefreshTrigger}
             />
           </div>
         </div>
@@ -1953,9 +1958,16 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             isOpen={isTagManagerOpen}
             onClose={() => {
               setIsTagManagerOpen(false);
-              setTagIds([...tagIds]);
+              setTagsRefreshTrigger(prev => prev + 1);
+              const currentTags = tagApi.getTags();
+              const validTagIds = tagIds.filter(id => currentTags.some(t => t.id === id));
+              if (validTagIds.length !== tagIds.length) {
+                setTagIds(validTagIds);
+              }
             }}
-            onTagsChange={() => {}}
+            onTagsChange={() => {
+              setTagsRefreshTrigger(prev => prev + 1);
+            }}
           />
         </div>
       </div>

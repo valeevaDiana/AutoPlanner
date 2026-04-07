@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTheme } from '../../../shared/lib/contexts';
 import { tagApi } from '../../../shared/api/tagApi';
 import type { Tag } from '../../../entities/tag/model/types';
@@ -6,25 +6,39 @@ import type { Tag } from '../../../entities/tag/model/types';
 interface TagFilterProps {
   selectedTagIds: string[];
   onChange: (tagIds: string[]) => void;
+  refreshTrigger?: number;
 }
 
-export const TagFilter: React.FC<TagFilterProps> = ({ selectedTagIds, onChange }) => {
+export const TagFilter: React.FC<TagFilterProps> = ({ selectedTagIds, onChange, refreshTrigger = 0 }) => {
   const { currentTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    loadTags();
+  const loadTags = useCallback(() => {
+    const freshTags = tagApi.getTags();
+    setTags(freshTags);
   }, []);
 
   useEffect(() => {
-    const handleStorageChange = () => {
+    loadTags();
+  }, [loadTags]);
+
+  useEffect(() => {
+    if (refreshTrigger > 0) {
       loadTags();
+    }
+  }, [refreshTrigger, loadTags]);
+
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'autoplanner_tags') {
+        loadTags();
+      }
     };
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [loadTags]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -37,10 +51,6 @@ export const TagFilter: React.FC<TagFilterProps> = ({ selectedTagIds, onChange }
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
-
-  const loadTags = () => {
-    setTags(tagApi.getTags());
-  };
 
   const handleTagToggle = (tagId: string) => {
     if (selectedTagIds.includes(tagId)) {
