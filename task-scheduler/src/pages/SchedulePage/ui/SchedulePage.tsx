@@ -14,6 +14,8 @@ import { useTaskSplitter } from '../../../shared/lib/hooks/useTaskSplitter';
 import { getContrastColor } from '../../../shared/lib/utils/priorityGradient';
 import { TagFilter } from '../../../features/tag-filter/ui/TagFilter';
 import { tagApi } from '../../../shared/api/tagApi';
+import { TaskFilterPanel, TaskFilters, PriorityFilterType } from '../../../features/task-filter/ui/TaskFilterPanel';
+
 
 
 export const SchedulePage: React.FC = () => {
@@ -47,6 +49,14 @@ export const SchedulePage: React.FC = () => {
   const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState(false);
   const [filterTagIds, setFilterTagIds] = useState<string[]>([]);
   const [tagsRefreshTrigger, setTagsRefreshTrigger] = useState(0);
+  const [taskFilters, setTaskFilters] = useState<TaskFilters>({
+    tagIds: [],
+    priorityFilterType: 'none',
+    priorityValue: 5,
+    priorityMin: 1,
+    priorityMax: 10,
+  });
+
 
   useEffect(() => {
     if (isTaskFormOpen) {
@@ -89,18 +99,40 @@ export const SchedulePage: React.FC = () => {
     }
   };
 
-  const filteredTasks = useMemo(() => {
-    if (filterTagIds.length === 0) {
-      return tasks;
+  const filterTasks = (tasks: Task[], filters: TaskFilters): Task[] => {
+    let filtered = [...tasks];
+    //по тегам
+    if (filters.tagIds.length > 0) {
+      filtered = filtered.filter(task => {
+        if (!task.tagIds || task.tagIds.length === 0) return false;
+        return task.tagIds.some(tagId => filters.tagIds.includes(tagId));
+      });
     }
-    
-    return tasks.filter(task => {
-      if (!task.tagIds || task.tagIds.length === 0) {
-        return false;
-      }
-      return task.tagIds.some(tagId => filterTagIds.includes(tagId));
-    });
-  }, [tasks, filterTagIds]);
+    //по приоритету
+    if (filters.priorityFilterType !== 'none') {
+      filtered = filtered.filter(task => {
+        const priority = task.priority;
+        
+        switch (filters.priorityFilterType) {
+          case 'exact':
+            return priority === filters.priorityValue;
+          case 'above':
+            return priority > filters.priorityValue;
+          case 'below':
+            return priority < filters.priorityValue;
+          case 'range':
+            return priority >= filters.priorityMin && priority <= filters.priorityMax;
+          default:
+            return true;
+        }
+      });
+    }
+    return filtered;
+  };
+
+  const filteredTasks = useMemo(() => {
+    return filterTasks(tasks, taskFilters);
+  }, [tasks, taskFilters]);
 
   const loadTaskById = async (taskId: string): Promise<Task | null> => {
     try {
@@ -223,11 +255,43 @@ export const SchedulePage: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <TagFilter 
-              selectedTagIds={filterTagIds} 
-              onChange={setFilterTagIds}
-              refreshTrigger={tagsRefreshTrigger}
-            />
+            <div style={{ position: 'relative' }}>
+              <TaskFilterPanel
+                filters={taskFilters}
+                onChange={setTaskFilters}
+                triggerButton={
+                  <button
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 12px',
+                      backgroundColor: (taskFilters.tagIds.length > 0 || taskFilters.priorityFilterType !== 'none')
+                        ? currentTheme.colors.primary + '20'
+                        : currentTheme.colors.background,
+                      border: `1px solid ${currentTheme.colors.border}`,
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      color: currentTheme.colors.text,
+                    }}
+                  >
+                    <span>Фильтры</span>
+                    {(taskFilters.tagIds.length > 0 || taskFilters.priorityFilterType !== 'none') && (
+                      <span style={{
+                        backgroundColor: currentTheme.colors.primary,
+                        color: 'white',
+                        borderRadius: '10px',
+                        padding: '2px 6px',
+                        fontSize: '11px',
+                      }}>
+                        {taskFilters.tagIds.length + (taskFilters.priorityFilterType !== 'none' ? 1 : 0)}
+                      </span>
+                    )}
+                  </button>
+                }
+              />
+            </div>
             <div className="notification-icon" onClick={() => setIsTelegramModalOpen(true)} style={{ cursor: 'pointer' }}>
               🔔
             </div>
