@@ -55,7 +55,6 @@ export interface PenaltyTask {
   startDateTimeRepit?: string | null;
   endDateTimeRepit?: string | null;
   tagIds?: string[];
-
 }
 
 export interface ApiTimeTableResponse {

@@ -3,9 +3,9 @@ import { useTheme } from '../../../shared/lib/contexts';
 import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
 import type { PenaltyTask } from '../../../shared/api/types';
 import type { Task } from '../../../entities/task/model/types';
-import { taskApi } from '../../../shared/api/taskApi';
 import { TaskFormModal } from '../../task-form/ui/TaskFormModal';
 import { ConfirmDeleteModal } from '../../task-actions/ui/ConfirmDeleteModal';
+import { tagApi, taskApi, taskTagStorage } from '../../../shared/api/taskApi';
 
 interface PenaltyTasksModalProps {
   isOpen: boolean;
@@ -331,6 +331,10 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
   const handleSaveEditedTask = async (taskData: Partial<Task>) => {
     if (taskData.id) {
       try {
+        if (taskData.tagIds) {
+          taskTagStorage.setTaskTags(taskData.id, taskData.tagIds);
+        }
+
         await taskApi.updateTask(taskData);
         await taskApi.rebuildTimeTable();
         
@@ -480,6 +484,34 @@ export const PenaltyTasksModal: React.FC<PenaltyTasksModalProps> = ({
                     }}>
                       {task.description}
                     </p>
+                  )}
+
+                  {task.tagIds && task.tagIds.length > 0 && (
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '4px',
+                      marginBottom: '10px',
+                    }}>
+                      {task.tagIds.map(tagId => {
+                        const tag = tagApi.getTagById(tagId);
+                        return tag ? (
+                          <span
+                            key={tagId}
+                            style={{
+                              backgroundColor: tag.color + '30',
+                              color: tag.color,
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              fontSize: '10px',
+                              border: `1px solid ${tag.color}`,
+                            }}
+                          >
+                            {tag.name}
+                          </span>
+                        ) : null;
+                      })}
+                    </div>
                   )}
                   
                   {getTaskSpecificInfo(task)}
