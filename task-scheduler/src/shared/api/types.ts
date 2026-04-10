@@ -54,6 +54,7 @@ export interface PenaltyTask {
   countRepit?: number;
   startDateTimeRepit?: string | null;
   endDateTimeRepit?: string | null;
+  tagIds?: string[];
 
 }
 
