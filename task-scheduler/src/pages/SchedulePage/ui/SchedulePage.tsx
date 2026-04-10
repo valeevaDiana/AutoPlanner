@@ -14,9 +14,8 @@ import { useTaskSplitter } from '../../../shared/lib/hooks/useTaskSplitter';
 import { getContrastColor } from '../../../shared/lib/utils/priorityGradient';
 import { TagFilter } from '../../../features/tag-filter/ui/TagFilter';
 import { tagApi } from '../../../shared/api/tagApi';
-import { TaskFilterPanel, TaskFilters, PriorityFilterType } from '../../../features/task-filter/ui/TaskFilterPanel';
-
-
+import { TaskFilterPanel, type TaskFilters, PriorityFilterType } from '../../../features/task-filter/ui/TaskFilterPanel';
+import { MonthCalendar } from './MonthCalendar';
 
 export const SchedulePage: React.FC = () => {
 
@@ -49,6 +48,7 @@ export const SchedulePage: React.FC = () => {
   const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState(false);
   const [filterTagIds, setFilterTagIds] = useState<string[]>([]);
   const [tagsRefreshTrigger, setTagsRefreshTrigger] = useState(0);
+  const [calendarView, setCalendarView] = useState<'week' | 'month'>('week');
   const [taskFilters, setTaskFilters] = useState<TaskFilters>({
     tagIds: [],
     priorityFilterType: 'none',
@@ -148,7 +148,7 @@ export const SchedulePage: React.FC = () => {
   };
 
   const handleToggleView = () => {
-    // alert("Переключение режима: неделя → месяц");
+    setCalendarView(prev => prev === 'week' ? 'month' : 'week');
   };
 
   const handlePenaltyTasksClick = () => {
@@ -247,7 +247,6 @@ export const SchedulePage: React.FC = () => {
   return (
     <div className="page-container">
       <div className="header-fixed">
-        {/* Первая строка: уведомления, темы, выход */}
         <div 
           className="header-top-row"
           style={{
@@ -329,7 +328,23 @@ export const SchedulePage: React.FC = () => {
         >
           <div className="header-title-wrapper">
             <div className="header-title">План на</div>
-            <button className="week-selector" onClick={handleToggleView}>неделю</button>
+            <button 
+              className="week-selector" 
+              onClick={handleToggleView}
+              style={{
+                background: currentTheme.colors.primary,
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontSize: '18px',
+                fontWeight: '600',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              {calendarView === 'week' ? 'Неделя' : 'Месяц'}
+            </button>
 
             <button
               onClick={handlePenaltyTasksClick}
@@ -357,16 +372,26 @@ export const SchedulePage: React.FC = () => {
       </div>
 
       <div className="content-wrapper">
-        <ScheduleCalendar
-          onAddTask={handleCellAddTask}
-          onEditTask={handleEditTask}
-          onViewTask={handleViewTask}
-          onDeleteTask={handleDeleteTask}
-          onCompleteTask={handleTaskComplete}
-          //tasks={tasks}
-          tasks={filteredTasks}
-          onTasksUpdate={handleTasksUpdate}
-        />
+        {calendarView === 'week' ? (
+          <ScheduleCalendar
+            onAddTask={handleCellAddTask}
+            onEditTask={handleEditTask}
+            onViewTask={handleViewTask}
+            onDeleteTask={handleDeleteTask}
+            onCompleteTask={handleTaskComplete}
+            tasks={filteredTasks}
+            onTasksUpdate={handleTasksUpdate}
+          />
+        ) : (
+          <MonthCalendar
+            onAddTask={handleCellAddTask}
+            onEditTask={handleEditTask}
+            onViewTask={handleViewTask}
+            onDeleteTask={handleDeleteTask}
+            onCompleteTask={handleTaskComplete}
+            tasks={filteredTasks}
+          />
+        )}
       </div>
 
       <div className="footer-fixed">

@@ -521,6 +521,37 @@ body {
     min-width: 1200px;
   }
 
+  .month-calendar-body {
+    flex: 1;
+    overflow: auto;
+  }
+
+  .month-calendar-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    min-height: 120px;
+  }
+
+  @media (max-width: 768px) {
+    .month-calendar-week {
+      min-height: 100px;
+    }
+    
+    .month-calendar-header div {
+      padding: 8px;
+      font-size: 12px;
+    }
+  }
+
+  .month-task-item {
+    transition: all 0.2s ease;
+  }
+
+  .month-task-item:hover {
+    transform: scale(1.02);
+    z-index: 10;
+  }
+
   .time-cell {
     width: 80px;
     padding: 6px 3px;
