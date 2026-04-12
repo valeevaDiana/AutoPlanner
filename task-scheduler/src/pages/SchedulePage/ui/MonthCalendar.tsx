@@ -367,7 +367,6 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
                       flexDirection: 'column',
                       gap: '2px',
                       maxHeight: 'calc(100% - 30px)',
-                      overflow: 'auto',
                     }}>
                       {tasksForDay.map((taskCell, idx) => (
                         <TaskCellItem

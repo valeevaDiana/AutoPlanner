@@ -274,6 +274,7 @@ export const SchedulePage: React.FC = () => {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <ThemeSelector />
             <div style={{ position: "relative" }}>
               <TaskFilterPanel
                 filters={taskFilters}
@@ -324,7 +325,6 @@ export const SchedulePage: React.FC = () => {
             >
               🔔
             </div> */}
-            <ThemeSelector />
           </div>
 
           {/* Кнопка выхода
