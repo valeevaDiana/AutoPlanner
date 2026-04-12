@@ -43,6 +43,7 @@ export const TaskFilterPanel: React.FC<TaskFilterPanelProps> = ({
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
+  const isFirstOpenRef = useRef(true);
 
   const actualIsOpen = externalIsOpen !== undefined ? externalIsOpen : isOpen;
 
@@ -51,11 +52,12 @@ export const TaskFilterPanel: React.FC<TaskFilterPanelProps> = ({
     
     const buttonRect = buttonRef.current.getBoundingClientRect();
     const windowWidth = window.innerWidth;
-    const dropdownWidth = 250; 
-    const margin = 10; 
+    const windowHeight = window.innerHeight;
+    const dropdownWidth = 250;
+    const dropdownHeight = 400; 
+    const margin = 10;
     
     let left = buttonRect.right - dropdownWidth;
-    let right = 'auto';
     
     if (left < margin) {
       left = margin;
@@ -65,13 +67,15 @@ export const TaskFilterPanel: React.FC<TaskFilterPanelProps> = ({
       left = windowWidth - dropdownWidth - margin;
     }
     
-    if (buttonRect.right + dropdownWidth > windowWidth - margin) {
-      left = windowWidth - dropdownWidth - margin;
+    let top = buttonRect.bottom + 5;
+    
+    if (top + dropdownHeight > windowHeight - margin) {
+      top = buttonRect.top - dropdownHeight - 5;
     }
     
     setDropdownStyle({
       position: 'fixed',
-      top: buttonRect.bottom + 5,
+      top: top,
       left: left,
       width: `${dropdownWidth}px`,
       backgroundColor: currentTheme.colors.surface,
@@ -79,8 +83,16 @@ export const TaskFilterPanel: React.FC<TaskFilterPanelProps> = ({
       borderRadius: '8px',
       boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
       zIndex: 1000,
+      maxHeight: '80vh',
+      overflow: 'auto',
     });
   }, [currentTheme.colors]);
+
+  const calculatePositionWithDelay = useCallback(() => {
+    setTimeout(() => {
+      calculateDropdownPosition();
+    }, 10);
+  }, [calculateDropdownPosition]);
 
   useEffect(() => {
     loadTags();
@@ -92,7 +104,7 @@ export const TaskFilterPanel: React.FC<TaskFilterPanelProps> = ({
 
   useEffect(() => {
     if (actualIsOpen) {
-      calculateDropdownPosition();
+      calculatePositionWithDelay();
       window.addEventListener('resize', calculateDropdownPosition);
       window.addEventListener('scroll', calculateDropdownPosition, true);
       return () => {
@@ -100,7 +112,17 @@ export const TaskFilterPanel: React.FC<TaskFilterPanelProps> = ({
         window.removeEventListener('scroll', calculateDropdownPosition, true);
       };
     }
-  }, [actualIsOpen, calculateDropdownPosition]);
+  }, [actualIsOpen, calculateDropdownPosition, calculatePositionWithDelay]);
+
+  useEffect(() => {
+    if (actualIsOpen) {
+      const timeoutId = setTimeout(() => {
+        calculateDropdownPosition();
+      }, 50);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [actualIsOpen, localFilters, tags, calculateDropdownPosition]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -164,9 +186,6 @@ export const TaskFilterPanel: React.FC<TaskFilterPanelProps> = ({
   const toggleOpen = () => {
     if (onClose && actualIsOpen) {
       onClose();
-    }
-    if (!actualIsOpen) {
-      setTimeout(calculateDropdownPosition, 0);
     }
     setIsOpen(!isOpen);
   };
@@ -275,7 +294,7 @@ export const TaskFilterPanel: React.FC<TaskFilterPanelProps> = ({
           </div>
 
           {/* Фильтр по приоритету */}
-          <div style={{ padding: '12px', borderBottom: `1px solid ${currentTheme.colors.border}` }}>
+          <div style={{ padding: '12px' }}>
             <div style={{ fontSize: '13px', fontWeight: '500', marginBottom: '8px', color: currentTheme.colors.text }}>
               Приоритет:
             </div>
@@ -427,25 +446,6 @@ export const TaskFilterPanel: React.FC<TaskFilterPanelProps> = ({
                 </div>
               </div>
             )}
-          </div>
-
-          <div style={{ padding: '12px', display: 'flex', justifyContent: 'flex-end' }}>
-            <button
-              onClick={() => {
-                if (onClose) onClose();
-                setIsOpen(false);
-              }}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: currentTheme.colors.primary,
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-              }}
-            >
-              Применить
-            </button>
           </div>
         </div>
       )}
