@@ -341,7 +341,9 @@ export const MonthCalendar: React.FC<MonthCalendarProps> = ({
                     key={dayIndex}
                     onClick={() => handleCellClick(date)}
                     style={{
-                      border: `1px solid ${currentTheme.colors.border}`,
+                      border: isTodayDay 
+                        ? `3px solid ${currentTheme.colors.error}` 
+                        : `1px solid ${currentTheme.colors.border}`,
                       padding: '8px',
                       minHeight: '120px',
                       backgroundColor: isCurrentMonthDay 
