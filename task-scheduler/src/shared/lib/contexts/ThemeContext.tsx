@@ -9,34 +9,42 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [currentTheme, setCurrentTheme] = useState<Theme>(predefinedThemes[0]);
-  const [customThemes, setCustomThemes] = useState<Theme[]>([]);
-  const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
-
-  useEffect(() => {
+  const [currentTheme, setCurrentTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem('calendar-theme');
-    const savedCustomThemes = localStorage.getItem('calendar-custom-themes');
-    
     if (savedTheme) {
       try {
-        const theme = JSON.parse(savedTheme);
-        setCurrentTheme(theme);
+        return JSON.parse(savedTheme);
       } catch (error) {
-        console.error('Error loading saved theme:', error);
+        console.error('Error parsing saved theme:', error);
+        return predefinedThemes[0];
       }
     }
-    
+    return predefinedThemes[0];
+  });
+
+  const [customThemes, setCustomThemes] = useState<Theme[]>(() => {
+    const savedCustomThemes = localStorage.getItem('calendar-custom-themes');
     if (savedCustomThemes) {
       try {
-        const themes = JSON.parse(savedCustomThemes);
-        setCustomThemes(themes);
+        return JSON.parse(savedCustomThemes);
       } catch (error) {
-        console.error('Error loading custom themes:', error);
+        console.error('Error parsing custom themes:', error);
+        return [];
       }
     }
-  }, []);
+    return [];
+  });
+
+  const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
+  const isFirstRender = React.useRef(true);
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      applyThemeToDOM(currentTheme);
+      return;
+    }
+    
     localStorage.setItem('calendar-theme', JSON.stringify(currentTheme));
     applyThemeToDOM(currentTheme);
   }, [currentTheme]);
@@ -48,16 +56,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const applyThemeToDOM = (theme: Theme) => {
     const root = document.documentElement;
     Object.entries(theme.colors).forEach(([key, value]) => {
-        root.style.setProperty(`--color-${key}`, value);
+      root.style.setProperty(`--color-${key}`, value);
     });
-
     root.style.setProperty('--priority-completed-bg', theme.colors.priorityCompleted);
     root.style.setProperty('--priority-completed-text', theme.colors.priorityCompletedText);
-    
     root.style.setProperty('--calendar-header-bg', theme.colors.calendarHeader);
     root.style.setProperty('--calendar-navigation-bg', theme.colors.calendarNavigation);
-    };
-
+  };
 
   const setTheme = (themeName: string) => {
     const allThemes = [...predefinedThemes, ...customThemes];
