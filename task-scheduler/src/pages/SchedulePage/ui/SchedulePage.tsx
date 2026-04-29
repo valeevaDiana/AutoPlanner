@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from "@tanstack/react-query";
 import { ScheduleCalendar } from "./ScheduleCalendar";
 import { TaskFormModal } from "../../../features/task-form/ui/TaskFormModal";
 import { PenaltyTasksModal } from "../../../features/penalty-tasks/ui/PenaltyTasksModal";
@@ -15,7 +15,11 @@ import { useTaskSplitter } from "../../../shared/lib/hooks/useTaskSplitter";
 import { getContrastColor } from "../../../shared/lib/utils/priorityGradient";
 import { TagFilter } from "../../../features/tag-filter/ui/TagFilter";
 import { tagApi } from "../../../shared/api/tagApi";
-import {  TaskFilterPanel,  type TaskFilters,  PriorityFilterType,} from "../../../features/task-filter/ui/TaskFilterPanel";
+import {
+  TaskFilterPanel,
+  type TaskFilters,
+  PriorityFilterType,
+} from "../../../features/task-filter/ui/TaskFilterPanel";
 import { MonthCalendar } from "./MonthCalendar";
 
 export const SchedulePage: React.FC = () => {
@@ -163,13 +167,13 @@ export const SchedulePage: React.FC = () => {
   };
 
   const queryClient = useQueryClient();
-  
+
   const handlePenaltyTasksUpdate = async () => {
-    await queryClient.invalidateQueries({ queryKey: ['tasks'] });
-    await queryClient.invalidateQueries({ queryKey: ['penaltyTasks'] });
+    await queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    await queryClient.invalidateQueries({ queryKey: ["penaltyTasks"] });
     await taskApi.rebuildTimeTable();
   };
-  
+
   const handleAddTaskClick = () => {
     setTaskFormMode("create");
     setEditingTask(null);

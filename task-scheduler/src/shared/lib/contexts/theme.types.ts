@@ -8,18 +8,18 @@ export interface ThemeColors {
   text: string;
   textSecondary: string;
   border: string;
-  
+
   success: string;
   error: string;
-  edit: string;  
+  edit: string;
 
-  priorityHigh: string;    
-  priorityLow: string;      
+  priorityHigh: string;
+  priorityLow: string;
   priorityCompleted: string;
   priorityCompletedText: string;
-  
-  calendarHeader: string;        
-  calendarNavigation: string;    
+
+  calendarHeader: string;
+  calendarNavigation: string;
 }
 
 export interface Theme {
@@ -32,7 +32,7 @@ export interface ThemeContextType {
   customThemes: Theme[];
   setTheme: (themeName: string) => void;
   addCustomTheme: (theme: Theme) => void;
-  updateCurrentTheme: (colors: Partial<Theme['colors']>) => void;
+  updateCurrentTheme: (colors: Partial<Theme["colors"]>) => void;
   isCustomizerOpen: boolean;
   setIsCustomizerOpen: (open: boolean) => void;
 }

@@ -27,14 +27,14 @@ export interface Task {
   countFrom: number;
   isSplitTask?: boolean;
 
-  parentTaskId?: string; 
-  splitParts?: string[]; 
-  splitIndex?: number; 
+  parentTaskId?: string;
+  splitParts?: string[];
+  splitIndex?: number;
 
   tagIds?: string[];
 }
 
-export type TaskAction = 'complete' | 'edit' | 'delete'; 
+export type TaskAction = "complete" | "edit" | "delete";
 
 export interface PenaltyTask {
   id: string;
@@ -42,7 +42,7 @@ export interface PenaltyTask {
   description?: string;
   priority: number;
   durationMinutes: number;
-  reason: string; 
-  penaltyScore?: number; 
-  originalTaskData?: Partial<Task>; 
+  reason: string;
+  penaltyScore?: number;
+  originalTaskData?: Partial<Task>;
 }

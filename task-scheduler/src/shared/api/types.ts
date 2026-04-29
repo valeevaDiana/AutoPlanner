@@ -1,6 +1,6 @@
 export interface ApiTask {
-  id?: number; 
-  myTaskId?: number; 
+  id?: number;
+  myTaskId?: number;
   name: string;
   description?: string;
   createdDate?: string;
@@ -34,7 +34,7 @@ export interface PenaltyTask {
   description: string;
   priority: number;
   startDateTime: string | null;
-  endDateTime: string | null;   
+  endDateTime: string | null;
   duration: string;
   countFrom: number;
   isComplete: boolean;

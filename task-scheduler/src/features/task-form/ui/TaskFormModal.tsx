@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import type { Task } from '../../../entities/task/model/types';
-import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
-import { useTheme } from '../../../shared/lib/contexts';
-import { getPriorityColor } from '../../../shared/lib/utils/priorityGradient';
-import { taskApi } from '../../../shared/api/taskApi';
-import { TagSelector } from '../../tag-selector/ui/TagSelector';
-import { TagManagerModal } from '../../tag-manager/ui/TagManagerModal';
-import { tagApi } from '../../../shared/api/tagApi';
-
+import React, { useState, useEffect } from "react";
+import type { Task } from "../../../entities/task/model/types";
+import { useEscapeKey } from "../../../shared/lib/hooks/useEscapeKey";
+import { useTheme } from "../../../shared/lib/contexts";
+import { getPriorityColor } from "../../../shared/lib/utils/priorityGradient";
+import { taskApi } from "../../../shared/api/taskApi";
+import { TagSelector } from "../../tag-selector/ui/TagSelector";
+import { TagManagerModal } from "../../tag-manager/ui/TagManagerModal";
+import { tagApi } from "../../../shared/api/tagApi";
 
 interface TaskFormModalProps {
   isOpen: boolean;
@@ -15,7 +14,7 @@ interface TaskFormModalProps {
   onSave: (taskData: Partial<Task>) => void;
   onEdit?: () => void;
   task?: Task | null;
-  mode?: 'create' | 'edit' | 'view';
+  mode?: "create" | "edit" | "view";
   initialDate?: {
     day: number;
     time: string;
@@ -29,60 +28,62 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   isOpen,
   onClose,
   onSave,
-  onEdit, 
+  onEdit,
   task,
-  mode = 'create',
+  mode = "create",
   initialDate,
   isSaving = false,
   availableTasks = [],
 }) => {
   const { currentTheme } = useTheme();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [durationDays, setDurationDays] = useState('0');
-  const [durationHours, setDurationHours] = useState('1');
-  const [durationMinutes, setDurationMinutes] = useState('0');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [durationDays, setDurationDays] = useState("0");
+  const [durationHours, setDurationHours] = useState("1");
+  const [durationMinutes, setDurationMinutes] = useState("0");
   const [priority, setPriority] = useState<number>(5);
-  
+
   // Новые состояния для повторяющихся задач
   const [isRepeating, setIsRepeating] = useState(false);
-  const [repeatDays, setRepeatDays] = useState('0');
-  const [repeatHours, setRepeatHours] = useState('0');
-  const [repeatMinutes, setRepeatMinutes] = useState('0');
-  const [repeatCount, setRepeatCount] = useState('0');
-  const [repeatStartDate, setRepeatStartDate] = useState('');
-  const [repeatStartTime, setRepeatStartTime] = useState('');
-  const [repeatEndDate, setRepeatEndDate] = useState('');
-  const [repeatEndTime, setRepeatEndTime] = useState('');
+  const [repeatDays, setRepeatDays] = useState("0");
+  const [repeatHours, setRepeatHours] = useState("0");
+  const [repeatMinutes, setRepeatMinutes] = useState("0");
+  const [repeatCount, setRepeatCount] = useState("0");
+  const [repeatStartDate, setRepeatStartDate] = useState("");
+  const [repeatStartTime, setRepeatStartTime] = useState("");
+  const [repeatEndDate, setRepeatEndDate] = useState("");
+  const [repeatEndTime, setRepeatEndTime] = useState("");
 
-  const [repeatType, setRepeatType] = useState<'count' | 'period'>('count'); // 'count' или 'period'
-  
+  const [repeatType, setRepeatType] = useState<"count" | "period">("count"); // 'count' или 'period'
+
   // Состояния для конкретного времени начала
   const [hasSpecificTime, setHasSpecificTime] = useState(false);
-  const [specificStartTime, setSpecificStartTime] = useState('');
-  const [specificEndTime, setSpecificEndTime] = useState('');
-  
+  const [specificStartTime, setSpecificStartTime] = useState("");
+  const [specificEndTime, setSpecificEndTime] = useState("");
+
   // Состояния для возможного времени
   const [hasPossibleTime, setHasPossibleTime] = useState(false);
-  const [possibleStartDate, setPossibleStartDate] = useState('');
-  const [possibleStartTime, setPossibleStartTime] = useState('');
-  const [possibleEndDate, setPossibleEndDate] = useState('');
-  const [possibleEndTime, setPossibleEndTime] = useState('');
+  const [possibleStartDate, setPossibleStartDate] = useState("");
+  const [possibleStartTime, setPossibleStartTime] = useState("");
+  const [possibleEndDate, setPossibleEndDate] = useState("");
+  const [possibleEndTime, setPossibleEndTime] = useState("");
 
-  const [formError, setFormError] = useState<string>('');
-  
+  const [formError, setFormError] = useState<string>("");
+
   // Состояния для зависимостей задач
   const [hasDependency, setHasDependency] = useState(false);
-  const [dependencyTask, setDependencyTask] = useState('');
-  const [dependencyType, setDependencyType] = useState<'before' | 'after'>('after');
-  const [dependencyOperator, setDependencyOperator] = useState('>');
-  const [dependencyDays, setDependencyDays] = useState('0');
-  const [dependencyHours, setDependencyHours] = useState('0');
-  const [dependencyMinutes, setDependencyMinutes] = useState('0');
+  const [dependencyTask, setDependencyTask] = useState("");
+  const [dependencyType, setDependencyType] = useState<"before" | "after">(
+    "after",
+  );
+  const [dependencyOperator, setDependencyOperator] = useState(">");
+  const [dependencyDays, setDependencyDays] = useState("0");
+  const [dependencyHours, setDependencyHours] = useState("0");
+  const [dependencyMinutes, setDependencyMinutes] = useState("0");
 
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
@@ -102,20 +103,20 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   };
 
   const getCurrentDate = () => {
-    return new Date().toISOString().split('T')[0];
+    return new Date().toISOString().split("T")[0];
   };
 
   const getDateByDayOfWeek = (dayOfWeek: number) => {
     const today = new Date();
-    const currentDay = today.getDay(); 
-    
+    const currentDay = today.getDay();
+
     const jsDayOfWeek = dayOfWeek === 6 ? 0 : dayOfWeek + 1;
-    
+
     const diff = jsDayOfWeek - currentDay;
     const targetDate = new Date(today);
     targetDate.setDate(today.getDate() + diff);
-    
-    return targetDate.toISOString().split('T')[0];
+
+    return targetDate.toISOString().split("T")[0];
   };
 
   const handleOpenTagManager = () => {
@@ -124,38 +125,50 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setFormError('');
+      setFormError("");
       if (task) {
         if (task.duration) {
-          const parts = task.duration.split(':');
+          const parts = task.duration.split(":");
 
           if (parts.length === 4) {
             // Формат: дни:часы:минуты:секунды
             const [days, hours, minutes, seconds] = parts;
-            console.log("range 4 parts:", task.dateTimeRange, days, hours, minutes, seconds);
+            console.log(
+              "range 4 parts:",
+              task.dateTimeRange,
+              days,
+              hours,
+              minutes,
+              seconds,
+            );
             setDurationDays(days);
             setDurationHours(hours);
             setDurationMinutes(minutes);
           } else if (parts.length === 3) {
             // Формат: дни:часы:минуты
             const [hours, minutes, seconds] = parts;
-            console.log("range 3 parts:", task.dateTimeRange, hours, minutes, seconds);
-            setDurationDays('0');
+            console.log(
+              "range 3 parts:",
+              task.dateTimeRange,
+              hours,
+              minutes,
+              seconds,
+            );
+            setDurationDays("0");
             setDurationHours(hours);
             setDurationMinutes(minutes);
-          } 
+          }
         }
 
+        setTitle(task.title || "");
+        setDescription(task.description || "");
+        setStartDate(task.startDate || "");
+        setEndDate(task.endDate || "");
+        setStartTime(task.startTime || "");
+        setEndTime(task.endTime || "");
 
-        setTitle(task.title || '');
-        setDescription(task.description || '');
-        setStartDate(task.startDate || '');
-        setEndDate(task.endDate || '');
-        setStartTime(task.startTime || '');
-        setEndTime(task.endTime || '');
-        
         setPriority(task.priority);
-        
+
         setIsRepeating(Boolean(task.isRepeating));
         setHasSpecificTime(Boolean(task.startDate && task.startTime));
         setHasPossibleTime(Boolean(task.ruleOneTask));
@@ -164,99 +177,128 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         if (task.tagIds) {
           setTagIds(task.tagIds);
         } else {
-          setTagIds([]);  
+          setTagIds([]);
         }
 
-        
         if (task.isRepeating && task.endDateTimeRepit) {
-          setRepeatType('period');
+          setRepeatType("period");
         } else {
-          setRepeatType('count');
+          setRepeatType("count");
         }
-        
+
         console.log("is repit?", task.isRepeating);
         if (task.isRepeating) {
           setIsRepeating(true);
-          setRepeatCount(String(task.repeatCount || '0'));
-          if(task.repeateDurationMinute)
-          {
-            const parts = task.repeateDurationMinute.split(':');
-  
+          setRepeatCount(String(task.repeatCount || "0"));
+          if (task.repeateDurationMinute) {
+            const parts = task.repeateDurationMinute.split(":");
+
             if (parts.length === 4) {
               // Формат: дни:часы:минуты:секунды
               const [days, hours, minutes, seconds] = parts;
-              console.log("range 4 parts:", task.repeateDurationMinute, days, hours, minutes, seconds);
-              setRepeatDays(days || '0');
-              setRepeatHours(hours || '0');
-              setRepeatMinutes(minutes || '0');
+              console.log(
+                "range 4 parts:",
+                task.repeateDurationMinute,
+                days,
+                hours,
+                minutes,
+                seconds,
+              );
+              setRepeatDays(days || "0");
+              setRepeatHours(hours || "0");
+              setRepeatMinutes(minutes || "0");
             } else if (parts.length === 3) {
               // Формат: дни:часы:минуты
               const [hours, minutes, seconds] = parts;
-              console.log("range 3 parts:", task.repeateDurationMinute, hours, minutes, seconds);
-              setRepeatDays('0');
-              setRepeatHours(hours || '0');
-              setRepeatMinutes(minutes || '0');
-            } 
+              console.log(
+                "range 3 parts:",
+                task.repeateDurationMinute,
+                hours,
+                minutes,
+                seconds,
+              );
+              setRepeatDays("0");
+              setRepeatHours(hours || "0");
+              setRepeatMinutes(minutes || "0");
+            }
           }
-          
-          if(task.startDateTimeRepit)
-          {
-            const [startRepitDate, startRepitTimes] = task.startDateTimeRepit.split('T');
-            setRepeatStartDate(startRepitDate || '');
-            setRepeatStartTime(startRepitTimes || '');
+
+          if (task.startDateTimeRepit) {
+            const [startRepitDate, startRepitTimes] =
+              task.startDateTimeRepit.split("T");
+            setRepeatStartDate(startRepitDate || "");
+            setRepeatStartTime(startRepitTimes || "");
           }
-          if(task.endDateTimeRepit)
-          {
-            const [endRepitDate, endRepitTimes] = task.endDateTimeRepit.split('T');
-            console.log("a", task.endDateTimeRepit, endRepitDate, endRepitTimes);
-            setRepeatEndDate(endRepitDate || '');
-            setRepeatEndTime(endRepitTimes || '');
+          if (task.endDateTimeRepit) {
+            const [endRepitDate, endRepitTimes] =
+              task.endDateTimeRepit.split("T");
+            console.log(
+              "a",
+              task.endDateTimeRepit,
+              endRepitDate,
+              endRepitTimes,
+            );
+            setRepeatEndDate(endRepitDate || "");
+            setRepeatEndTime(endRepitTimes || "");
           }
         }
 
-        if (task.ruleOneTask)
-        {
+        if (task.ruleOneTask) {
           setHasPossibleTime(true);
         }
-        
+
         if (task.ruleTwoTask) {
-          setDependencyTask(String(task.secondTaskId || ''));
-          setDependencyType(task.timePositionRegardingTaskId === 0 ? 'before' : 'after');
-          
+          setDependencyTask(String(task.secondTaskId || ""));
+          setDependencyType(
+            task.timePositionRegardingTaskId === 0 ? "before" : "after",
+          );
+
           if (task.relationRangeId === 0) {
-            setDependencyOperator('>');
+            setDependencyOperator(">");
           } else if (task.relationRangeId === 1) {
-            setDependencyOperator('=');
+            setDependencyOperator("=");
           } else if (task.relationRangeId === 2) {
-            setDependencyOperator('<');
+            setDependencyOperator("<");
           }
-          
+
           if (task.dateTimeRange) {
-            const parts = task.dateTimeRange.split(':');
-  
+            const parts = task.dateTimeRange.split(":");
+
             if (parts.length === 4) {
               // Формат: дни:часы:минуты:секунды
               const [days, hours, minutes, seconds] = parts;
-              console.log("range 4 parts:", task.dateTimeRange, days, hours, minutes, seconds);
-              setDependencyDays(days || '0');
-              setDependencyHours(hours || '0');
-              setDependencyMinutes(minutes || '0');
+              console.log(
+                "range 4 parts:",
+                task.dateTimeRange,
+                days,
+                hours,
+                minutes,
+                seconds,
+              );
+              setDependencyDays(days || "0");
+              setDependencyHours(hours || "0");
+              setDependencyMinutes(minutes || "0");
             } else if (parts.length === 3) {
               // Формат: дни:часы:минуты
               const [hours, minutes, seconds] = parts;
-              console.log("range 3 parts:", task.dateTimeRange, hours, minutes, seconds);
-              setDependencyDays('0');
-              setDependencyHours(hours || '0');
-              setDependencyMinutes(minutes || '0');
-            } 
+              console.log(
+                "range 3 parts:",
+                task.dateTimeRange,
+                hours,
+                minutes,
+                seconds,
+              );
+              setDependencyDays("0");
+              setDependencyHours(hours || "0");
+              setDependencyMinutes(minutes || "0");
+            }
           }
           setHasDependency(true);
         }
-        
       } else {
-        setTitle('');
-        setDescription('');
-        
+        setTitle("");
+        setDescription("");
+
         if (initialDate) {
           const date = initialDate.date || getDateByDayOfWeek(initialDate.day);
           setStartDate(date);
@@ -267,58 +309,58 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
           setRepeatStartDate(date);
           setRepeatStartTime(initialDate.time);
         } else {
-          setStartDate('');
-          setEndDate('');
-          setStartTime('');
-          setEndTime('');
+          setStartDate("");
+          setEndDate("");
+          setStartTime("");
+          setEndTime("");
 
           setRepeatStartDate(getCurrentDate());
-          setRepeatStartTime('09:00');
+          setRepeatStartTime("09:00");
         }
-        
-        setDurationDays('0');
-        setDurationHours('1');
-        setDurationMinutes('0');
+
+        setDurationDays("0");
+        setDurationHours("1");
+        setDurationMinutes("0");
         setPriority(5);
-        
+
         // сброс новых полей при создании новой задачи
-        
+
         setHasSpecificTime(false);
         setHasPossibleTime(false);
         setHasDependency(false);
-        setRepeatDays('0');
-        setRepeatHours('0');
-        setRepeatMinutes('0');
-        setRepeatCount('0');
+        setRepeatDays("0");
+        setRepeatHours("0");
+        setRepeatMinutes("0");
+        setRepeatCount("0");
         setRepeatStartDate(getCurrentDate());
         setRepeatEndDate(getCurrentDate());
-        setRepeatStartTime('09:00:00');
-        setRepeatEndTime('18:00:00');
-        setSpecificStartTime('09:00');
-        setSpecificEndTime('18:00');
-        setPossibleStartDate('');
-        setPossibleStartTime('');
-        setPossibleEndDate('');
-        setPossibleEndTime('');
-        setDependencyTask('');
-        setDependencyType('after');
-        setDependencyOperator('>');
-        setDependencyDays('0');
-        setDependencyHours('0');
-        setDependencyMinutes('0');
+        setRepeatStartTime("09:00:00");
+        setRepeatEndTime("18:00:00");
+        setSpecificStartTime("09:00");
+        setSpecificEndTime("18:00");
+        setPossibleStartDate("");
+        setPossibleStartTime("");
+        setPossibleEndDate("");
+        setPossibleEndTime("");
+        setDependencyTask("");
+        setDependencyType("after");
+        setDependencyOperator(">");
+        setDependencyDays("0");
+        setDependencyHours("0");
+        setDependencyMinutes("0");
 
-        setRepeatType('count');
+        setRepeatType("count");
         setTagIds([]);
       }
     }
   }, [isOpen, task, initialDate]);
 
   useEffect(() => {
-      console.log('=== TaskFormModal OPEN DEBUG ===');
-  console.log('isOpen:', isOpen);
-  console.log('task prop:', task);
-  console.log('task.id:', task?.id);
-  console.log('task.tagIds from prop:', task?.tagIds);
+    console.log("=== TaskFormModal OPEN DEBUG ===");
+    console.log("isOpen:", isOpen);
+    console.log("task prop:", task);
+    console.log("task.id:", task?.id);
+    console.log("task.tagIds from prop:", task?.tagIds);
     if (isOpen) {
       if (task) {
         loadTaskData(task.id);
@@ -329,39 +371,38 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
   }, [isOpen, task]);
 
   const formatTimeForBackend = (timeString: string): string => {
-  if (!timeString) return '00:00:00';
-  
-  // Убираем возможные пробелы
-  const cleanTime = timeString.trim();
-  
-  // Проверяем формат hh:mm:ss
-  if (/^\d{1,2}:\d{1,2}:\d{1,2}$/.test(cleanTime)) {
-    return cleanTime;
-  }
-  
-  // Проверяем формат hh:mm
-  if (/^\d{1,2}:\d{1,2}$/.test(cleanTime)) {
-    return `${cleanTime}:00`;
-  }
-  
-  // Если формат непонятный, возвращаем по умолчанию
-  console.warn('Invalid time format, using default:', cleanTime);
-  return '00:00:00';
-};
+    if (!timeString) return "00:00:00";
+
+    // Убираем возможные пробелы
+    const cleanTime = timeString.trim();
+
+    // Проверяем формат hh:mm:ss
+    if (/^\d{1,2}:\d{1,2}:\d{1,2}$/.test(cleanTime)) {
+      return cleanTime;
+    }
+
+    // Проверяем формат hh:mm
+    if (/^\d{1,2}:\d{1,2}$/.test(cleanTime)) {
+      return `${cleanTime}:00`;
+    }
+
+    // Если формат непонятный, возвращаем по умолчанию
+    console.warn("Invalid time format, using default:", cleanTime);
+    return "00:00:00";
+  };
 
   const handleSave = () => {
+    setFormError("");
 
-    setFormError('');
-
-    console.log('Description before save:', {
+    console.log("Description before save:", {
       original: description,
       trimmed: description?.trim(),
-      willSend: description?.trim() === '' ? ' ' : description
+      willSend: description?.trim() === "" ? " " : description,
     });
 
-    if (isRepeating && repeatType === 'period') {
+    if (isRepeating && repeatType === "period") {
       if (!repeatStartDate || !repeatEndDate) {
-        setFormError('Заполните даты начала и конца периода повторения');
+        setFormError("Заполните даты начала и конца периода повторения");
         return;
       }
 
@@ -369,57 +410,67 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       const endDateTime = new Date(`${repeatEndDate}T${repeatEndTime}`);
 
       if (endDateTime <= startDateTime) {
-        setFormError('Конец периода повторения не может быть раньше или равен началу периода');
+        setFormError(
+          "Конец периода повторения не может быть раньше или равен началу периода",
+        );
         return;
       }
     }
     if (hasPossibleTime) {
-      if (!possibleStartDate || !possibleStartTime || !possibleEndDate || !possibleEndTime) {
-        setFormError('Заполните даты начала и конца возможной задачи');
+      if (
+        !possibleStartDate ||
+        !possibleStartTime ||
+        !possibleEndDate ||
+        !possibleEndTime
+      ) {
+        setFormError("Заполните даты начала и конца возможной задачи");
         return;
       }
 
-      const startDateTime = new Date(`${possibleStartDate}T${possibleStartTime}`);
+      const startDateTime = new Date(
+        `${possibleStartDate}T${possibleStartTime}`,
+      );
       const endDateTime = new Date(`${possibleEndDate}T${possibleEndTime}`);
 
       if (endDateTime <= startDateTime) {
-        setFormError('Конец возможной задачи не может быть раньше или равен началу');
+        setFormError(
+          "Конец возможной задачи не может быть раньше или равен началу",
+        );
         return;
       }
     }
 
-
     const totalMinutes = durationToMinutes(
       parseInt(durationDays) || 0,
       parseInt(durationHours) || 0,
-      parseInt(durationMinutes) || 0
+      parseInt(durationMinutes) || 0,
     );
-    let startDateForSave: string | undefined = startDate; 
+    let startDateForSave: string | undefined = startDate;
     let startTimeForSave: string | undefined = startTime;
 
     // АВТОМАТИЧЕСКИ ВЫЧИСЛЯЕМ КОНЕЧНУЮ ДАТУ И ВРЕМЯ
     let calculatedEndDate: string | undefined = endDate;
     let calculatedEndTime: string | undefined = endTime;
 
-
     if (startDate && startTime) {
       const startDateTimeStr = `${startDate}T${startTime}:00`;
-      
-      const [startHours, startMinutes] = startTime.split(':').map(Number);
-      const totalMinutesFromStart = startHours * 60 + startMinutes + totalMinutes;
-      
+
+      const [startHours, startMinutes] = startTime.split(":").map(Number);
+      const totalMinutesFromStart =
+        startHours * 60 + startMinutes + totalMinutes;
+
       const endHours = Math.floor(totalMinutesFromStart / 60) % 24;
       const endMinutes = totalMinutesFromStart % 60;
-      
-      calculatedEndTime = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
-      
+
+      calculatedEndTime = `${String(endHours).padStart(2, "0")}:${String(endMinutes).padStart(2, "0")}`;
+
       const daysToAdd = Math.floor(totalMinutesFromStart / (24 * 60));
       if (daysToAdd > 0) {
         const newDate = new Date(startDate);
         newDate.setDate(newDate.getDate() + daysToAdd);
         const year = newDate.getFullYear();
-        const month = String(newDate.getMonth() + 1).padStart(2, '0');
-        const day = String(newDate.getDate()).padStart(2, '0');
+        const month = String(newDate.getMonth() + 1).padStart(2, "0");
+        const day = String(newDate.getDate()).padStart(2, "0");
         calculatedEndDate = `${year}-${month}-${day}`;
       } else {
         calculatedEndDate = startDate;
@@ -429,8 +480,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     let calculatedStartDateTimeRepit: string | undefined = undefined;
     let calculatedEndDateTimeRepit: string | undefined = undefined;
     let repeatTotalMinutes: number | undefined = undefined;
-    
-    if (isRepeating && repeatStartDate  && repeatStartTime) {
+
+    if (isRepeating && repeatStartDate && repeatStartTime) {
       console.log("repeatStartTime", repeatStartTime);
       // startDateTimeRepit = startDate + startTime (начало первой задачи)
       const formattedStartTime = formatTimeForBackend(repeatStartTime);
@@ -440,32 +491,50 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       repeatTotalMinutes = durationToMinutes(
         parseInt(repeatDays) || 0,
         parseInt(repeatHours) || 0,
-        parseInt(repeatMinutes) || 0
+        parseInt(repeatMinutes) || 0,
       );
 
-      if (repeatType === 'period' && repeatEndDate && repeatEndTime) {
+      if (repeatType === "period" && repeatEndDate && repeatEndTime) {
         const formattedEndTime = formatTimeForBackend(repeatEndTime);
         calculatedEndDateTimeRepit = `${repeatEndDate}T${formattedEndTime}`;
-      } else if (repeatType === 'count') {
-        const repeatCountValue = repeatType === 'count' ? parseInt(repeatCount) || 0 : 0;
+      } else if (repeatType === "count") {
+        const repeatCountValue =
+          repeatType === "count" ? parseInt(repeatCount) || 0 : 0;
 
-        if (repeatTotalMinutes > 0) { 
-          const totalDurationForAllRepetitions = 
-            (totalMinutes + repeatTotalMinutes) * (repeatCountValue - 1) + totalMinutes;
-          
+        if (repeatTotalMinutes > 0) {
+          const totalDurationForAllRepetitions =
+            (totalMinutes + repeatTotalMinutes) * (repeatCountValue - 1) +
+            totalMinutes;
+
           const startDateTime = new Date(calculatedStartDateTimeRepit);
           const endRepetitionDateTime = new Date(
-            startDateTime.getTime() + totalDurationForAllRepetitions * 60 * 1000
+            startDateTime.getTime() +
+              totalDurationForAllRepetitions * 60 * 1000,
           );
-          
+
           const endRepYear = endRepetitionDateTime.getFullYear();
-          const endRepMonth = String(endRepetitionDateTime.getMonth() + 1).padStart(2, '0');
-          const endRepDay = String(endRepetitionDateTime.getDate()).padStart(2, '0');
-          const endRepHours = String(endRepetitionDateTime.getHours()).padStart(2, '0');
-          const endRepMinutes = String(endRepetitionDateTime.getMinutes()).padStart(2, '0');
-          
+          const endRepMonth = String(
+            endRepetitionDateTime.getMonth() + 1,
+          ).padStart(2, "0");
+          const endRepDay = String(endRepetitionDateTime.getDate()).padStart(
+            2,
+            "0",
+          );
+          const endRepHours = String(endRepetitionDateTime.getHours()).padStart(
+            2,
+            "0",
+          );
+          const endRepMinutes = String(
+            endRepetitionDateTime.getMinutes(),
+          ).padStart(2, "0");
+
           calculatedEndDateTimeRepit = `${endRepYear}-${endRepMonth}-${endRepDay}T${endRepHours}:${endRepMinutes}`;
-        } else if (repeatStartDate && repeatStartTime && repeatEndDate && repeatEndTime) {
+        } else if (
+          repeatStartDate &&
+          repeatStartTime &&
+          repeatEndDate &&
+          repeatEndTime
+        ) {
           calculatedStartDateTimeRepit = `${repeatStartDate}T${formatTimeForBackend(repeatStartTime)}`;
           calculatedEndDateTimeRepit = `${repeatEndDate}T${formatTimeForBackend(repeatEndTime)}`;
         }
@@ -487,26 +556,20 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     }
 
     let timePosition: number | undefined = undefined;
-    let secondTaskIdFrom: number | undefined = undefined; 
+    let secondTaskIdFrom: number | undefined = undefined;
     let relationRangeIdFrom: number | undefined = undefined;
     let dateTimeRangeFrom: string | undefined = undefined;
-    if (hasDependency)
-    {
+    if (hasDependency) {
       timePosition = dependencyType == "before" ? 0 : 1;
-      if (dependencyOperator == ">")
-      {
+      if (dependencyOperator == ">") {
         relationRangeIdFrom = 0;
-      }
-      else if (dependencyOperator == "=")
-      {
+      } else if (dependencyOperator == "=") {
         relationRangeIdFrom = 1;
-      }
-      else if (dependencyOperator == "<")
-      {
+      } else if (dependencyOperator == "<") {
         relationRangeIdFrom = 2;
       }
-      dateTimeRangeFrom = `${dependencyDays.padStart(2, '0')}:${dependencyHours.padStart(2, '0')}:${dependencyMinutes.padStart(2, '0')}:00`;
-      const selectedTask = availableTasks.find(t => t.id === dependencyTask);
+      dateTimeRangeFrom = `${dependencyDays.padStart(2, "0")}:${dependencyHours.padStart(2, "0")}:${dependencyMinutes.padStart(2, "0")}:00`;
+      const selectedTask = availableTasks.find((t) => t.id === dependencyTask);
       secondTaskIdFrom = selectedTask ? parseInt(selectedTask.id) : undefined;
       startDateForSave = undefined;
       startTimeForSave = undefined;
@@ -517,20 +580,20 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     const taskData: Partial<Task> = {
       id: task?.id,
       title: title,
-      description: description?.trim() === '' ? ' ' : description,
+      description: description?.trim() === "" ? " " : description,
       startDate: startDateForSave || undefined,
       endDate: calculatedEndDate || undefined,
       startTime: startTimeForSave || undefined,
       endTime: calculatedEndTime || undefined,
       duration: `${durationDays}:${durationHours}:${durationMinutes}:00`,
       priority,
-      realDate: startDateForSave || new Date().toISOString().split('T')[0],
+      realDate: startDateForSave || new Date().toISOString().split("T")[0],
       // повтор
       isRepeating: isRepeating || undefined,
       repeatCount: isRepeating ? parseInt(repeatCount) || 0 : undefined,
       startDateTimeRepit: calculatedStartDateTimeRepit,
       endDateTimeRepit: calculatedEndDateTimeRepit,
-      repeateDurationMinute: `${repeatDays.padStart(2, '0')}:${repeatHours.padStart(2, '0')}:${repeatMinutes.padStart(2, '0')}:00`,
+      repeateDurationMinute: `${repeatDays.padStart(2, "0")}:${repeatHours.padStart(2, "0")}:${repeatMinutes.padStart(2, "0")}:00`,
       // rule one task
       ruleOneTask: ruleOneTaskValue,
       startDateTimeRuleOneTask: calculatedStartTimeRuleOneTask,
@@ -544,72 +607,86 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
       tagIds: tagIds,
     };
 
-    console.log('Final taskData:', taskData);
+    console.log("Final taskData:", taskData);
 
-    console.log('Final taskData:', taskData);  
+    console.log("Final taskData:", taskData);
     onSave(taskData);
     onClose();
   };
 
-  const handleCheckboxChange = (type: 'repeat' | 'specific' | 'possible' | 'dependency', checked: boolean) => {
+  const handleCheckboxChange = (
+    type: "repeat" | "specific" | "possible" | "dependency",
+    checked: boolean,
+  ) => {
     if (isViewMode) return;
 
     if (checked) {
-
-      setIsRepeating(type === 'repeat');
-      setHasSpecificTime(type === 'specific');
-      setHasPossibleTime(type === 'possible');
-      setHasDependency(type === 'dependency');
+      setIsRepeating(type === "repeat");
+      setHasSpecificTime(type === "specific");
+      setHasPossibleTime(type === "possible");
+      setHasDependency(type === "dependency");
     } else {
-
-      if (type === 'repeat') setIsRepeating(false);
-      else if (type === 'specific') setHasSpecificTime(false);
-      else if (type === 'possible') setHasPossibleTime(false);
-      else if (type === 'dependency') setHasDependency(false);
+      if (type === "repeat") setIsRepeating(false);
+      else if (type === "specific") setHasSpecificTime(false);
+      else if (type === "possible") setHasPossibleTime(false);
+      else if (type === "dependency") setHasDependency(false);
     }
   };
 
   const loadTaskData = async (taskId: string) => {
-    console.log('=== loadTaskData DEBUG ===');
-  console.log('Loading task with ID:', taskId);
+    console.log("=== loadTaskData DEBUG ===");
+    console.log("Loading task with ID:", taskId);
 
     try {
       const fullTask = await taskApi.getTaskById(taskId);
-      console.log('Full task from API:', fullTask);
-    console.log('tagIds from API:', fullTask?.tagIds);
+      console.log("Full task from API:", fullTask);
+      console.log("tagIds from API:", fullTask?.tagIds);
 
       if (fullTask) {
         if (fullTask.duration) {
-          const parts = fullTask.duration.split(':');
+          const parts = fullTask.duration.split(":");
 
           if (parts.length === 4) {
             // Формат: дни:часы:минуты:секунды
             const [days, hours, minutes, seconds] = parts;
-            console.log("range 4 parts:", fullTask.duration, days, hours, minutes, seconds);
+            console.log(
+              "range 4 parts:",
+              fullTask.duration,
+              days,
+              hours,
+              minutes,
+              seconds,
+            );
             setDurationDays(days);
             setDurationHours(hours);
             setDurationMinutes(minutes);
           } else if (parts.length === 3) {
             // Формат: дни:часы:минуты
             const [hours, minutes, seconds] = parts;
-            console.log("range 3 parts:", fullTask.duration, hours, minutes, seconds);
-            setDurationDays('0');
+            console.log(
+              "range 3 parts:",
+              fullTask.duration,
+              hours,
+              minutes,
+              seconds,
+            );
+            setDurationDays("0");
             setDurationHours(hours);
             setDurationMinutes(minutes);
-          } 
+          }
         }
-        setTitle(fullTask.title || '');
-        setDescription(fullTask.description || '');
-        setStartDate(fullTask.startDate || '');
-        setEndDate(fullTask.endDate || '');
-        setStartTime(fullTask.startTime || '');
-        setEndTime(fullTask.endTime || '');
+        setTitle(fullTask.title || "");
+        setDescription(fullTask.description || "");
+        setStartDate(fullTask.startDate || "");
+        setEndDate(fullTask.endDate || "");
+        setStartTime(fullTask.startTime || "");
+        setEndTime(fullTask.endTime || "");
         setPriority(fullTask.priority);
 
-        console.log('Task type detection:', {
+        console.log("Task type detection:", {
           isRepit: fullTask.isRepeating,
           ruleOneTask: fullTask.ruleOneTask,
-          ruleTwoTask: fullTask.ruleTwoTask
+          ruleTwoTask: fullTask.ruleTwoTask,
         });
 
         setIsRepeating(false);
@@ -619,105 +696,129 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
         if (fullTask.isRepeating) {
           setIsRepeating(true);
-          setRepeatCount(String(fullTask.repeatCount || '0'));
-          
+          setRepeatCount(String(fullTask.repeatCount || "0"));
+
           if (fullTask.endDateTimeRepit) {
-            setRepeatType('period');
+            setRepeatType("period");
           } else {
-            setRepeatType('count');
+            setRepeatType("count");
           }
-        } 
-        else if (fullTask.ruleOneTask) {
+        } else if (fullTask.ruleOneTask) {
           setHasPossibleTime(true);
           if (fullTask.startDateTimeRuleOneTask) {
-            const [date, time] = fullTask.startDateTimeRuleOneTask.split('T');
+            const [date, time] = fullTask.startDateTimeRuleOneTask.split("T");
             setPossibleStartDate(date);
             setPossibleStartTime(time.substring(0, 5));
           }
           if (fullTask.endDateTimeRuleOneTask) {
-            const [date, time] = fullTask.endDateTimeRuleOneTask.split('T');
+            const [date, time] = fullTask.endDateTimeRuleOneTask.split("T");
             setPossibleEndDate(date);
             setPossibleEndTime(time.substring(0, 5));
           }
-        }
-        else if (fullTask.ruleTwoTask) {
+        } else if (fullTask.ruleTwoTask) {
           setHasDependency(true);
-          setDependencyTask(String(fullTask.secondTaskId || ''));
-          setDependencyType(fullTask.timePositionRegardingTaskId === 0 ? 'before' : 'after');
-          
+          setDependencyTask(String(fullTask.secondTaskId || ""));
+          setDependencyType(
+            fullTask.timePositionRegardingTaskId === 0 ? "before" : "after",
+          );
+
           if (fullTask.relationRangeId === 0) {
-            setDependencyOperator('>');
+            setDependencyOperator(">");
           } else if (fullTask.relationRangeId === 1) {
-            setDependencyOperator('=');
+            setDependencyOperator("=");
           } else if (fullTask.relationRangeId === 2) {
-            setDependencyOperator('<');
+            setDependencyOperator("<");
           }
-          
+
           if (fullTask.dateTimeRange) {
             if (fullTask.dateTimeRange) {
-              const parts = fullTask.dateTimeRange.split(':');
-    
+              const parts = fullTask.dateTimeRange.split(":");
+
               if (parts.length === 4) {
                 // Формат: дни:часы:минуты:секунды
                 const [days, hours, minutes, seconds] = parts;
-                console.log("range 4 parts:", fullTask.dateTimeRange, days, hours, minutes, seconds);
-                setDependencyDays(days || '0');
-                setDependencyHours(hours || '0');
-                setDependencyMinutes(minutes || '0');
+                console.log(
+                  "range 4 parts:",
+                  fullTask.dateTimeRange,
+                  days,
+                  hours,
+                  minutes,
+                  seconds,
+                );
+                setDependencyDays(days || "0");
+                setDependencyHours(hours || "0");
+                setDependencyMinutes(minutes || "0");
               } else if (parts.length === 3) {
                 // Формат: дни:часы:минуты
                 const [hours, minutes, seconds] = parts;
-                console.log("range 3 parts:", fullTask.dateTimeRange, hours, minutes, seconds);
-                setDependencyDays('0');
-                setDependencyHours(hours || '0');
-                setDependencyMinutes(minutes || '0');
-              } 
+                console.log(
+                  "range 3 parts:",
+                  fullTask.dateTimeRange,
+                  hours,
+                  minutes,
+                  seconds,
+                );
+                setDependencyDays("0");
+                setDependencyHours(hours || "0");
+                setDependencyMinutes(minutes || "0");
+              }
             }
           }
-        }
-        else {
+        } else {
           setHasSpecificTime(true);
         }
-        console.log('Setting tagIds to state:', fullTask.tagIds);
+        console.log("Setting tagIds to state:", fullTask.tagIds);
         setTagIds(fullTask.tagIds || []);
-
       }
     } catch (error) {
-      console.error('Error loading task data:', error);
+      console.error("Error loading task data:", error);
       initializeWithExistingData();
     }
   };
 
   const initializeWithExistingData = () => {
     if (!task) return;
-    
+
     if (task.duration) {
-      const parts = task.duration.split(':');
+      const parts = task.duration.split(":");
 
       if (parts.length === 4) {
         // Формат: дни:часы:минуты:секунды
         const [days, hours, minutes, seconds] = parts;
-        console.log("range 4 parts:", task.dateTimeRange, days, hours, minutes, seconds);
+        console.log(
+          "range 4 parts:",
+          task.dateTimeRange,
+          days,
+          hours,
+          minutes,
+          seconds,
+        );
         setDurationDays(days);
         setDurationHours(hours);
         setDurationMinutes(minutes);
       } else if (parts.length === 3) {
         // Формат: дни:часы:минуты
         const [hours, minutes, seconds] = parts;
-        console.log("range 3 parts:", task.dateTimeRange, hours, minutes, seconds);
-        setDurationDays('0');
+        console.log(
+          "range 3 parts:",
+          task.dateTimeRange,
+          hours,
+          minutes,
+          seconds,
+        );
+        setDurationDays("0");
         setDurationHours(hours);
         setDurationMinutes(minutes);
-      } 
+      }
     }
-    setTitle(task.title || '');
-    setDescription(task.description || '');
-    setStartDate(task.startDate || '');
-    setEndDate(task.endDate || '');
-    setStartTime(task.startTime || '');
-    setEndTime(task.endTime || '');
+    setTitle(task.title || "");
+    setDescription(task.description || "");
+    setStartDate(task.startDate || "");
+    setEndDate(task.endDate || "");
+    setStartTime(task.startTime || "");
+    setEndTime(task.endTime || "");
     setPriority(task.priority);
-    
+
     setIsRepeating(Boolean(task.isRepeating));
     setHasSpecificTime(Boolean(task.startDate && task.startTime));
     setHasPossibleTime(Boolean(task.ruleOneTask));
@@ -739,61 +840,68 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
   if (!isOpen) return null;
 
-  const isViewMode = mode === 'view';
-  const headerText = mode === 'create' ? 'Добавьте свою задачу' : 
-                    mode === 'edit' ? 'Редактирование задачи' : 
-                    'Просмотр задачи';
+  const isViewMode = mode === "view";
+  const headerText =
+    mode === "create"
+      ? "Добавьте свою задачу"
+      : mode === "edit"
+        ? "Редактирование задачи"
+        : "Просмотр задачи";
 
   return (
-    <div 
-      className="modal-overlay" 
+    <div
+      className="modal-overlay"
       onClick={handleBackgroundClick}
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         zIndex: 1001,
       }}
     >
-      <div 
+      <div
         className="task-form-modal"
         style={{
           backgroundColor: currentTheme.colors.surface,
-          padding: '30px',
-          borderRadius: '12px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-          width: '90%',
-          maxWidth: '600px',
-          maxHeight: '90vh',
-          overflow: 'auto',
+          padding: "30px",
+          borderRadius: "12px",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+          width: "90%",
+          maxWidth: "600px",
+          maxHeight: "90vh",
+          overflow: "auto",
           border: `1px solid ${currentTheme.colors.border}`,
         }}
       >
-        <h2 style={{ 
-          marginBottom: '25px', 
-          textAlign: 'center',
-          color: currentTheme.colors.text,
-          fontSize: '24px',
-          fontWeight: '600'
-        }}>
+        <h2
+          style={{
+            marginBottom: "25px",
+            textAlign: "center",
+            color: currentTheme.colors.text,
+            fontSize: "24px",
+            fontWeight: "600",
+          }}
+        >
           {headerText}
         </h2>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           {/* Название задачи */}
           <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px',
-              fontWeight: '500',
-              color: currentTheme.colors.text
-            }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "8px",
+                fontWeight: "500",
+                color: currentTheme.colors.text,
+              }}
+            >
               Задача:
             </label>
             <input
@@ -803,27 +911,33 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               placeholder="введите название задачи"
               disabled={isViewMode}
               style={{
-                width: '100%',
-                padding: '12px',
+                width: "100%",
+                padding: "12px",
                 border: `1px solid ${currentTheme.colors.border}`,
-                borderRadius: '6px',
-                fontSize: '16px',
-                fontStyle: title ? 'normal' : 'italic',
-                color: title ? currentTheme.colors.text : currentTheme.colors.textSecondary,
-                backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                cursor: isViewMode ? 'not-allowed' : 'text'
+                borderRadius: "6px",
+                fontSize: "16px",
+                fontStyle: title ? "normal" : "italic",
+                color: title
+                  ? currentTheme.colors.text
+                  : currentTheme.colors.textSecondary,
+                backgroundColor: isViewMode
+                  ? currentTheme.colors.background
+                  : currentTheme.colors.surface,
+                cursor: isViewMode ? "not-allowed" : "text",
               }}
             />
           </div>
 
           {/* Описание задачи */}
           <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px',
-              fontWeight: '500',
-              color: currentTheme.colors.text
-            }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "8px",
+                fontWeight: "500",
+                color: currentTheme.colors.text,
+              }}
+            >
               Описание задачи:
             </label>
             <textarea
@@ -833,199 +947,279 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
               disabled={isViewMode}
               rows={4}
               style={{
-                width: '100%',
-                padding: '12px',
+                width: "100%",
+                padding: "12px",
                 border: `1px solid ${currentTheme.colors.border}`,
-                borderRadius: '6px',
-                fontSize: '16px',
-                fontStyle: description ? 'normal' : 'italic',
-                color: description ? currentTheme.colors.text : currentTheme.colors.textSecondary,
-                backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                cursor: isViewMode ? 'not-allowed' : 'text',
-                resize: 'vertical',
-                minHeight: '100px'
+                borderRadius: "6px",
+                fontSize: "16px",
+                fontStyle: description ? "normal" : "italic",
+                color: description
+                  ? currentTheme.colors.text
+                  : currentTheme.colors.textSecondary,
+                backgroundColor: isViewMode
+                  ? currentTheme.colors.background
+                  : currentTheme.colors.surface,
+                cursor: isViewMode ? "not-allowed" : "text",
+                resize: "vertical",
+                minHeight: "100px",
               }}
             />
           </div>
 
           {/* Длительность */}
           <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '12px',
-              fontWeight: '500',
-              color: currentTheme.colors.text
-            }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "12px",
+                fontWeight: "500",
+                color: currentTheme.colors.text,
+              }}
+            >
               Длительность:
             </label>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Дни</div>
+            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "5px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: currentTheme.colors.textSecondary,
+                  }}
+                >
+                  Дни
+                </div>
                 <input
                   type="text"
                   value={durationDays}
                   onChange={(e) => {
-                    const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                    const onlyNums = e.target.value.replace(/[^0-9]/g, "");
                     setDurationDays(onlyNums);
                   }}
-
                   disabled={isViewMode}
                   min="0"
                   max="365"
                   style={{
-                    width: '100%',
-                    padding: '8px',
+                    width: "100%",
+                    padding: "8px",
                     border: `1px solid ${currentTheme.colors.border}`,
-                    borderRadius: '4px',
-                    fontSize: '14px',
-                    backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                    cursor: isViewMode ? 'not-allowed' : 'text',
-                    textAlign: 'center',
-                    color: currentTheme.colors.text
+                    borderRadius: "4px",
+                    fontSize: "14px",
+                    backgroundColor: isViewMode
+                      ? currentTheme.colors.background
+                      : currentTheme.colors.surface,
+                    cursor: isViewMode ? "not-allowed" : "text",
+                    textAlign: "center",
+                    color: currentTheme.colors.text,
                   }}
                 />
               </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Часы</div>
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "5px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: currentTheme.colors.textSecondary,
+                  }}
+                >
+                  Часы
+                </div>
                 <input
                   type="text"
                   value={durationHours}
                   onChange={(e) => {
-                    const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                    const onlyNums = e.target.value.replace(/[^0-9]/g, "");
                     setDurationHours(onlyNums);
                   }}
-
                   disabled={isViewMode}
                   min="0"
                   max="23"
                   style={{
-                    width: '100%',
-                    padding: '8px',
+                    width: "100%",
+                    padding: "8px",
                     border: `1px solid ${currentTheme.colors.border}`,
-                    borderRadius: '4px',
-                    fontSize: '14px',
-                    backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                    cursor: isViewMode ? 'not-allowed' : 'text',
-                    textAlign: 'center',
-                    color: currentTheme.colors.text
+                    borderRadius: "4px",
+                    fontSize: "14px",
+                    backgroundColor: isViewMode
+                      ? currentTheme.colors.background
+                      : currentTheme.colors.surface,
+                    cursor: isViewMode ? "not-allowed" : "text",
+                    textAlign: "center",
+                    color: currentTheme.colors.text,
                   }}
                 />
               </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Минуты</div>
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "5px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: currentTheme.colors.textSecondary,
+                  }}
+                >
+                  Минуты
+                </div>
                 <input
                   type="text"
                   value={durationMinutes}
                   onChange={(e) => {
-                    const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                    const onlyNums = e.target.value.replace(/[^0-9]/g, "");
                     setDurationMinutes(onlyNums);
                   }}
-
                   disabled={isViewMode}
                   min="0"
                   max="59"
                   step="15"
                   style={{
-                    width: '100%',
-                    padding: '8px',
+                    width: "100%",
+                    padding: "8px",
                     border: `1px solid ${currentTheme.colors.border}`,
-                    borderRadius: '4px',
-                    fontSize: '14px',
-                    backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                    cursor: isViewMode ? 'not-allowed' : 'text',
-                    textAlign: 'center',
-                    color: currentTheme.colors.text
+                    borderRadius: "4px",
+                    fontSize: "14px",
+                    backgroundColor: isViewMode
+                      ? currentTheme.colors.background
+                      : currentTheme.colors.surface,
+                    cursor: isViewMode ? "not-allowed" : "text",
+                    textAlign: "center",
+                    color: currentTheme.colors.text,
                   }}
                 />
               </div>
             </div>
-            <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, marginTop: '5px', textAlign: 'center' }}>
-              Общая длительность: {durationToMinutes(
+            <div
+              style={{
+                fontSize: "12px",
+                color: currentTheme.colors.textSecondary,
+                marginTop: "5px",
+                textAlign: "center",
+              }}
+            >
+              Общая длительность:{" "}
+              {durationToMinutes(
                 parseInt(durationDays) || 0,
                 parseInt(durationHours) || 0,
-                parseInt(durationMinutes) || 0
-              )} минут
+                parseInt(durationMinutes) || 0,
+              )}{" "}
+              минут
             </div>
           </div>
 
           {/* Приоритет */}
           <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '12px',
-              fontWeight: '500',
-              color: currentTheme.colors.text
-            }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "12px",
+                fontWeight: "500",
+                color: currentTheme.colors.text,
+              }}
+            >
               Приоритет: {priority}
             </label>
 
-            <div style={{ 
-              padding: '20px 15px',
-              backgroundColor: currentTheme.colors.background,
-              borderRadius: '8px',
-              marginBottom: '10px'
-            }}>
+            <div
+              style={{
+                padding: "20px 15px",
+                backgroundColor: currentTheme.colors.background,
+                borderRadius: "8px",
+                marginBottom: "10px",
+              }}
+            >
               <input
                 type="range"
                 min="1"
                 max="10"
                 value={priority}
-                onChange={(e) => !isViewMode && setPriority(parseInt(e.target.value))}
+                onChange={(e) =>
+                  !isViewMode && setPriority(parseInt(e.target.value))
+                }
                 disabled={isViewMode}
                 style={{
-                  width: '100%',
-                  height: '6px',
-                  borderRadius: '3px',
+                  width: "100%",
+                  height: "6px",
+                  borderRadius: "3px",
                   background: `linear-gradient(to right, ${currentTheme.colors.priorityLow}, ${currentTheme.colors.priorityHigh})`,
-                  outline: 'none',
-                  cursor: isViewMode ? 'not-allowed' : 'pointer',
+                  outline: "none",
+                  cursor: isViewMode ? "not-allowed" : "pointer",
                 }}
               />
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginTop: '8px',
-                fontSize: '12px',
-                color: currentTheme.colors.textSecondary
-              }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginTop: "8px",
+                  fontSize: "12px",
+                  color: currentTheme.colors.textSecondary,
+                }}
+              >
                 <span>1 (Низкий)</span>
                 <span>10 (Высокий)</span>
               </div>
             </div>
-            
+
             {/* Визуализация текущего приоритета */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '10px',
-              marginTop: '10px'
-            }}>
-              <div style={{
-                width: '20px',
-                height: '20px',
-                borderRadius: '50%',
-                backgroundColor: getPriorityColor(priority, currentTheme.colors.priorityLow, currentTheme.colors.priorityHigh),
-                border: `2px solid ${currentTheme.colors.border}`
-              }} />
-              <span style={{
-                fontSize: '14px',
-                color: currentTheme.colors.text,
-                fontWeight: '500'
-              }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "10px",
+                marginTop: "10px",
+              }}
+            >
+              <div
+                style={{
+                  width: "20px",
+                  height: "20px",
+                  borderRadius: "50%",
+                  backgroundColor: getPriorityColor(
+                    priority,
+                    currentTheme.colors.priorityLow,
+                    currentTheme.colors.priorityHigh,
+                  ),
+                  border: `2px solid ${currentTheme.colors.border}`,
+                }}
+              />
+              <span
+                style={{
+                  fontSize: "14px",
+                  color: currentTheme.colors.text,
+                  fontWeight: "500",
+                }}
+              >
                 Текущий приоритет: {priority}
               </span>
             </div>
           </div>
 
           {/* Теги */}
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '8px',
-              fontWeight: '500',
-              color: currentTheme.colors.text
-            }}>
+          <div style={{ marginBottom: "20px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "8px",
+                fontWeight: "500",
+                color: currentTheme.colors.text,
+              }}
+            >
               Теги:
             </label>
             <TagSelector
@@ -1037,1018 +1231,1239 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             />
           </div>
         </div>
-          {/* Тип задачи */}
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: '12px',
-              padding: '10px 0'
-            }}>
-              {/* Повторяющаяся задача */}
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '12px',
-                opacity: isViewMode ? 0.6 : 1
-              }}>
-                <input
-                  type="radio"
-                  id="taskTypeRepeat"
-                  name="taskType"
-                  checked={isRepeating}
-                  onChange={() => {
-                    if (!isViewMode) {
-                      setIsRepeating(true);
-                      setHasSpecificTime(false);
-                      setHasPossibleTime(false);
-                      setHasDependency(false);
-                    }
-                  }}
-                  disabled={isViewMode}
-                  style={{
-                    width: '18px',
-                    height: '18px',
-                    cursor: isViewMode ? 'not-allowed' : 'pointer',
-                    accentColor: currentTheme.colors.primary
-                  }}
-                />
-                <label 
-                  htmlFor="taskTypeRepeat"
-                  style={{ 
-                    fontWeight: '500',
-                    color: currentTheme.colors.text,
-                    cursor: isViewMode ? 'not-allowed' : 'pointer',
-                    flex: 1
-                  }}
-                >
-                  Задача повторяется?
-                </label>
-              </div>
+        {/* Тип задачи */}
+        <div style={{ marginBottom: "20px" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+              padding: "10px 0",
+            }}
+          >
+            {/* Повторяющаяся задача */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                opacity: isViewMode ? 0.6 : 1,
+              }}
+            >
+              <input
+                type="radio"
+                id="taskTypeRepeat"
+                name="taskType"
+                checked={isRepeating}
+                onChange={() => {
+                  if (!isViewMode) {
+                    setIsRepeating(true);
+                    setHasSpecificTime(false);
+                    setHasPossibleTime(false);
+                    setHasDependency(false);
+                  }
+                }}
+                disabled={isViewMode}
+                style={{
+                  width: "18px",
+                  height: "18px",
+                  cursor: isViewMode ? "not-allowed" : "pointer",
+                  accentColor: currentTheme.colors.primary,
+                }}
+              />
+              <label
+                htmlFor="taskTypeRepeat"
+                style={{
+                  fontWeight: "500",
+                  color: currentTheme.colors.text,
+                  cursor: isViewMode ? "not-allowed" : "pointer",
+                  flex: 1,
+                }}
+              >
+                Задача повторяется?
+              </label>
+            </div>
 
-              {isRepeating && (
-                <div style={{ 
-                  padding: '15px', 
-                  marginLeft: '30px',
+            {isRepeating && (
+              <div
+                style={{
+                  padding: "15px",
+                  marginLeft: "30px",
                   backgroundColor: currentTheme.colors.background,
-                  borderRadius: '6px',
+                  borderRadius: "6px",
                   border: `1px solid ${currentTheme.colors.border}`,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '15px'
-                }}>
-                  
-                  {/* Время начала первой задачи */}
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      marginBottom: '8px',
-                      fontSize: '14px',
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "15px",
+                }}
+              >
+                {/* Время начала первой задачи */}
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "8px",
+                      fontSize: "14px",
                       color: currentTheme.colors.text,
-                      fontWeight: '500'
-                    }}>
-                      Время начала первой задачи:
-                    </label>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <input
-                        type="date"
-                        value={repeatStartDate}
-                        onChange={(e) => setRepeatStartDate(e.target.value)}
-                        disabled={isViewMode}
-                        style={{
-                          flex: 1,
-                          padding: '8px',
-                          border: `1px solid ${currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                          cursor: isViewMode ? 'not-allowed' : 'text',
-                          color: currentTheme.colors.text
-                        }}
-                      />
-                      <input
-                        type="time"
-                        value={repeatStartTime}
-                        onChange={(e) => setRepeatStartTime(e.target.value)}
-                        disabled={isViewMode}
-                        style={{
-                          flex: 1,
-                          padding: '8px',
-                          border: `1px solid ${currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                          cursor: isViewMode ? 'not-allowed' : 'text',
-                          color: currentTheme.colors.text
-                        }}
-                      />
-                    </div>
+                      fontWeight: "500",
+                    }}
+                  >
+                    Время начала первой задачи:
+                  </label>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <input
+                      type="date"
+                      value={repeatStartDate}
+                      onChange={(e) => setRepeatStartDate(e.target.value)}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: "8px",
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: isViewMode
+                          ? currentTheme.colors.background
+                          : currentTheme.colors.surface,
+                        cursor: isViewMode ? "not-allowed" : "text",
+                        color: currentTheme.colors.text,
+                      }}
+                    />
+                    <input
+                      type="time"
+                      value={repeatStartTime}
+                      onChange={(e) => setRepeatStartTime(e.target.value)}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: "8px",
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: isViewMode
+                          ? currentTheme.colors.background
+                          : currentTheme.colors.surface,
+                        cursor: isViewMode ? "not-allowed" : "text",
+                        color: currentTheme.colors.text,
+                      }}
+                    />
                   </div>
+                </div>
 
-                  {/* Интервал между задачами (ОБЯЗАТЕЛЬНО) */}
-                  <div>
-                    <label style={{ 
-                      display: 'block', 
-                      marginBottom: '8px',
-                      fontSize: '14px',
+                {/* Интервал между задачами (ОБЯЗАТЕЛЬНО) */}
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "8px",
+                      fontSize: "14px",
                       color: currentTheme.colors.text,
-                      fontWeight: '500'
-                    }}>
-                      Интервал между задачами *:
-                    </label>
-                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                        <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Дни</div>
-                        <input
-                          type="text"
-                          value={repeatDays}
-                          onChange={(e) => {
-                            const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                            setRepeatDays(onlyNums);
-                          }}
-                          disabled={isViewMode}
-                          min="0"
-                          style={{
-                            width: '100%',
-                            padding: '8px',
-                            border: `1px solid ${currentTheme.colors.border}`,
-                            borderRadius: '4px',
-                            fontSize: '14px',
-                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'text',
-                            textAlign: 'center',
-                            color: currentTheme.colors.text
-                          }}
-                        />
-                      </div>
-                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                        <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Часы</div>
-                        <input
-                          type="text"
-                          value={repeatHours}
-                          onChange={(e) => {
-                            const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                            setRepeatHours(onlyNums);
-                          }}
-                          disabled={isViewMode}
-                          min="0"
-                          max="23"
-                          style={{
-                            width: '100%',
-                            padding: '8px',
-                            border: `1px solid ${currentTheme.colors.border}`,
-                            borderRadius: '4px',
-                            fontSize: '14px',
-                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'text',
-                            textAlign: 'center',
-                            color: currentTheme.colors.text
-                          }}
-                        />
-                      </div>
-                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                        <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Минуты</div>
-                        <input
-                          type="text"
-                          value={repeatMinutes}
-                          onChange={(e) => {
-                            const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                            setRepeatMinutes(onlyNums);
-                          }}
-                          disabled={isViewMode}
-                          min="0"
-                          max="59"
-                          style={{
-                            width: '100%',
-                            padding: '8px',
-                            border: `1px solid ${currentTheme.colors.border}`,
-                            borderRadius: '4px',
-                            fontSize: '14px',
-                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'text',
-                            textAlign: 'center',
-                            color: currentTheme.colors.text
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Выбор типа повторения */}
-                  <div>
-                    <label style={{ 
-                      display: 'block', 
-                      marginBottom: '8px',
-                      fontSize: '14px',
-                      color: currentTheme.colors.text,
-                      fontWeight: '500'
-                    }}>
-                      Тип повторения:
-                    </label>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <button
-                        type="button"
-                        onClick={() => setRepeatType('count')}
-                        disabled={isViewMode}
+                      fontWeight: "500",
+                    }}
+                  >
+                    Интервал между задачами *:
+                  </label>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "5px",
+                      }}
+                    >
+                      <div
                         style={{
-                          flex: 1,
-                          padding: '10px',
-                          border: `2px solid ${repeatType === 'count' ? currentTheme.colors.primary : currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          backgroundColor: repeatType === 'count' ? currentTheme.colors.background : currentTheme.colors.surface,
-                          color: currentTheme.colors.text,
-                          cursor: isViewMode ? 'not-allowed' : 'pointer',
-                          fontWeight: repeatType === 'count' ? '600' : '400'
+                          fontSize: "12px",
+                          color: currentTheme.colors.textSecondary,
                         }}
                       >
-                        По количеству
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setRepeatType('period')}
-                        disabled={isViewMode}
-                        style={{
-                          flex: 1,
-                          padding: '10px',
-                          border: `2px solid ${repeatType === 'period' ? currentTheme.colors.primary : currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          backgroundColor: repeatType === 'period' ? currentTheme.colors.background : currentTheme.colors.surface,
-                          color: currentTheme.colors.text,
-                          cursor: isViewMode ? 'not-allowed' : 'pointer',
-                          fontWeight: repeatType === 'period' ? '600' : '400'
-                        }}
-                      >
-                        По периоду
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Количество повторений (если выбран тип "count") */}
-                  {repeatType === 'count' && (
-                    <div>
-                      <label style={{ 
-                        display: 'block', 
-                        marginBottom: '8px',
-                        fontSize: '14px',
-                        color: currentTheme.colors.text
-                      }}>
-                        Количество повторений:
-                      </label>
+                        Дни
+                      </div>
                       <input
                         type="text"
-                        value={repeatCount}
+                        value={repeatDays}
                         onChange={(e) => {
-                          const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                          setRepeatCount(onlyNums);
+                          const onlyNums = e.target.value.replace(
+                            /[^0-9]/g,
+                            "",
+                          );
+                          setRepeatDays(onlyNums);
                         }}
                         disabled={isViewMode}
                         min="0"
-                        placeholder="0"
                         style={{
-                          width: '100%',
-                          padding: '8px',
+                          width: "100%",
+                          padding: "8px",
                           border: `1px solid ${currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                          cursor: isViewMode ? 'not-allowed' : 'text',
-                          color: currentTheme.colors.text
+                          borderRadius: "4px",
+                          fontSize: "14px",
+                          backgroundColor: isViewMode
+                            ? currentTheme.colors.background
+                            : currentTheme.colors.surface,
+                          cursor: isViewMode ? "not-allowed" : "text",
+                          textAlign: "center",
+                          color: currentTheme.colors.text,
                         }}
                       />
                     </div>
-                  )}
-
-                  {/* Период повторения (если выбран тип "period") */}
-                  {repeatType === 'period' && (
-                    <>
-                      <div>
-                        <label style={{ 
-                          display: 'block', 
-                          marginBottom: '8px',
-                          fontSize: '14px',
-                          color: currentTheme.colors.text
-                        }}>
-                          Начало периода повторения:
-                        </label>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                          <input
-                            type="date"
-                            value={repeatStartDate}
-                            onChange={(e) => setRepeatStartDate(e.target.value)}
-                            disabled={isViewMode}
-                            style={{
-                              flex: 1,
-                              padding: '8px',
-                              border: `1px solid ${currentTheme.colors.border}`,
-                              borderRadius: '4px',
-                              fontSize: '14px',
-                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                              cursor: isViewMode ? 'not-allowed' : 'text',
-                              color: currentTheme.colors.text
-                            }}
-                          />
-                          <input
-                            type="time"
-                            value={repeatStartTime}
-                            onChange={(e) => setRepeatStartTime(e.target.value)}
-                            disabled={isViewMode}
-                            style={{
-                              flex: 1,
-                              padding: '8px',
-                              border: `1px solid ${currentTheme.colors.border}`,
-                              borderRadius: '4px',
-                              fontSize: '14px',
-                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                              cursor: isViewMode ? 'not-allowed' : 'text',
-                              color: currentTheme.colors.text
-                            }}
-                          />
-                        </div>
+                    <div
+                      style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "5px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: currentTheme.colors.textSecondary,
+                        }}
+                      >
+                        Часы
                       </div>
-
-                      <div>
-                        <label style={{ 
-                          display: 'block', 
-                          marginBottom: '8px',
-                          fontSize: '14px',
-                          color: currentTheme.colors.text
-                        }}>
-                          Конец периода повторения:
-                        </label>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                          <input
-                            type="date"
-                            value={repeatEndDate}
-                            onChange={(e) => setRepeatEndDate(e.target.value)}
-                            disabled={isViewMode}
-                            min={repeatStartDate} 
-                            style={{
-                              flex: 1,
-                              padding: '8px',
-                              border: `1px solid ${currentTheme.colors.border}`,
-                              borderRadius: '4px',
-                              fontSize: '14px',
-                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                              cursor: isViewMode ? 'not-allowed' : 'text',
-                              color: currentTheme.colors.text
-                            }}
-                          />
-                          <input
-                            type="time"
-                            value={repeatEndTime}
-                            onChange={(e) => setRepeatEndTime(e.target.value)}
-                            disabled={isViewMode}
-                            min={repeatStartDate === repeatEndDate ? repeatStartTime : undefined} 
-                            style={{
-                              flex: 1,
-                              padding: '8px',
-                              border: `1px solid ${currentTheme.colors.border}`,
-                              borderRadius: '4px',
-                              fontSize: '14px',
-                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                              cursor: isViewMode ? 'not-allowed' : 'text',
-                              color: currentTheme.colors.text
-                            }}
-                          />
-                        </div>
+                      <input
+                        type="text"
+                        value={repeatHours}
+                        onChange={(e) => {
+                          const onlyNums = e.target.value.replace(
+                            /[^0-9]/g,
+                            "",
+                          );
+                          setRepeatHours(onlyNums);
+                        }}
+                        disabled={isViewMode}
+                        min="0"
+                        max="23"
+                        style={{
+                          width: "100%",
+                          padding: "8px",
+                          border: `1px solid ${currentTheme.colors.border}`,
+                          borderRadius: "4px",
+                          fontSize: "14px",
+                          backgroundColor: isViewMode
+                            ? currentTheme.colors.background
+                            : currentTheme.colors.surface,
+                          cursor: isViewMode ? "not-allowed" : "text",
+                          textAlign: "center",
+                          color: currentTheme.colors.text,
+                        }}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "5px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: currentTheme.colors.textSecondary,
+                        }}
+                      >
+                        Минуты
                       </div>
-                    </>
-                  )}
+                      <input
+                        type="text"
+                        value={repeatMinutes}
+                        onChange={(e) => {
+                          const onlyNums = e.target.value.replace(
+                            /[^0-9]/g,
+                            "",
+                          );
+                          setRepeatMinutes(onlyNums);
+                        }}
+                        disabled={isViewMode}
+                        min="0"
+                        max="59"
+                        style={{
+                          width: "100%",
+                          padding: "8px",
+                          border: `1px solid ${currentTheme.colors.border}`,
+                          borderRadius: "4px",
+                          fontSize: "14px",
+                          backgroundColor: isViewMode
+                            ? currentTheme.colors.background
+                            : currentTheme.colors.surface,
+                          cursor: isViewMode ? "not-allowed" : "text",
+                          textAlign: "center",
+                          color: currentTheme.colors.text,
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
-              )}
 
-              {/* Задача с конкретным временем начала */}
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '12px',
-                opacity: isViewMode ? 0.6 : 1
-              }}>
-                <input
-                  type="radio"
-                  id="taskTypeSpecific"
-                  name="taskType"
-                  checked={hasSpecificTime}
-                  onChange={() => {
-                    if (!isViewMode) {
-                      setIsRepeating(false);
-                      setHasSpecificTime(true);
-                      setHasPossibleTime(false);
-                      setHasDependency(false);
-                    }
-                  }}
-                  disabled={isViewMode}
-                  style={{
-                    width: '18px',
-                    height: '18px',
-                    cursor: isViewMode ? 'not-allowed' : 'pointer',
-                    accentColor: currentTheme.colors.primary
-                  }}
-                />
-                <label 
-                  htmlFor="taskTypeSpecific"
-                  style={{ 
-                    fontWeight: '500',
-                    color: currentTheme.colors.text,
-                    cursor: isViewMode ? 'not-allowed' : 'pointer',
-                    flex: 1
-                  }}
-                >
-                  У задачи есть конкретное время начала?
-                </label>
-              </div>
+                {/* Выбор типа повторения */}
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "8px",
+                      fontSize: "14px",
+                      color: currentTheme.colors.text,
+                      fontWeight: "500",
+                    }}
+                  >
+                    Тип повторения:
+                  </label>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <button
+                      type="button"
+                      onClick={() => setRepeatType("count")}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: "10px",
+                        border: `2px solid ${repeatType === "count" ? currentTheme.colors.primary : currentTheme.colors.border}`,
+                        borderRadius: "4px",
+                        backgroundColor:
+                          repeatType === "count"
+                            ? currentTheme.colors.background
+                            : currentTheme.colors.surface,
+                        color: currentTheme.colors.text,
+                        cursor: isViewMode ? "not-allowed" : "pointer",
+                        fontWeight: repeatType === "count" ? "600" : "400",
+                      }}
+                    >
+                      По количеству
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRepeatType("period")}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: "10px",
+                        border: `2px solid ${repeatType === "period" ? currentTheme.colors.primary : currentTheme.colors.border}`,
+                        borderRadius: "4px",
+                        backgroundColor:
+                          repeatType === "period"
+                            ? currentTheme.colors.background
+                            : currentTheme.colors.surface,
+                        color: currentTheme.colors.text,
+                        cursor: isViewMode ? "not-allowed" : "pointer",
+                        fontWeight: repeatType === "period" ? "600" : "400",
+                      }}
+                    >
+                      По периоду
+                    </button>
+                  </div>
+                </div>
 
-              {hasSpecificTime && (
-                <div style={{ 
-                  padding: '15px', 
-                  marginLeft: '30px',
-                  backgroundColor: currentTheme.colors.background,
-                  borderRadius: '6px',
-                  border: `1px solid ${currentTheme.colors.border}`,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '15px'
-                }}>
-                  <div className="dates-container">
+                {/* Количество повторений (если выбран тип "count") */}
+                {repeatType === "count" && (
+                  <div>
+                    <label
+                      style={{
+                        display: "block",
+                        marginBottom: "8px",
+                        fontSize: "14px",
+                        color: currentTheme.colors.text,
+                      }}
+                    >
+                      Количество повторений:
+                    </label>
+                    <input
+                      type="text"
+                      value={repeatCount}
+                      onChange={(e) => {
+                        const onlyNums = e.target.value.replace(/[^0-9]/g, "");
+                        setRepeatCount(onlyNums);
+                      }}
+                      disabled={isViewMode}
+                      min="0"
+                      placeholder="0"
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: isViewMode
+                          ? currentTheme.colors.background
+                          : currentTheme.colors.surface,
+                        cursor: isViewMode ? "not-allowed" : "text",
+                        color: currentTheme.colors.text,
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* Период повторения (если выбран тип "period") */}
+                {repeatType === "period" && (
+                  <>
                     <div>
-                      <div style={{ fontSize: '14px', color: currentTheme.colors.textSecondary, marginBottom: '5px' }}>Начать с:</div>
-                      <div className="date-group">
+                      <label
+                        style={{
+                          display: "block",
+                          marginBottom: "8px",
+                          fontSize: "14px",
+                          color: currentTheme.colors.text,
+                        }}
+                      >
+                        Начало периода повторения:
+                      </label>
+                      <div style={{ display: "flex", gap: "10px" }}>
                         <input
                           type="date"
-                          value={startDate}
-                          onChange={(e) => setStartDate(e.target.value)}
+                          value={repeatStartDate}
+                          onChange={(e) => setRepeatStartDate(e.target.value)}
                           disabled={isViewMode}
                           style={{
                             flex: 1,
-                            padding: '8px',
+                            padding: "8px",
                             border: `1px solid ${currentTheme.colors.border}`,
-                            borderRadius: '4px',
-                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'text',
-                            color: currentTheme.colors.text
+                            borderRadius: "4px",
+                            fontSize: "14px",
+                            backgroundColor: isViewMode
+                              ? currentTheme.colors.background
+                              : currentTheme.colors.surface,
+                            cursor: isViewMode ? "not-allowed" : "text",
+                            color: currentTheme.colors.text,
                           }}
                         />
                         <input
                           type="time"
-                          value={startTime}
-                          onChange={(e) => setStartTime(e.target.value)}
+                          value={repeatStartTime}
+                          onChange={(e) => setRepeatStartTime(e.target.value)}
                           disabled={isViewMode}
                           style={{
                             flex: 1,
-                            padding: '8px',
+                            padding: "8px",
                             border: `1px solid ${currentTheme.colors.border}`,
-                            borderRadius: '4px',
-                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'text',
-                            color: currentTheme.colors.text
+                            borderRadius: "4px",
+                            fontSize: "14px",
+                            backgroundColor: isViewMode
+                              ? currentTheme.colors.background
+                              : currentTheme.colors.surface,
+                            cursor: isViewMode ? "not-allowed" : "text",
+                            color: currentTheme.colors.text,
                           }}
                         />
                       </div>
                     </div>
-                  </div>
-                </div>
-              )}
 
-              {/* Задача с возможным временем */}
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '12px',
-                opacity: isViewMode ? 0.6 : 1
-              }}>
-                <input
-                  type="radio"
-                  id="taskTypePossible"
-                  name="taskType"
-                  checked={hasPossibleTime}
-                  onChange={() => {
-                    if (!isViewMode) {
-                      setIsRepeating(false);
-                      setHasSpecificTime(false);
-                      setHasPossibleTime(true);
-                      setHasDependency(false);
-                    }
-                  }}
-                  disabled={isViewMode}
-                  style={{
-                    width: '18px',
-                    height: '18px',
-                    cursor: isViewMode ? 'not-allowed' : 'pointer',
-                    accentColor: currentTheme.colors.primary
-                  }}
-                />
-                <label 
-                  htmlFor="taskTypePossible"
-                  style={{ 
-                    fontWeight: '500',
-                    color: currentTheme.colors.text,
-                    cursor: isViewMode ? 'not-allowed' : 'pointer',
-                    flex: 1
-                  }}
-                >
-                  Есть ли возможное время начала и конца задачи?
-                </label>
-              </div>
-
-              {hasPossibleTime && (
-                <div style={{ 
-                  padding: '15px', 
-                  marginLeft: '30px',
-                  backgroundColor: currentTheme.colors.background,
-                  borderRadius: '6px',
-                  border: `1px solid ${currentTheme.colors.border}`,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '15px'
-                }}>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <div style={{ flex: 1 }}>
-                      <input
-                        type="date"
-                        value={possibleStartDate}
-                        onChange={(e) => setPossibleStartDate(e.target.value)}
-                        disabled={isViewMode}
+                    <div>
+                      <label
                         style={{
-                          flex: 1,
-                          padding: '8px',
-                          border: `1px solid ${currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                          cursor: isViewMode ? 'not-allowed' : 'text',
-                          color: currentTheme.colors.text
+                          display: "block",
+                          marginBottom: "8px",
+                          fontSize: "14px",
+                          color: currentTheme.colors.text,
                         }}
-                      />
-                      <input
-                        type="time"
-                        value={possibleStartTime}
-                        onChange={(e) => setPossibleStartTime(e.target.value)}
-                        disabled={isViewMode}
-                        placeholder="примерно начать с..."
-                        style={{
-                          width: '100%',
-                          padding: '8px',
-                          border: `1px solid ${currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                          cursor: isViewMode ? 'not-allowed' : 'text',
-                          fontStyle: possibleStartTime ? 'normal' : 'italic',
-                          color: possibleStartTime ? currentTheme.colors.text : currentTheme.colors.textSecondary
-                        }}
-                      />
+                      >
+                        Конец периода повторения:
+                      </label>
+                      <div style={{ display: "flex", gap: "10px" }}>
+                        <input
+                          type="date"
+                          value={repeatEndDate}
+                          onChange={(e) => setRepeatEndDate(e.target.value)}
+                          disabled={isViewMode}
+                          min={repeatStartDate}
+                          style={{
+                            flex: 1,
+                            padding: "8px",
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: "4px",
+                            fontSize: "14px",
+                            backgroundColor: isViewMode
+                              ? currentTheme.colors.background
+                              : currentTheme.colors.surface,
+                            cursor: isViewMode ? "not-allowed" : "text",
+                            color: currentTheme.colors.text,
+                          }}
+                        />
+                        <input
+                          type="time"
+                          value={repeatEndTime}
+                          onChange={(e) => setRepeatEndTime(e.target.value)}
+                          disabled={isViewMode}
+                          min={
+                            repeatStartDate === repeatEndDate
+                              ? repeatStartTime
+                              : undefined
+                          }
+                          style={{
+                            flex: 1,
+                            padding: "8px",
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: "4px",
+                            fontSize: "14px",
+                            backgroundColor: isViewMode
+                              ? currentTheme.colors.background
+                              : currentTheme.colors.surface,
+                            cursor: isViewMode ? "not-allowed" : "text",
+                            color: currentTheme.colors.text,
+                          }}
+                        />
+                      </div>
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <input
-                        type="date"
-                        value={possibleEndDate}
-                        onChange={(e) => setPossibleEndDate(e.target.value)}
-                        disabled={isViewMode}
-                        style={{
-                          flex: 1,
-                          padding: '8px',
-                          border: `1px solid ${currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                          cursor: isViewMode ? 'not-allowed' : 'text',
-                          color: currentTheme.colors.text
-                        }}
-                      />
-                      <input
-                        type="time"
-                        value={possibleEndTime}
-                        onChange={(e) => setPossibleEndTime(e.target.value)}
-                        disabled={isViewMode}
-                        placeholder="примерно закончить"
-                        style={{
-                          width: '100%',
-                          padding: '8px',
-                          border: `1px solid ${currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                          cursor: isViewMode ? 'not-allowed' : 'text',
-                          fontStyle: possibleEndTime ? 'normal' : 'italic',
-                          color: possibleEndTime ? currentTheme.colors.text : currentTheme.colors.textSecondary
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Зависимая задача */}
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '12px',
-                opacity: isViewMode ? 0.6 : 1
-              }}>
-                <input
-                  type="radio"
-                  id="taskTypeDependency"
-                  name="taskType"
-                  checked={hasDependency}
-                  onChange={() => {
-                    if (!isViewMode) {
-                      setIsRepeating(false);
-                      setHasSpecificTime(false);
-                      setHasPossibleTime(false);
-                      setHasDependency(true);
-                    }
-                  }}
-                  disabled={isViewMode}
-                  style={{
-                    width: '18px',
-                    height: '18px',
-                    cursor: isViewMode ? 'not-allowed' : 'pointer',
-                    accentColor: currentTheme.colors.primary
-                  }}
-                />
-                <label 
-                  htmlFor="taskTypeDependency"
-                  style={{ 
-                    fontWeight: '500',
-                    color: currentTheme.colors.text,
-                    cursor: isViewMode ? 'not-allowed' : 'pointer',
-                    flex: 1
-                  }}
-                >
-                  Зависит ли задача от другой задачи?
-                </label>
+                  </>
+                )}
               </div>
+            )}
 
-              {hasDependency && (
-                <div style={{ 
-                  padding: '15px', 
-                  marginLeft: '30px',
+            {/* Задача с конкретным временем начала */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                opacity: isViewMode ? 0.6 : 1,
+              }}
+            >
+              <input
+                type="radio"
+                id="taskTypeSpecific"
+                name="taskType"
+                checked={hasSpecificTime}
+                onChange={() => {
+                  if (!isViewMode) {
+                    setIsRepeating(false);
+                    setHasSpecificTime(true);
+                    setHasPossibleTime(false);
+                    setHasDependency(false);
+                  }
+                }}
+                disabled={isViewMode}
+                style={{
+                  width: "18px",
+                  height: "18px",
+                  cursor: isViewMode ? "not-allowed" : "pointer",
+                  accentColor: currentTheme.colors.primary,
+                }}
+              />
+              <label
+                htmlFor="taskTypeSpecific"
+                style={{
+                  fontWeight: "500",
+                  color: currentTheme.colors.text,
+                  cursor: isViewMode ? "not-allowed" : "pointer",
+                  flex: 1,
+                }}
+              >
+                У задачи есть конкретное время начала?
+              </label>
+            </div>
+
+            {hasSpecificTime && (
+              <div
+                style={{
+                  padding: "15px",
+                  marginLeft: "30px",
                   backgroundColor: currentTheme.colors.background,
-                  borderRadius: '6px',
+                  borderRadius: "6px",
                   border: `1px solid ${currentTheme.colors.border}`,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '15px'
-                }}>
-                  {/* Что за задача */}
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "15px",
+                }}
+              >
+                <div className="dates-container">
                   <div>
-                    <label style={{ 
-                      display: 'block', 
-                      marginBottom: '8px',
-                      fontSize: '14px',
-                      color: currentTheme.colors.text
-                    }}>
-                      Родительская задача:
-                    </label>
-                    <select
-                      value={dependencyTask}
-                      onChange={(e) => setDependencyTask(e.target.value)}
-                      disabled={isViewMode}
+                    <div
                       style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'pointer',
-                        color: currentTheme.colors.text
+                        fontSize: "14px",
+                        color: currentTheme.colors.textSecondary,
+                        marginBottom: "5px",
                       }}
                     >
-                      <option value="">Выберите задачу</option>
-                      {/* Динамически подгружаем задачи из availableTasks */}
-                      {availableTasks.map((task) => (
-                        <option key={task.id} value={task.id}>
-                          {task.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* раньше или позже */}
-                  <div>
-                    <label style={{ 
-                      display: 'block', 
-                      marginBottom: '8px',
-                      fontSize: '14px',
-                      color: currentTheme.colors.text
-                    }}>
-                      Поставить задачу РАНЬШЕ или ПОЗЖЕ родительской?
-                    </label>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <button
-                        type="button"
-                        onClick={() => setDependencyType('before')}
+                      Начать с:
+                    </div>
+                    <div className="date-group">
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
                         disabled={isViewMode}
                         style={{
                           flex: 1,
-                          padding: '8px',
-                          border: `2px solid ${dependencyType === 'before' ? currentTheme.colors.primary : currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          backgroundColor: dependencyType === 'before' ? currentTheme.colors.background : currentTheme.colors.surface,
+                          padding: "8px",
+                          border: `1px solid ${currentTheme.colors.border}`,
+                          borderRadius: "4px",
+                          backgroundColor: isViewMode
+                            ? currentTheme.colors.background
+                            : currentTheme.colors.surface,
+                          cursor: isViewMode ? "not-allowed" : "text",
                           color: currentTheme.colors.text,
-                          cursor: isViewMode ? 'not-allowed' : 'pointer',
-                          fontWeight: dependencyType === 'before' ? '600' : '400'
                         }}
-                      >
-                        Раньше
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDependencyType('after')}
+                      />
+                      <input
+                        type="time"
+                        value={startTime}
+                        onChange={(e) => setStartTime(e.target.value)}
                         disabled={isViewMode}
                         style={{
                           flex: 1,
-                          padding: '8px',
-                          border: `2px solid ${dependencyType === 'after' ? currentTheme.colors.primary : currentTheme.colors.border}`,
-                          borderRadius: '4px',
-                          backgroundColor: dependencyType === 'after' ? currentTheme.colors.background : currentTheme.colors.surface,
+                          padding: "8px",
+                          border: `1px solid ${currentTheme.colors.border}`,
+                          borderRadius: "4px",
+                          backgroundColor: isViewMode
+                            ? currentTheme.colors.background
+                            : currentTheme.colors.surface,
+                          cursor: isViewMode ? "not-allowed" : "text",
                           color: currentTheme.colors.text,
-                          cursor: isViewMode ? 'not-allowed' : 'pointer',
-                          fontWeight: dependencyType === 'after' ? '600' : '400'
                         }}
-                      >
-                        Позже
-                      </button>
+                      />
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
 
-                  {/* Временной интервал */}
-                  <div>
-                    <label style={{ 
-                      display: 'block', 
-                      marginBottom: '8px',
-                      fontSize: '14px',
-                      color: currentTheme.colors.text
-                    }}>
-                      {dependencyType === 'before' ? 'На сколько раньше?' : 'На сколько позже?'}
-                    </label>
-                    <div className="dependency-fields-container">
-                      {/* Выпадающий список */}
-                      <div className="dependency-operator">
-                        <select
-                          value={dependencyOperator}
-                          onChange={(e) => setDependencyOperator(e.target.value)}
+            {/* Задача с возможным временем */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                opacity: isViewMode ? 0.6 : 1,
+              }}
+            >
+              <input
+                type="radio"
+                id="taskTypePossible"
+                name="taskType"
+                checked={hasPossibleTime}
+                onChange={() => {
+                  if (!isViewMode) {
+                    setIsRepeating(false);
+                    setHasSpecificTime(false);
+                    setHasPossibleTime(true);
+                    setHasDependency(false);
+                  }
+                }}
+                disabled={isViewMode}
+                style={{
+                  width: "18px",
+                  height: "18px",
+                  cursor: isViewMode ? "not-allowed" : "pointer",
+                  accentColor: currentTheme.colors.primary,
+                }}
+              />
+              <label
+                htmlFor="taskTypePossible"
+                style={{
+                  fontWeight: "500",
+                  color: currentTheme.colors.text,
+                  cursor: isViewMode ? "not-allowed" : "pointer",
+                  flex: 1,
+                }}
+              >
+                Есть ли возможное время начала и конца задачи?
+              </label>
+            </div>
+
+            {hasPossibleTime && (
+              <div
+                style={{
+                  padding: "15px",
+                  marginLeft: "30px",
+                  backgroundColor: currentTheme.colors.background,
+                  borderRadius: "6px",
+                  border: `1px solid ${currentTheme.colors.border}`,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "15px",
+                }}
+              >
+                <div
+                  style={{ display: "flex", gap: "10px", alignItems: "center" }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <input
+                      type="date"
+                      value={possibleStartDate}
+                      onChange={(e) => setPossibleStartDate(e.target.value)}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: "8px",
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: isViewMode
+                          ? currentTheme.colors.background
+                          : currentTheme.colors.surface,
+                        cursor: isViewMode ? "not-allowed" : "text",
+                        color: currentTheme.colors.text,
+                      }}
+                    />
+                    <input
+                      type="time"
+                      value={possibleStartTime}
+                      onChange={(e) => setPossibleStartTime(e.target.value)}
+                      disabled={isViewMode}
+                      placeholder="примерно начать с..."
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: isViewMode
+                          ? currentTheme.colors.background
+                          : currentTheme.colors.surface,
+                        cursor: isViewMode ? "not-allowed" : "text",
+                        fontStyle: possibleStartTime ? "normal" : "italic",
+                        color: possibleStartTime
+                          ? currentTheme.colors.text
+                          : currentTheme.colors.textSecondary,
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <input
+                      type="date"
+                      value={possibleEndDate}
+                      onChange={(e) => setPossibleEndDate(e.target.value)}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: "8px",
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: isViewMode
+                          ? currentTheme.colors.background
+                          : currentTheme.colors.surface,
+                        cursor: isViewMode ? "not-allowed" : "text",
+                        color: currentTheme.colors.text,
+                      }}
+                    />
+                    <input
+                      type="time"
+                      value={possibleEndTime}
+                      onChange={(e) => setPossibleEndTime(e.target.value)}
+                      disabled={isViewMode}
+                      placeholder="примерно закончить"
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        border: `1px solid ${currentTheme.colors.border}`,
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        backgroundColor: isViewMode
+                          ? currentTheme.colors.background
+                          : currentTheme.colors.surface,
+                        cursor: isViewMode ? "not-allowed" : "text",
+                        fontStyle: possibleEndTime ? "normal" : "italic",
+                        color: possibleEndTime
+                          ? currentTheme.colors.text
+                          : currentTheme.colors.textSecondary,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Зависимая задача */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                opacity: isViewMode ? 0.6 : 1,
+              }}
+            >
+              <input
+                type="radio"
+                id="taskTypeDependency"
+                name="taskType"
+                checked={hasDependency}
+                onChange={() => {
+                  if (!isViewMode) {
+                    setIsRepeating(false);
+                    setHasSpecificTime(false);
+                    setHasPossibleTime(false);
+                    setHasDependency(true);
+                  }
+                }}
+                disabled={isViewMode}
+                style={{
+                  width: "18px",
+                  height: "18px",
+                  cursor: isViewMode ? "not-allowed" : "pointer",
+                  accentColor: currentTheme.colors.primary,
+                }}
+              />
+              <label
+                htmlFor="taskTypeDependency"
+                style={{
+                  fontWeight: "500",
+                  color: currentTheme.colors.text,
+                  cursor: isViewMode ? "not-allowed" : "pointer",
+                  flex: 1,
+                }}
+              >
+                Зависит ли задача от другой задачи?
+              </label>
+            </div>
+
+            {hasDependency && (
+              <div
+                style={{
+                  padding: "15px",
+                  marginLeft: "30px",
+                  backgroundColor: currentTheme.colors.background,
+                  borderRadius: "6px",
+                  border: `1px solid ${currentTheme.colors.border}`,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "15px",
+                }}
+              >
+                {/* Что за задача */}
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "8px",
+                      fontSize: "14px",
+                      color: currentTheme.colors.text,
+                    }}
+                  >
+                    Родительская задача:
+                  </label>
+                  <select
+                    value={dependencyTask}
+                    onChange={(e) => setDependencyTask(e.target.value)}
+                    disabled={isViewMode}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      border: `1px solid ${currentTheme.colors.border}`,
+                      borderRadius: "4px",
+                      fontSize: "14px",
+                      backgroundColor: isViewMode
+                        ? currentTheme.colors.background
+                        : currentTheme.colors.surface,
+                      cursor: isViewMode ? "not-allowed" : "pointer",
+                      color: currentTheme.colors.text,
+                    }}
+                  >
+                    <option value="">Выберите задачу</option>
+                    {/* Динамически подгружаем задачи из availableTasks */}
+                    {availableTasks.map((task) => (
+                      <option key={task.id} value={task.id}>
+                        {task.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* раньше или позже */}
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "8px",
+                      fontSize: "14px",
+                      color: currentTheme.colors.text,
+                    }}
+                  >
+                    Поставить задачу РАНЬШЕ или ПОЗЖЕ родительской?
+                  </label>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    <button
+                      type="button"
+                      onClick={() => setDependencyType("before")}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: "8px",
+                        border: `2px solid ${dependencyType === "before" ? currentTheme.colors.primary : currentTheme.colors.border}`,
+                        borderRadius: "4px",
+                        backgroundColor:
+                          dependencyType === "before"
+                            ? currentTheme.colors.background
+                            : currentTheme.colors.surface,
+                        color: currentTheme.colors.text,
+                        cursor: isViewMode ? "not-allowed" : "pointer",
+                        fontWeight: dependencyType === "before" ? "600" : "400",
+                      }}
+                    >
+                      Раньше
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDependencyType("after")}
+                      disabled={isViewMode}
+                      style={{
+                        flex: 1,
+                        padding: "8px",
+                        border: `2px solid ${dependencyType === "after" ? currentTheme.colors.primary : currentTheme.colors.border}`,
+                        borderRadius: "4px",
+                        backgroundColor:
+                          dependencyType === "after"
+                            ? currentTheme.colors.background
+                            : currentTheme.colors.surface,
+                        color: currentTheme.colors.text,
+                        cursor: isViewMode ? "not-allowed" : "pointer",
+                        fontWeight: dependencyType === "after" ? "600" : "400",
+                      }}
+                    >
+                      Позже
+                    </button>
+                  </div>
+                </div>
+
+                {/* Временной интервал */}
+                <div>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "8px",
+                      fontSize: "14px",
+                      color: currentTheme.colors.text,
+                    }}
+                  >
+                    {dependencyType === "before"
+                      ? "На сколько раньше?"
+                      : "На сколько позже?"}
+                  </label>
+                  <div className="dependency-fields-container">
+                    {/* Выпадающий список */}
+                    <div className="dependency-operator">
+                      <select
+                        value={dependencyOperator}
+                        onChange={(e) => setDependencyOperator(e.target.value)}
+                        disabled={isViewMode}
+                        style={{
+                          width: "100%",
+                          padding: "8px",
+                          border: `1px solid ${currentTheme.colors.border}`,
+                          borderRadius: "4px",
+                          fontSize: "14px",
+                          backgroundColor: isViewMode
+                            ? currentTheme.colors.background
+                            : currentTheme.colors.surface,
+                          cursor: isViewMode ? "not-allowed" : "pointer",
+                          color: currentTheme.colors.text,
+                        }}
+                      >
+                        {dependencyType === "before" ? (
+                          <>
+                            <option value=">">больше чем на</option>
+                            <option value="<">меньше чем на</option>
+                            <option value="=">ровно на</option>
+                          </>
+                        ) : (
+                          <>
+                            <option value=">">больше чем через</option>
+                            <option value="<">меньше чем через</option>
+                            <option value="=">ровно через</option>
+                          </>
+                        )}
+                      </select>
+                    </div>
+
+                    <div className="dependency-inputs-container">
+                      {/* Дни */}
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <input
+                          type="text"
+                          value={dependencyDays}
+                          onChange={(e) => {
+                            const onlyNums = e.target.value.replace(
+                              /[^0-9]/g,
+                              "",
+                            );
+                            setDependencyDays(onlyNums);
+                          }}
                           disabled={isViewMode}
+                          min="0"
+                          placeholder="0"
                           style={{
-                            width: '100%',
-                            padding: '8px',
+                            width: "100%",
+                            padding: "8px",
                             border: `1px solid ${currentTheme.colors.border}`,
-                            borderRadius: '4px',
-                            fontSize: '14px',
-                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'pointer',
-                            color: currentTheme.colors.text
+                            borderRadius: "4px",
+                            fontSize: "14px",
+                            backgroundColor: isViewMode
+                              ? currentTheme.colors.background
+                              : currentTheme.colors.surface,
+                            cursor: isViewMode ? "not-allowed" : "text",
+                            textAlign: "center",
+                            color: currentTheme.colors.text,
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            color: currentTheme.colors.textSecondary,
+                            minWidth: "25px",
                           }}
                         >
-                          {dependencyType === 'before' ? (
-                            <>
-                              <option value=">">больше чем на</option>
-                              <option value="<">меньше чем на</option>
-                              <option value="=">ровно на</option>
-                            </>
-                          ) : (
-                            <>
-                              <option value=">">больше чем через</option>
-                              <option value="<">меньше чем через</option>
-                              <option value="=">ровно через</option>
-                            </>
-                          )}
-                        </select>
+                          дн
+                        </span>
                       </div>
 
-                      <div className="dependency-inputs-container">
-                        {/* Дни */}
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <input
-                            type="text"
-                            value={dependencyDays}
-                            onChange={(e) => {
-                              const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                              setDependencyDays(onlyNums);
-                            }}
-                            disabled={isViewMode}
-                            min="0"
-                            placeholder="0"
-                            style={{
-                              width: '100%',
-                              padding: '8px',
-                              border: `1px solid ${currentTheme.colors.border}`,
-                              borderRadius: '4px',
-                              fontSize: '14px',
-                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                              cursor: isViewMode ? 'not-allowed' : 'text',
-                              textAlign: 'center',
-                              color: currentTheme.colors.text
-                            }}
-                          />
-                          <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, minWidth: '25px' }}>дн</span>
-                        </div>
-                        
-                        {/* Часы */}
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <input
-                            type="text"
-                            value={dependencyHours}
-                            onChange={(e) => {
-                              const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                              setDependencyHours(onlyNums);
-                            }}
-                            disabled={isViewMode}
-                            min="0"
-                            max="23"
-                            placeholder="0"
-                            style={{
-                              width: '100%',
-                              padding: '8px',
-                              border: `1px solid ${currentTheme.colors.border}`,
-                              borderRadius: '4px',
-                              fontSize: '14px',
-                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                              cursor: isViewMode ? 'not-allowed' : 'text',
-                              textAlign: 'center',
-                              color: currentTheme.colors.text
-                            }}
-                          />
-                          <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, minWidth: '25px' }}>час</span>
-                        </div>
-                        
-                        {/* Минуты */}
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <input
-                            type="text"
-                            value={dependencyMinutes}
-                            onChange={(e) => {
-                              const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                              setDependencyMinutes(onlyNums);
-                            }}
-                            disabled={isViewMode}
-                            min="0"
-                            max="59"
-                            placeholder="0"
-                            style={{
-                              width: '100%',
-                              padding: '8px',
-                              border: `1px solid ${currentTheme.colors.border}`,
-                              borderRadius: '4px',
-                              fontSize: '14px',
-                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                              cursor: isViewMode ? 'not-allowed' : 'text',
-                              textAlign: 'center',
-                              color: currentTheme.colors.text
-                            }}
-                          />
-                          <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, minWidth: '25px' }}>мин</span>
-                        </div>
+                      {/* Часы */}
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <input
+                          type="text"
+                          value={dependencyHours}
+                          onChange={(e) => {
+                            const onlyNums = e.target.value.replace(
+                              /[^0-9]/g,
+                              "",
+                            );
+                            setDependencyHours(onlyNums);
+                          }}
+                          disabled={isViewMode}
+                          min="0"
+                          max="23"
+                          placeholder="0"
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: "4px",
+                            fontSize: "14px",
+                            backgroundColor: isViewMode
+                              ? currentTheme.colors.background
+                              : currentTheme.colors.surface,
+                            cursor: isViewMode ? "not-allowed" : "text",
+                            textAlign: "center",
+                            color: currentTheme.colors.text,
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            color: currentTheme.colors.textSecondary,
+                            minWidth: "25px",
+                          }}
+                        >
+                          час
+                        </span>
+                      </div>
+
+                      {/* Минуты */}
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          alignItems: "center",
+                        }}
+                      >
+                        <input
+                          type="text"
+                          value={dependencyMinutes}
+                          onChange={(e) => {
+                            const onlyNums = e.target.value.replace(
+                              /[^0-9]/g,
+                              "",
+                            );
+                            setDependencyMinutes(onlyNums);
+                          }}
+                          disabled={isViewMode}
+                          min="0"
+                          max="59"
+                          placeholder="0"
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: "4px",
+                            fontSize: "14px",
+                            backgroundColor: isViewMode
+                              ? currentTheme.colors.background
+                              : currentTheme.colors.surface,
+                            cursor: isViewMode ? "not-allowed" : "text",
+                            textAlign: "center",
+                            color: currentTheme.colors.text,
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            color: currentTheme.colors.textSecondary,
+                            minWidth: "25px",
+                          }}
+                        >
+                          мин
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-
-          {formError && (
-            <div style={{
-              padding: '12px',
-              backgroundColor: currentTheme.colors.error + '20',
-              color: currentTheme.colors.error,
-              borderRadius: '6px',
-              fontSize: '14px',
-              border: `1px solid ${currentTheme.colors.error}`,
-              marginBottom: '15px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              <span style={{ fontSize: '16px' }}>⚠️</span>
-              {formError}
-            </div>
-          )}
-          {/* Кнопки действий */}
-          {!isViewMode && (
-            <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-              <button
-                onClick={handleSave}
-                disabled={isSaving}
-                style={{
-                  flex: 1,
-                  padding: '14px',
-                  backgroundColor: currentTheme.colors.success,
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  transform: 'scale(1)'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                {mode === 'create' ? 'Создать задачу' : 'Сохранить изменения'}
-              </button>
-              <button
-                onClick={onClose}
-                disabled={isSaving} 
-                style={{
-                  flex: 1,
-                  padding: '14px',
-                  backgroundColor: currentTheme.colors.background,
-                  color: currentTheme.colors.text,
-                  border: `1px solid ${currentTheme.colors.border}`,
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  transform: 'scale(1)'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                Отмена
-              </button>
-            </div>
-          )}
-          
-          {isViewMode && (
-            <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
-              <button
-                onClick={onEdit} 
-                style={{
-                  flex: 1,
-                  padding: '14px',
-                  backgroundColor: currentTheme.colors.edit,
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  transform: 'scale(1)'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                Редактировать
-              </button>
-              <button
-                onClick={onClose}
-                style={{
-                  flex: 1,
-                  padding: '14px',
-                  backgroundColor: currentTheme.colors.background,
-                  color: currentTheme.colors.text,
-                  border: `1px solid ${currentTheme.colors.border}`,
-                  borderRadius: '6px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  transform: 'scale(1)'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                }}
-              >
-                Закрыть
-              </button>
-            </div>
-          )}
-          <TagManagerModal
-            isOpen={isTagManagerOpen}
-            onClose={() => {
-              setIsTagManagerOpen(false);
-              setTagsRefreshTrigger(prev => prev + 1);
-              const currentTags = tagApi.getTags();
-              const validTagIds = tagIds.filter(id => currentTags.some(t => t.id === id));
-              if (validTagIds.length !== tagIds.length) {
-                setTagIds(validTagIds);
-              }
-            }}
-            onTagsChange={() => {
-              setTagsRefreshTrigger(prev => prev + 1);
-            }}
-          />
         </div>
+
+        {formError && (
+          <div
+            style={{
+              padding: "12px",
+              backgroundColor: currentTheme.colors.error + "20",
+              color: currentTheme.colors.error,
+              borderRadius: "6px",
+              fontSize: "14px",
+              border: `1px solid ${currentTheme.colors.error}`,
+              marginBottom: "15px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <span style={{ fontSize: "16px" }}>⚠️</span>
+            {formError}
+          </div>
+        )}
+        {/* Кнопки действий */}
+        {!isViewMode && (
+          <div style={{ display: "flex", gap: "15px", marginTop: "10px" }}>
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              style={{
+                flex: 1,
+                padding: "14px",
+                backgroundColor: currentTheme.colors.success,
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                fontSize: "16px",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                transform: "scale(1)",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+            >
+              {mode === "create" ? "Создать задачу" : "Сохранить изменения"}
+            </button>
+            <button
+              onClick={onClose}
+              disabled={isSaving}
+              style={{
+                flex: 1,
+                padding: "14px",
+                backgroundColor: currentTheme.colors.background,
+                color: currentTheme.colors.text,
+                border: `1px solid ${currentTheme.colors.border}`,
+                borderRadius: "6px",
+                fontSize: "16px",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                transform: "scale(1)",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+            >
+              Отмена
+            </button>
+          </div>
+        )}
+
+        {isViewMode && (
+          <div style={{ display: "flex", gap: "15px", marginTop: "10px" }}>
+            <button
+              onClick={onEdit}
+              style={{
+                flex: 1,
+                padding: "14px",
+                backgroundColor: currentTheme.colors.edit,
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                fontSize: "16px",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                transform: "scale(1)",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+            >
+              Редактировать
+            </button>
+            <button
+              onClick={onClose}
+              style={{
+                flex: 1,
+                padding: "14px",
+                backgroundColor: currentTheme.colors.background,
+                color: currentTheme.colors.text,
+                border: `1px solid ${currentTheme.colors.border}`,
+                borderRadius: "6px",
+                fontSize: "16px",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                transform: "scale(1)",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "scale(1.05)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+            >
+              Закрыть
+            </button>
+          </div>
+        )}
+        <TagManagerModal
+          isOpen={isTagManagerOpen}
+          onClose={() => {
+            setIsTagManagerOpen(false);
+            setTagsRefreshTrigger((prev) => prev + 1);
+            const currentTags = tagApi.getTags();
+            const validTagIds = tagIds.filter((id) =>
+              currentTags.some((t) => t.id === id),
+            );
+            if (validTagIds.length !== tagIds.length) {
+              setTagIds(validTagIds);
+            }
+          }}
+          onTagsChange={() => {
+            setTagsRefreshTrigger((prev) => prev + 1);
+          }}
+        />
       </div>
+    </div>
   );
 };

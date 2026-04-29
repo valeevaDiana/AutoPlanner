@@ -109,7 +109,10 @@ export const tagApi = {
     return newTag;
   },
 
-  updateTag: (id: string, updates: Partial<Omit<Tag, "id" | "createdAt">>): Tag | null => {
+  updateTag: (
+    id: string,
+    updates: Partial<Omit<Tag, "id" | "createdAt">>,
+  ): Tag | null => {
     const tags = tagApi.getTags();
     const index = tags.findIndex((t) => t.id === id);
     if (index !== -1) {
@@ -161,7 +164,7 @@ export const localStorageApi = {
       const data = localStorage.getItem(STORAGE_KEY_PENALTY);
       return data ? JSON.parse(data) : [];
     } catch (error) {
-      console.error('Error reading penalty tasks from localStorage:', error);
+      console.error("Error reading penalty tasks from localStorage:", error);
       return [];
     }
   },
@@ -170,7 +173,7 @@ export const localStorageApi = {
     try {
       localStorage.setItem(STORAGE_KEY_PENALTY, JSON.stringify(tasks));
     } catch (error) {
-      console.error('Error saving penalty tasks to localStorage:', error);
+      console.error("Error saving penalty tasks to localStorage:", error);
     }
   },
 

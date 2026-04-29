@@ -1,6 +1,6 @@
-import type { Tag } from '../../entities/tag/model/types';
+import type { Tag } from "../../entities/tag/model/types";
 
-const STORAGE_KEY_TAGS = 'autoplanner_tags';
+const STORAGE_KEY_TAGS = "autoplanner_tags";
 
 const DEFAULT_TAGS: Tag[] = [];
 
@@ -16,7 +16,7 @@ export const tagApi = {
       tagApi.saveTags(DEFAULT_TAGS);
       return DEFAULT_TAGS;
     } catch (error) {
-      console.error('Error reading tags from localStorage:', error);
+      console.error("Error reading tags from localStorage:", error);
       return DEFAULT_TAGS;
     }
   },
@@ -26,7 +26,7 @@ export const tagApi = {
     try {
       localStorage.setItem(STORAGE_KEY_TAGS, JSON.stringify(tags));
     } catch (error) {
-      console.error('Error saving tags to localStorage:', error);
+      console.error("Error saving tags to localStorage:", error);
     }
   },
 
@@ -45,9 +45,12 @@ export const tagApi = {
   },
 
   // Обновить тег
-  updateTag: (id: string, updates: Partial<Omit<Tag, 'id' | 'createdAt'>>): Tag | null => {
+  updateTag: (
+    id: string,
+    updates: Partial<Omit<Tag, "id" | "createdAt">>,
+  ): Tag | null => {
     const tags = tagApi.getTags();
-    const index = tags.findIndex(t => t.id === id);
+    const index = tags.findIndex((t) => t.id === id);
     if (index !== -1) {
       tags[index] = { ...tags[index], ...updates };
       tagApi.saveTags(tags);
@@ -59,7 +62,7 @@ export const tagApi = {
   // Удалить тег
   deleteTag: (id: string): boolean => {
     const tags = tagApi.getTags();
-    const filtered = tags.filter(t => t.id !== id);
+    const filtered = tags.filter((t) => t.id !== id);
     if (filtered.length !== tags.length) {
       tagApi.saveTags(filtered);
       return true;
@@ -70,6 +73,6 @@ export const tagApi = {
   // Получить тег по id
   getTagById: (id: string): Tag | undefined => {
     const tags = tagApi.getTags();
-    return tags.find(t => t.id === id);
+    return tags.find((t) => t.id === id);
   },
 };

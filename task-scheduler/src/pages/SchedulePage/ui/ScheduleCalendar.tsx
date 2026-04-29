@@ -1,29 +1,35 @@
-import { ConfirmDeleteModal } from '../../../features/task-actions/ui/ConfirmDeleteModal'; 
-import React, { useState, useMemo } from 'react'; 
-import type { Task, TaskAction } from '../../../entities/task/model/types'; 
-import { TaskActionsModal } from '../../../features/task-actions/ui/TaskActionsModal';
-import { useWeekNavigation } from '../../../shared/lib/hooks/useWeekNavigation';
-import { useTheme } from '../../../shared/lib/contexts';
-import { getContrastColor, getPriorityColor } from '../../../shared/lib/utils/priorityGradient';
-import { useTaskSplitter } from '../../../shared/lib/hooks/useTaskSplitter'; 
+import { ConfirmDeleteModal } from "../../../features/task-actions/ui/ConfirmDeleteModal";
+import React, { useState, useMemo } from "react";
+import type { Task, TaskAction } from "../../../entities/task/model/types";
+import { TaskActionsModal } from "../../../features/task-actions/ui/TaskActionsModal";
+import { useWeekNavigation } from "../../../shared/lib/hooks/useWeekNavigation";
+import { useTheme } from "../../../shared/lib/contexts";
+import {
+  getContrastColor,
+  getPriorityColor,
+} from "../../../shared/lib/utils/priorityGradient";
+import { useTaskSplitter } from "../../../shared/lib/hooks/useTaskSplitter";
 
-
-const DAYS = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
+const DAYS = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
 
 const generateTimeSlots = (): string[] => {
   const times: string[] = [];
   for (let hour = 0; hour < 24; hour++) {
-    const timeStr = `${hour.toString().padStart(2, '0')}:00`;
+    const timeStr = `${hour.toString().padStart(2, "0")}:00`;
     times.push(timeStr);
   }
   return times;
 };
 
 interface ScheduleCalendarProps {
-  onAddTask?: (initialDate?: { day: number; time: string; date: string }) => void;
-  onEditTask?: (task: Task) => void; 
+  onAddTask?: (initialDate?: {
+    day: number;
+    time: string;
+    date: string;
+  }) => void;
+  onEditTask?: (task: Task) => void;
   onViewTask?: (task: Task) => void;
-  onDeleteTask?: (task: Task) => void; 
+  onDeleteTask?: (task: Task) => void;
   onCompleteTask?: (task: Task) => void;
   onAction?: (action: TaskAction) => void;
   tasks: Task[];
@@ -31,39 +37,38 @@ interface ScheduleCalendarProps {
 }
 
 const getOverlappingTasks = (tasks: Task[]): Task[][] => {
-
   const groups: Task[][] = [];
-  
+
   tasks.forEach((task: Task) => {
     let taskStart = 0;
     if (task.startTime) {
-      const [hours, minutes] = task.startTime.split(':').map(Number);
+      const [hours, minutes] = task.startTime.split(":").map(Number);
       taskStart = hours * 60 + minutes; // Начало задачи в минутах
     }
     let taskEnd = 0;
     if (task.endTime) {
-      const [hours, minutes] = task.endTime.split(':').map(Number);
+      const [hours, minutes] = task.endTime.split(":").map(Number);
       taskEnd = hours * 60 + minutes; // Начало задачи в минутах
     }
     // const taskEnd = taskStart + task.durationMinutes;
 
     let addedToGroup = false;
-    
+
     for (const group of groups) {
-      const groupHasOverlap = group.some(groupTask => {
+      const groupHasOverlap = group.some((groupTask) => {
         let groupStart = 0;
         if (groupTask.startTime) {
-          const [hours, minutes] = groupTask.startTime.split(':').map(Number);
+          const [hours, minutes] = groupTask.startTime.split(":").map(Number);
           groupStart = hours * 60 + minutes;
         }
-        const parts = task.duration.split(':');
+        const parts = task.duration.split(":");
         let day = 0;
         let hour = 0;
         let minute = 0;
         if (parts.length === 4) {
           // Формат: дни:часы:минуты:секунды
           const [days, hours, minutes, seconds] = parts;
-          day =  parseInt(days);
+          day = parseInt(days);
           hour = parseInt(hours);
           minute = parseInt(minutes);
         } else if (parts.length === 3) {
@@ -71,10 +76,10 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
           const [hours, minutes, seconds] = parts;
           hour = parseInt(hours);
           minute = parseInt(minutes);
-        } 
+        }
         const dur = day * 24 * 60 + hour * 60 + minute;
         const groupEnd = groupStart + dur;
-        
+
         return taskStart < groupEnd && taskEnd > groupStart;
       });
 
@@ -93,18 +98,22 @@ const getOverlappingTasks = (tasks: Task[]): Task[][] => {
   return groups;
 };
 
-const getTaskPosition = (task: Task, overlappingGroup: Task[], taskIndex: number) => {
+const getTaskPosition = (
+  task: Task,
+  overlappingGroup: Task[],
+  taskIndex: number,
+) => {
   const totalTasks = overlappingGroup.length;
-  
+
   const maxTasks = Math.min(totalTasks, 5);
-  
+
   if (maxTasks === 1) {
-    return { width: 'calc(100% - 4px)', left: '2px' };
+    return { width: "calc(100% - 4px)", left: "2px" };
   } else {
-    const availableWidth = 100 - 4; 
+    const availableWidth = 100 - 4;
     const taskWidth = availableWidth / maxTasks;
     const width = `calc(${taskWidth}% - 2px)`;
-    const left = `calc(${2 + (taskIndex * taskWidth)}% + 1px)`;
+    const left = `calc(${2 + taskIndex * taskWidth}% + 1px)`;
     return { width, left };
   }
 };
@@ -117,22 +126,22 @@ interface TaskBlockProps {
   onTaskClick: (task: Task, event: React.MouseEvent) => void;
 }
 
-const TaskBlock: React.FC<TaskBlockProps> = ({ 
-  task, 
-  width, 
-  left, 
+const TaskBlock: React.FC<TaskBlockProps> = ({
+  task,
+  width,
+  left,
   taskCount,
-  onTaskClick 
+  onTaskClick,
 }) => {
   const { currentTheme } = useTheme();
-  const parts = task.duration.split(':');
+  const parts = task.duration.split(":");
   let day = 0;
   let hour = 0;
   let minute = 0;
   if (parts.length === 4) {
     // Формат: дни:часы:минуты:секунды
     const [days, hours, minutes, seconds] = parts;
-    day =  parseInt(days);
+    day = parseInt(days);
     hour = parseInt(hours);
     minute = parseInt(minutes);
   } else if (parts.length === 3) {
@@ -140,13 +149,12 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
     const [hours, minutes, seconds] = parts;
     hour = parseInt(hours);
     minute = parseInt(minutes);
-  } 
+  }
   let dur = day * 24 * 60 + hour * 60 + minute;
-  if (dur == 0)
-  {
+  if (dur == 0) {
     const startDateTime: Date = new Date(`${task.startDate}T${task.startTime}`);
     const endDateTime: Date = new Date(`${task.startDate}T${task.endTime}`);
-    
+
     // Расчет длительности в минутах
     const durationMs: number = endDateTime.getTime() - startDateTime.getTime();
     dur = Math.floor(durationMs / (1000 * 60));
@@ -154,22 +162,22 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   const totalHeight = dur;
   let topOffset = 0;
   if (task.startTime) {
-    const [hours, minutes] = task.startTime.split(':').map(Number);
-    topOffset = minutes; 
+    const [hours, minutes] = task.startTime.split(":").map(Number);
+    topOffset = minutes;
   }
   const isCompleted = task.completed;
 
   const backgroundColor = getPriorityColor(
-    task.priority, 
-    currentTheme.colors.priorityLow, 
-    currentTheme.colors.priorityHigh
+    task.priority,
+    currentTheme.colors.priorityLow,
+    currentTheme.colors.priorityHigh,
   );
 
   const textColor = getContrastColor(backgroundColor);
 
   // const getTextSettings = () => {
   //   const maxLines = Math.max(1, Math.floor(totalHeight / 20));
-  
+
   //   switch (taskCount) {
   //     case 1:
   //       return { fontSize: '14px', lineClamp: maxLines };
@@ -189,73 +197,73 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
   const getTextSettings = () => {
     // Определяем настройки в зависимости от высоты
     if (totalHeight <= 15) {
-      return { 
-        fontSize: '8px', 
+      return {
+        fontSize: "8px",
         lineClamp: 1,
-        padding: '0px',
-        lineHeight: '1',
+        padding: "0px",
+        lineHeight: "1",
       };
     } else if (totalHeight <= 25) {
-      return { 
-        fontSize: '9px', 
+      return {
+        fontSize: "9px",
         lineClamp: 1,
-        padding: '0px',
-        lineHeight: '1.1'
+        padding: "0px",
+        lineHeight: "1.1",
       };
     } else if (totalHeight <= 35) {
-      return { 
-        fontSize: '10px', 
+      return {
+        fontSize: "10px",
         lineClamp: 2,
-        padding: '1px',
-        lineHeight: '1.1'
+        padding: "1px",
+        lineHeight: "1.1",
       };
     }
 
     const maxLines = Math.max(1, Math.floor(totalHeight / 15));
-    
+
     // Остальная логика для нормальных размеров...
     switch (taskCount) {
       case 1:
-        return { 
-          fontSize: '14px', 
+        return {
+          fontSize: "14px",
           lineClamp: maxLines,
-          padding: '2px',
-          lineHeight: '1.2'
+          padding: "2px",
+          lineHeight: "1.2",
         };
       case 2:
-        return { 
-          fontSize: '12px', 
+        return {
+          fontSize: "12px",
           lineClamp: maxLines,
-          padding: '1px',
-          lineHeight: '1.2'
+          padding: "1px",
+          lineHeight: "1.2",
         };
       case 3:
-        return { 
-          fontSize: '11px', 
+        return {
+          fontSize: "11px",
           lineClamp: maxLines,
-          padding: '1px',
-          lineHeight: '1.2'
+          padding: "1px",
+          lineHeight: "1.2",
         };
       case 4:
-        return { 
-          fontSize: '10px', 
+        return {
+          fontSize: "10px",
           lineClamp: maxLines,
-          padding: '1px',
-          lineHeight: '1.1'
+          padding: "1px",
+          lineHeight: "1.1",
         };
       case 5:
-        return { 
-          fontSize: '9px', 
+        return {
+          fontSize: "9px",
           lineClamp: maxLines,
-          padding: '1px',
-          lineHeight: '1.1'
+          padding: "1px",
+          lineHeight: "1.1",
         };
       default:
-        return { 
-          fontSize: '8px', 
+        return {
+          fontSize: "8px",
           lineClamp: 1,
-          padding: '0px',
-          lineHeight: '1'
+          padding: "0px",
+          lineHeight: "1",
         };
     }
   };
@@ -271,7 +279,7 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
     <div
       className="task-block"
       style={{
-        position: 'absolute',
+        position: "absolute",
         top: `calc(${topOffset}px + 1px)`,
         //top: `1px`,
         // top: `${topOffset}px`,
@@ -281,18 +289,24 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
         //height: `60px`,
         zIndex: 10,
         opacity: isCompleted ? 0.7 : 0.95,
-        minHeight: '15px',
-        border: '1px solid rgba(0,0,0,0.1)',
-        borderRadius: '2px',
-        boxSizing: 'border-box',
-        padding: '1px',
-        cursor: 'pointer',
-        backgroundColor: isCompleted ? currentTheme.colors.priorityCompleted : backgroundColor,
-        borderLeft: task.isSplitTask && task.splitIndex === 0 ?  `3px solid ${currentTheme.colors.textSecondary}` : 'none',
-        borderRight: task.isSplitTask && (task.splitIndex || 0) > 0 ? `3px solid ${currentTheme.colors.textSecondary}` : 'none',
-
+        minHeight: "15px",
+        border: "1px solid rgba(0,0,0,0.1)",
+        borderRadius: "2px",
+        boxSizing: "border-box",
+        padding: "1px",
+        cursor: "pointer",
+        backgroundColor: isCompleted
+          ? currentTheme.colors.priorityCompleted
+          : backgroundColor,
+        borderLeft:
+          task.isSplitTask && task.splitIndex === 0
+            ? `3px solid ${currentTheme.colors.textSecondary}`
+            : "none",
+        borderRight:
+          task.isSplitTask && (task.splitIndex || 0) > 0
+            ? `3px solid ${currentTheme.colors.textSecondary}`
+            : "none",
       }}
-      
       onClick={handleClick}
     >
       <div
@@ -301,17 +315,19 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
           fontSize: textSettings.fontSize,
           lineHeight: textSettings.lineHeight,
           padding: textSettings.padding,
-          overflow: 'hidden',
-          display: textSettings.display || '-webkit-box',
+          overflow: "hidden",
+          display: textSettings.display || "-webkit-box",
           WebkitLineClamp: textSettings.lineClamp,
-          WebkitBoxOrient: textSettings.display ? 'horizontal' : 'vertical',
-          width: '100%',
-          maxHeight: totalHeight <= 20 ? 'none' : `calc(${totalHeight - 4}px)`,
-          wordBreak: 'break-word',
-          textOverflow: 'ellipsis',
-          textDecoration: isCompleted ? 'line-through' : 'none',
-          color: isCompleted ? currentTheme.colors.priorityCompletedText : textColor,
-          minHeight: '10px',
+          WebkitBoxOrient: textSettings.display ? "horizontal" : "vertical",
+          width: "100%",
+          maxHeight: totalHeight <= 20 ? "none" : `calc(${totalHeight - 4}px)`,
+          wordBreak: "break-word",
+          textOverflow: "ellipsis",
+          textDecoration: isCompleted ? "line-through" : "none",
+          color: isCompleted
+            ? currentTheme.colors.priorityCompletedText
+            : textColor,
+          minHeight: "10px",
           alignItems: textSettings.alignItems,
           justifyContent: textSettings.justifyContent,
         }}
@@ -324,43 +340,38 @@ const TaskBlock: React.FC<TaskBlockProps> = ({
 
 export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
   onAddTask,
-  onEditTask, 
+  onEditTask,
   onViewTask,
   onDeleteTask,
-  onCompleteTask, 
-  onAction, 
+  onCompleteTask,
+  onAction,
   tasks,
-  onTasksUpdate
+  onTasksUpdate,
 }) => {
   const { currentTheme } = useTheme();
   const timeSlots = generateTimeSlots();
-  const {
-    weekDates,
-    nextWeek,
-    prevWeek,
-    goToToday,
-    formatDate,
-    getISODate
-  } = useWeekNavigation();
+  const { weekDates, nextWeek, prevWeek, goToToday, formatDate, getISODate } =
+    useWeekNavigation();
 
   const { splitAllTasks } = useTaskSplitter();
   const displayTasks = useMemo(() => {
     return splitAllTasks(tasks);
   }, [tasks, splitAllTasks]);
 
-
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteModalPosition, setDeleteModalPosition] = useState({ top: 0, left: 0 });
+  const [deleteModalPosition, setDeleteModalPosition] = useState({
+    top: 0,
+    left: 0,
+  });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
-
 
   const getTasksForDate = (date: Date) => {
     const dateString = getISODate(date);
     return displayTasks.filter((task: Task) => {
-      const taskRealDate = task.realDate || task.startDate || '';
+      const taskRealDate = task.realDate || task.startDate || "";
       return taskRealDate === dateString;
     });
   };
@@ -374,7 +385,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
     setSelectedTask(task);
     setModalPosition({
       top: event.clientY,
-      left: event.clientX
+      left: event.clientX,
     });
     setIsModalOpen(true);
   };
@@ -389,24 +400,23 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
       onAddTask({
         day: dayIndex,
         time: time,
-        date: getISODate(date)
+        date: getISODate(date),
       });
     }
   };
 
   const handleTaskAction = (action: TaskAction) => {
     if (!selectedTask) return;
-    if (action === 'complete') {
+    if (action === "complete") {
       if (onCompleteTask) {
         onCompleteTask(selectedTask);
       }
     } else {
-      if (onAction) { 
+      if (onAction) {
         onAction(action);
       }
     }
   };
-
 
   const handleDirectEdit = (task: Task) => {
     if (onEditTask) {
@@ -416,7 +426,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
 
   const handleTaskDelete = (task: Task) => {
     setTaskToDelete(task);
-    setDeleteModalPosition(modalPosition); 
+    setDeleteModalPosition(modalPosition);
     setIsDeleteModalOpen(true);
   };
 
@@ -442,64 +452,84 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
         <button
           onClick={prevWeek}
           style={{
-            padding: '8px 16px',
+            padding: "8px 16px",
             backgroundColor: currentTheme.colors.primary,
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '20px',
-            fontWeight: '600'
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "20px",
+            fontWeight: "600",
           }}
         >
           ←
         </button>
-        
-        <div style={{ textAlign: 'center' }}>
-          <div className="week-range-text" style={{ fontSize: '18px', fontWeight: '600', color: currentTheme.colors.text }}>
+
+        <div style={{ textAlign: "center" }}>
+          <div
+            className="week-range-text"
+            style={{
+              fontSize: "18px",
+              fontWeight: "600",
+              color: currentTheme.colors.text,
+            }}
+          >
             {weekRange}
           </div>
           <button
             onClick={goToToday}
             style={{
-              marginTop: '5px',
-              padding: '4px 12px',
-              backgroundColor: 'transparent',
+              marginTop: "5px",
+              padding: "4px 12px",
+              backgroundColor: "transparent",
               color: currentTheme.colors.primary,
               border: `1px solid ${currentTheme.colors.primary}`,
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '16px'
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "16px",
             }}
           >
             Сегодня
           </button>
         </div>
-        
+
         <button
           onClick={nextWeek}
           style={{
-            padding: '8px 16px',
+            padding: "8px 16px",
             backgroundColor: currentTheme.colors.primary,
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '20px',
-            fontWeight: '600'
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "20px",
+            fontWeight: "600",
           }}
         >
           →
         </button>
-      </div>  
+      </div>
 
       <div className="calendar-scroll-container">
         <div className="calendar-header">
           <div>Время</div>
           {weekDates.map((date, index) => (
-            <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ fontWeight: '600' }}>{DAYS[index]}</div>
-              <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, marginTop: '2px' }}>
+            <div
+              key={index}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <div style={{ fontWeight: "600" }}>{DAYS[index]}</div>
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: currentTheme.colors.textSecondary,
+                  marginTop: "2px",
+                }}
+              >
                 {formatDate(date)}
               </div>
             </div>
@@ -507,48 +537,54 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
         </div>
 
         <div className="calendar-body">
-          {timeSlots.map((time) => ( 
+          {timeSlots.map((time) => (
             <div key={time} className="calendar-row">
               <div className="time-cell">{time}</div>
 
               {weekDates.map((date, dayIndex) => {
                 const tasksForDate = getTasksForDate(date);
                 const tasksInThisSlot = tasksForDate.filter((task: Task) => {
-                  const taskHour = parseInt(task.startTime?.split(':')[0] || '0', 10);
-                  const currentHour = parseInt(time.split(':')[0], 10);
+                  const taskHour = parseInt(
+                    task.startTime?.split(":")[0] || "0",
+                    10,
+                  );
+                  const currentHour = parseInt(time.split(":")[0], 10);
                   return taskHour === currentHour;
                 });
-
 
                 const overlappingGroups = getOverlappingTasks(tasksInThisSlot);
 
                 return (
-                  <div 
-                    key={dayIndex} 
-                    className="cell empty" 
-                    style={{ 
-                      position: 'relative',
-                      minHeight: '60px',
-                      height: '60px'
+                  <div
+                    key={dayIndex}
+                    className="cell empty"
+                    style={{
+                      position: "relative",
+                      minHeight: "60px",
+                      height: "60px",
                     }}
                     onClick={() => handleEmptyCellClick(dayIndex, time, date)}
                   >
                     <span className="plus">+</span>
-                    
-                    {overlappingGroups.map((group) => 
+
+                    {overlappingGroups.map((group) =>
                       group.map((task, taskIndex) => {
-                        const position = getTaskPosition(task, group, taskIndex);
+                        const position = getTaskPosition(
+                          task,
+                          group,
+                          taskIndex,
+                        );
                         return (
-                          <TaskBlock 
-                            key={task.id} 
-                            task={task} 
+                          <TaskBlock
+                            key={task.id}
+                            task={task}
                             width={position.width}
                             left={position.left}
                             taskCount={group.length}
                             onTaskClick={handleTaskClick}
                           />
                         );
-                      })
+                      }),
                     )}
                   </div>
                 );
@@ -559,27 +595,27 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
       </div>
 
       {selectedTask && (
-      <TaskActionsModal
-        task={selectedTask}
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        onAction={handleTaskAction}
-        onEdit={handleDirectEdit} 
-        onDelete={handleTaskDelete} 
-        onComplete={onCompleteTask}
-        onViewTask={onViewTask} 
-        position={modalPosition}
-      />
-    )}
+        <TaskActionsModal
+          task={selectedTask}
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onAction={handleTaskAction}
+          onEdit={handleDirectEdit}
+          onDelete={handleTaskDelete}
+          onComplete={onCompleteTask}
+          onViewTask={onViewTask}
+          position={modalPosition}
+        />
+      )}
       {taskToDelete && (
-          <ConfirmDeleteModal
-            task={taskToDelete}
-            isOpen={isDeleteModalOpen}
-            onClose={handleCloseDeleteModal}
-            onConfirm={handleConfirmDelete}
-            position={deleteModalPosition}
-          />
-        )}
+        <ConfirmDeleteModal
+          task={taskToDelete}
+          isOpen={isDeleteModalOpen}
+          onClose={handleCloseDeleteModal}
+          onConfirm={handleConfirmDelete}
+          position={deleteModalPosition}
+        />
+      )}
     </div>
   );
 };

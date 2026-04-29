@@ -1,17 +1,17 @@
-import React from 'react';
-import type { Task, TaskAction } from '../../../entities/task/model/types';
-import { useEscapeKey } from '../../../shared/lib/hooks/useEscapeKey';
-import { useTheme } from '../../../shared/lib/contexts';
-import { useModalPosition } from '../../../shared/lib/hooks/useModalPosition'; 
+import React from "react";
+import type { Task, TaskAction } from "../../../entities/task/model/types";
+import { useEscapeKey } from "../../../shared/lib/hooks/useEscapeKey";
+import { useTheme } from "../../../shared/lib/contexts";
+import { useModalPosition } from "../../../shared/lib/hooks/useModalPosition";
 
 interface TaskActionsModalProps {
   task: Task;
   isOpen: boolean;
   onClose: () => void;
   onAction: (action: TaskAction) => void;
-  onEdit?: (task: Task) => void; 
-  onDelete?: (task: Task) => void; 
-  onComplete?: (task: Task) => void; 
+  onEdit?: (task: Task) => void;
+  onDelete?: (task: Task) => void;
+  onComplete?: (task: Task) => void;
   onViewTask?: (task: Task) => void;
   position: { top: number; left: number };
 }
@@ -24,16 +24,16 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
   onEdit,
   onDelete,
   onComplete,
-  onViewTask, 
-  position
+  onViewTask,
+  position,
 }) => {
   const { currentTheme } = useTheme();
   useEscapeKey(onClose, isOpen);
-  
+
   const adjustedPosition = useModalPosition({
     position,
-    modalWidth: 250, 
-    modalHeight: 300 
+    modalWidth: 250,
+    modalHeight: 300,
   });
 
   if (!isOpen) return null;
@@ -45,8 +45,8 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
   };
 
   const handleAction = (action: TaskAction) => {
-    if (action === 'complete' && onComplete) {
-      onComplete(task); 
+    if (action === "complete" && onComplete) {
+      onComplete(task);
     } else {
       onAction(action);
     }
@@ -62,26 +62,25 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
 
   const handleDeleteClick = () => {
     if (onDelete) {
-      onDelete(task); 
-      onClose(); 
+      onDelete(task);
+      onClose();
     }
   };
-
 
   const getActionButton = () => {
     if (task.completed) {
       return (
         <button
           className="action-button uncomplete-button"
-          onClick={() => handleAction('complete')}
+          onClick={() => handleAction("complete")}
           style={{
-            padding: '10px 15px',
+            padding: "10px 15px",
             backgroundColor: currentTheme.colors.error,
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '14px',
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "14px",
           }}
         >
           Отменить выполнение
@@ -91,15 +90,15 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
       return (
         <button
           className="action-button complete-button"
-          onClick={() => handleAction('complete')}
+          onClick={() => handleAction("complete")}
           style={{
-            padding: '10px 15px',
+            padding: "10px 15px",
             backgroundColor: currentTheme.colors.success,
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '14px',
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "14px",
           }}
         >
           Выполнить задачу
@@ -109,64 +108,66 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
   };
 
   return (
-    <div 
-      className="modal-overlay" 
+    <div
+      className="modal-overlay"
       onClick={handleBackgroundClick}
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         zIndex: 1000,
       }}
     >
-      <div 
+      <div
         className="modal-content"
         style={{
           backgroundColor: currentTheme.colors.surface,
-          padding: '20px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-          minWidth: '250px',
-          position: 'absolute',
-          top: `${adjustedPosition.top}px`, 
-          left: `${adjustedPosition.left}px`, 
-          transform: 'translate(-50%, -50%)',
+          padding: "20px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+          minWidth: "250px",
+          position: "absolute",
+          top: `${adjustedPosition.top}px`,
+          left: `${adjustedPosition.left}px`,
+          transform: "translate(-50%, -50%)",
           border: `1px solid ${currentTheme.colors.border}`,
-          maxWidth: 'calc(100vw - 20px)', 
-          maxHeight: 'calc(100vh - 20px)'
+          maxWidth: "calc(100vw - 20px)",
+          maxHeight: "calc(100vh - 20px)",
         }}
       >
-        <h3 style={{ 
-          marginBottom: '15px', 
-          textAlign: 'center',
-          color: currentTheme.colors.text 
-        }}>
+        <h3
+          style={{
+            marginBottom: "15px",
+            textAlign: "center",
+            color: currentTheme.colors.text,
+          }}
+        >
           Выберите действие
         </h3>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           {getActionButton()}
-          
+
           <button
             className="action-button view-button"
             onClick={() => {
               onClose();
-              if (onViewTask) onViewTask(task); 
+              if (onViewTask) onViewTask(task);
             }}
             style={{
-              padding: '10px 15px',
+              padding: "10px 15px",
               backgroundColor: currentTheme.colors.primary,
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px',
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "14px",
             }}
           >
             Открыть задачу
@@ -176,23 +177,22 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
             className="action-button direct-edit-button"
             onClick={handleEditClick}
             style={{
-              padding: '10px 15px',
-              backgroundColor: currentTheme.colors.edit, 
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              transition: 'all 0.3s ease',
-              transform: 'scale(1)'
+              padding: "10px 15px",
+              backgroundColor: currentTheme.colors.edit,
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "14px",
+              transition: "all 0.3s ease",
+              transform: "scale(1)",
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.transform = "scale(1.05)";
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.transform = "scale(1)";
             }}
-
           >
             Редактировать задачу
           </button>
@@ -201,21 +201,21 @@ export const TaskActionsModal: React.FC<TaskActionsModalProps> = ({
             className="action-button delete-button"
             onClick={handleDeleteClick}
             style={{
-              padding: '10px 15px',
+              padding: "10px 15px",
               backgroundColor: currentTheme.colors.error,
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              transition: 'all 0.3s ease',
-              transform: 'scale(1)'
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "14px",
+              transition: "all 0.3s ease",
+              transform: "scale(1)",
             }}
             onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.transform = "scale(1.05)";
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.transform = "scale(1)";
             }}
           >
             Удалить задачу
