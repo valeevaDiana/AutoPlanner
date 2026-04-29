@@ -1037,136 +1037,554 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             />
           </div>
         </div>
-          {/* Задача повторяется? */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <label style={{ 
-                fontWeight: '500',
-                color: currentTheme.colors.text
-              }}>
-                Задача повторяется?
-              </label>
-              <input
-                type="checkbox"
-                checked={isRepeating}
-                onChange={(e) => handleCheckboxChange('repeat', e.target.checked)}
-                disabled={isViewMode || (hasSpecificTime || hasPossibleTime || hasDependency) && !isRepeating}
-                style={{
-                  width: '18px',
-                  height: '18px',
-                  cursor: isViewMode ? 'not-allowed' : 'pointer',
-                  flexShrink: 0 
-                }}
-              />
-            </div>
-
-            {isRepeating && (
+          {/* Тип задачи */}
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '12px',
+              padding: '10px 0'
+            }}>
+              {/* Повторяющаяся задача */}
               <div style={{ 
-                padding: '15px', 
-                backgroundColor: currentTheme.colors.background,
-                borderRadius: '6px',
-                border: `1px solid ${currentTheme.colors.border}`,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '15px'
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '12px',
+                opacity: isViewMode ? 0.6 : 1
               }}>
-                
-                {/* Время начала первой задачи */}
-                <div>
-                  <label style={{
-                    display: 'block',
-                    marginBottom: '8px',
-                    fontSize: '14px',
+                <input
+                  type="radio"
+                  id="taskTypeRepeat"
+                  name="taskType"
+                  checked={isRepeating}
+                  onChange={() => {
+                    if (!isViewMode) {
+                      setIsRepeating(true);
+                      setHasSpecificTime(false);
+                      setHasPossibleTime(false);
+                      setHasDependency(false);
+                    }
+                  }}
+                  disabled={isViewMode}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    cursor: isViewMode ? 'not-allowed' : 'pointer',
+                    accentColor: currentTheme.colors.primary
+                  }}
+                />
+                <label 
+                  htmlFor="taskTypeRepeat"
+                  style={{ 
+                    fontWeight: '500',
                     color: currentTheme.colors.text,
-                    fontWeight: '500'
-                  }}>
-                    Время начала первой задачи:
-                  </label>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <input
-                      type="date"
-                      value={repeatStartDate}
-                      onChange={(e) => setRepeatStartDate(e.target.value)}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
+                    cursor: isViewMode ? 'not-allowed' : 'pointer',
+                    flex: 1
+                  }}
+                >
+                  Задача повторяется?
+                </label>
+              </div>
+
+              {isRepeating && (
+                <div style={{ 
+                  padding: '15px', 
+                  marginLeft: '30px',
+                  backgroundColor: currentTheme.colors.background,
+                  borderRadius: '6px',
+                  border: `1px solid ${currentTheme.colors.border}`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '15px'
+                }}>
+                  
+                  {/* Время начала первой задачи */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      marginBottom: '8px',
+                      fontSize: '14px',
+                      color: currentTheme.colors.text,
+                      fontWeight: '500'
+                    }}>
+                      Время начала первой задачи:
+                    </label>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <input
+                        type="date"
+                        value={repeatStartDate}
+                        onChange={(e) => setRepeatStartDate(e.target.value)}
+                        disabled={isViewMode}
+                        style={{
+                          flex: 1,
+                          padding: '8px',
+                          border: `1px solid ${currentTheme.colors.border}`,
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                          cursor: isViewMode ? 'not-allowed' : 'text',
+                          color: currentTheme.colors.text
+                        }}
+                      />
+                      <input
+                        type="time"
+                        value={repeatStartTime}
+                        onChange={(e) => setRepeatStartTime(e.target.value)}
+                        disabled={isViewMode}
+                        style={{
+                          flex: 1,
+                          padding: '8px',
+                          border: `1px solid ${currentTheme.colors.border}`,
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                          cursor: isViewMode ? 'not-allowed' : 'text',
+                          color: currentTheme.colors.text
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Интервал между задачами (ОБЯЗАТЕЛЬНО) */}
+                  <div>
+                    <label style={{ 
+                      display: 'block', 
+                      marginBottom: '8px',
+                      fontSize: '14px',
+                      color: currentTheme.colors.text,
+                      fontWeight: '500'
+                    }}>
+                      Интервал между задачами *:
+                    </label>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Дни</div>
+                        <input
+                          type="text"
+                          value={repeatDays}
+                          onChange={(e) => {
+                            const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                            setRepeatDays(onlyNums);
+                          }}
+                          disabled={isViewMode}
+                          min="0"
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                            cursor: isViewMode ? 'not-allowed' : 'text',
+                            textAlign: 'center',
+                            color: currentTheme.colors.text
+                          }}
+                        />
+                      </div>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Часы</div>
+                        <input
+                          type="text"
+                          value={repeatHours}
+                          onChange={(e) => {
+                            const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                            setRepeatHours(onlyNums);
+                          }}
+                          disabled={isViewMode}
+                          min="0"
+                          max="23"
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                            cursor: isViewMode ? 'not-allowed' : 'text',
+                            textAlign: 'center',
+                            color: currentTheme.colors.text
+                          }}
+                        />
+                      </div>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Минуты</div>
+                        <input
+                          type="text"
+                          value={repeatMinutes}
+                          onChange={(e) => {
+                            const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                            setRepeatMinutes(onlyNums);
+                          }}
+                          disabled={isViewMode}
+                          min="0"
+                          max="59"
+                          style={{
+                            width: '100%',
+                            padding: '8px',
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                            cursor: isViewMode ? 'not-allowed' : 'text',
+                            textAlign: 'center',
+                            color: currentTheme.colors.text
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Выбор типа повторения */}
+                  <div>
+                    <label style={{ 
+                      display: 'block', 
+                      marginBottom: '8px',
+                      fontSize: '14px',
+                      color: currentTheme.colors.text,
+                      fontWeight: '500'
+                    }}>
+                      Тип повторения:
+                    </label>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setRepeatType('count')}
+                        disabled={isViewMode}
+                        style={{
+                          flex: 1,
+                          padding: '10px',
+                          border: `2px solid ${repeatType === 'count' ? currentTheme.colors.primary : currentTheme.colors.border}`,
+                          borderRadius: '4px',
+                          backgroundColor: repeatType === 'count' ? currentTheme.colors.background : currentTheme.colors.surface,
+                          color: currentTheme.colors.text,
+                          cursor: isViewMode ? 'not-allowed' : 'pointer',
+                          fontWeight: repeatType === 'count' ? '600' : '400'
+                        }}
+                      >
+                        По количеству
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRepeatType('period')}
+                        disabled={isViewMode}
+                        style={{
+                          flex: 1,
+                          padding: '10px',
+                          border: `2px solid ${repeatType === 'period' ? currentTheme.colors.primary : currentTheme.colors.border}`,
+                          borderRadius: '4px',
+                          backgroundColor: repeatType === 'period' ? currentTheme.colors.background : currentTheme.colors.surface,
+                          color: currentTheme.colors.text,
+                          cursor: isViewMode ? 'not-allowed' : 'pointer',
+                          fontWeight: repeatType === 'period' ? '600' : '400'
+                        }}
+                      >
+                        По периоду
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Количество повторений (если выбран тип "count") */}
+                  {repeatType === 'count' && (
+                    <div>
+                      <label style={{ 
+                        display: 'block', 
+                        marginBottom: '8px',
                         fontSize: '14px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
                         color: currentTheme.colors.text
-                      }}
-                    />
-                    <input
-                      type="time"
-                      value={repeatStartTime}
-                      onChange={(e) => setRepeatStartTime(e.target.value)}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
-                        color: currentTheme.colors.text
-                      }}
-                    />
+                      }}>
+                        Количество повторений:
+                      </label>
+                      <input
+                        type="text"
+                        value={repeatCount}
+                        onChange={(e) => {
+                          const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                          setRepeatCount(onlyNums);
+                        }}
+                        disabled={isViewMode}
+                        min="0"
+                        placeholder="0"
+                        style={{
+                          width: '100%',
+                          padding: '8px',
+                          border: `1px solid ${currentTheme.colors.border}`,
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                          cursor: isViewMode ? 'not-allowed' : 'text',
+                          color: currentTheme.colors.text
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Период повторения (если выбран тип "period") */}
+                  {repeatType === 'period' && (
+                    <>
+                      <div>
+                        <label style={{ 
+                          display: 'block', 
+                          marginBottom: '8px',
+                          fontSize: '14px',
+                          color: currentTheme.colors.text
+                        }}>
+                          Начало периода повторения:
+                        </label>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                          <input
+                            type="date"
+                            value={repeatStartDate}
+                            onChange={(e) => setRepeatStartDate(e.target.value)}
+                            disabled={isViewMode}
+                            style={{
+                              flex: 1,
+                              padding: '8px',
+                              border: `1px solid ${currentTheme.colors.border}`,
+                              borderRadius: '4px',
+                              fontSize: '14px',
+                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                              cursor: isViewMode ? 'not-allowed' : 'text',
+                              color: currentTheme.colors.text
+                            }}
+                          />
+                          <input
+                            type="time"
+                            value={repeatStartTime}
+                            onChange={(e) => setRepeatStartTime(e.target.value)}
+                            disabled={isViewMode}
+                            style={{
+                              flex: 1,
+                              padding: '8px',
+                              border: `1px solid ${currentTheme.colors.border}`,
+                              borderRadius: '4px',
+                              fontSize: '14px',
+                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                              cursor: isViewMode ? 'not-allowed' : 'text',
+                              color: currentTheme.colors.text
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label style={{ 
+                          display: 'block', 
+                          marginBottom: '8px',
+                          fontSize: '14px',
+                          color: currentTheme.colors.text
+                        }}>
+                          Конец периода повторения:
+                        </label>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                          <input
+                            type="date"
+                            value={repeatEndDate}
+                            onChange={(e) => setRepeatEndDate(e.target.value)}
+                            disabled={isViewMode}
+                            min={repeatStartDate} 
+                            style={{
+                              flex: 1,
+                              padding: '8px',
+                              border: `1px solid ${currentTheme.colors.border}`,
+                              borderRadius: '4px',
+                              fontSize: '14px',
+                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                              cursor: isViewMode ? 'not-allowed' : 'text',
+                              color: currentTheme.colors.text
+                            }}
+                          />
+                          <input
+                            type="time"
+                            value={repeatEndTime}
+                            onChange={(e) => setRepeatEndTime(e.target.value)}
+                            disabled={isViewMode}
+                            min={repeatStartDate === repeatEndDate ? repeatStartTime : undefined} 
+                            style={{
+                              flex: 1,
+                              padding: '8px',
+                              border: `1px solid ${currentTheme.colors.border}`,
+                              borderRadius: '4px',
+                              fontSize: '14px',
+                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                              cursor: isViewMode ? 'not-allowed' : 'text',
+                              color: currentTheme.colors.text
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Задача с конкретным временем начала */}
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '12px',
+                opacity: isViewMode ? 0.6 : 1
+              }}>
+                <input
+                  type="radio"
+                  id="taskTypeSpecific"
+                  name="taskType"
+                  checked={hasSpecificTime}
+                  onChange={() => {
+                    if (!isViewMode) {
+                      setIsRepeating(false);
+                      setHasSpecificTime(true);
+                      setHasPossibleTime(false);
+                      setHasDependency(false);
+                    }
+                  }}
+                  disabled={isViewMode}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    cursor: isViewMode ? 'not-allowed' : 'pointer',
+                    accentColor: currentTheme.colors.primary
+                  }}
+                />
+                <label 
+                  htmlFor="taskTypeSpecific"
+                  style={{ 
+                    fontWeight: '500',
+                    color: currentTheme.colors.text,
+                    cursor: isViewMode ? 'not-allowed' : 'pointer',
+                    flex: 1
+                  }}
+                >
+                  У задачи есть конкретное время начала?
+                </label>
+              </div>
+
+              {hasSpecificTime && (
+                <div style={{ 
+                  padding: '15px', 
+                  marginLeft: '30px',
+                  backgroundColor: currentTheme.colors.background,
+                  borderRadius: '6px',
+                  border: `1px solid ${currentTheme.colors.border}`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '15px'
+                }}>
+                  <div className="dates-container">
+                    <div>
+                      <div style={{ fontSize: '14px', color: currentTheme.colors.textSecondary, marginBottom: '5px' }}>Начать с:</div>
+                      <div className="date-group">
+                        <input
+                          type="date"
+                          value={startDate}
+                          onChange={(e) => setStartDate(e.target.value)}
+                          disabled={isViewMode}
+                          style={{
+                            flex: 1,
+                            padding: '8px',
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: '4px',
+                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                            cursor: isViewMode ? 'not-allowed' : 'text',
+                            color: currentTheme.colors.text
+                          }}
+                        />
+                        <input
+                          type="time"
+                          value={startTime}
+                          onChange={(e) => setStartTime(e.target.value)}
+                          disabled={isViewMode}
+                          style={{
+                            flex: 1,
+                            padding: '8px',
+                            border: `1px solid ${currentTheme.colors.border}`,
+                            borderRadius: '4px',
+                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                            cursor: isViewMode ? 'not-allowed' : 'text',
+                            color: currentTheme.colors.text
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
+              )}
 
-                {/* Интервал между задачами (ОБЯЗАТЕЛЬНО) */}
-                <div>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px',
-                    fontSize: '14px',
+              {/* Задача с возможным временем */}
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '12px',
+                opacity: isViewMode ? 0.6 : 1
+              }}>
+                <input
+                  type="radio"
+                  id="taskTypePossible"
+                  name="taskType"
+                  checked={hasPossibleTime}
+                  onChange={() => {
+                    if (!isViewMode) {
+                      setIsRepeating(false);
+                      setHasSpecificTime(false);
+                      setHasPossibleTime(true);
+                      setHasDependency(false);
+                    }
+                  }}
+                  disabled={isViewMode}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    cursor: isViewMode ? 'not-allowed' : 'pointer',
+                    accentColor: currentTheme.colors.primary
+                  }}
+                />
+                <label 
+                  htmlFor="taskTypePossible"
+                  style={{ 
+                    fontWeight: '500',
                     color: currentTheme.colors.text,
-                    fontWeight: '500'
-                  }}>
-                    Интервал между задачами *:
-                  </label>
+                    cursor: isViewMode ? 'not-allowed' : 'pointer',
+                    flex: 1
+                  }}
+                >
+                  Есть ли возможное время начала и конца задачи?
+                </label>
+              </div>
+
+              {hasPossibleTime && (
+                <div style={{ 
+                  padding: '15px', 
+                  marginLeft: '30px',
+                  backgroundColor: currentTheme.colors.background,
+                  borderRadius: '6px',
+                  border: `1px solid ${currentTheme.colors.border}`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '15px'
+                }}>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Дни</div>
+                    <div style={{ flex: 1 }}>
                       <input
-                        type="text"
-                        value={repeatDays}
-                        onChange={(e) => {
-                          const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                          setRepeatDays(onlyNums);
-                        }}
-
+                        type="date"
+                        value={possibleStartDate}
+                        onChange={(e) => setPossibleStartDate(e.target.value)}
                         disabled={isViewMode}
-                        min="0"
                         style={{
-                          width: '100%',
+                          flex: 1,
                           padding: '8px',
                           border: `1px solid ${currentTheme.colors.border}`,
                           borderRadius: '4px',
                           fontSize: '14px',
                           backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                           cursor: isViewMode ? 'not-allowed' : 'text',
-                          textAlign: 'center',
                           color: currentTheme.colors.text
                         }}
                       />
-                    </div>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Часы</div>
                       <input
-                        type="text"
-                        value={repeatHours}
-                        onChange={(e) => {
-                          const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                          setRepeatHours(onlyNums);
-                        }}
+                        type="time"
+                        value={possibleStartTime}
+                        onChange={(e) => setPossibleStartTime(e.target.value)}
                         disabled={isViewMode}
-                        min="0"
-                        max="23"
+                        placeholder="примерно начать с..."
                         style={{
                           width: '100%',
                           padding: '8px',
@@ -1175,23 +1593,34 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                           fontSize: '14px',
                           backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                           cursor: isViewMode ? 'not-allowed' : 'text',
-                          textAlign: 'center',
-                          color: currentTheme.colors.text
+                          fontStyle: possibleStartTime ? 'normal' : 'italic',
+                          color: possibleStartTime ? currentTheme.colors.text : currentTheme.colors.textSecondary
                         }}
                       />
                     </div>
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                      <div style={{ fontSize: '12px', color: currentTheme.colors.textSecondary }}>Минуты</div>
+                    <div style={{ flex: 1 }}>
                       <input
-                        type="text"
-                        value={repeatMinutes}
-                        onChange={(e) => {
-                          const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                          setRepeatMinutes(onlyNums);
-                        }}
+                        type="date"
+                        value={possibleEndDate}
+                        onChange={(e) => setPossibleEndDate(e.target.value)}
                         disabled={isViewMode}
-                        min="0"
-                        max="59"
+                        style={{
+                          flex: 1,
+                          padding: '8px',
+                          border: `1px solid ${currentTheme.colors.border}`,
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                          cursor: isViewMode ? 'not-allowed' : 'text',
+                          color: currentTheme.colors.text
+                        }}
+                      />
+                      <input
+                        type="time"
+                        value={possibleEndTime}
+                        onChange={(e) => setPossibleEndTime(e.target.value)}
+                        disabled={isViewMode}
+                        placeholder="примерно закончить"
                         style={{
                           width: '100%',
                           padding: '8px',
@@ -1200,65 +1629,68 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                           fontSize: '14px',
                           backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
                           cursor: isViewMode ? 'not-allowed' : 'text',
-                          textAlign: 'center',
-                          color: currentTheme.colors.text
+                          fontStyle: possibleEndTime ? 'normal' : 'italic',
+                          color: possibleEndTime ? currentTheme.colors.text : currentTheme.colors.textSecondary
                         }}
                       />
                     </div>
                   </div>
                 </div>
+              )}
 
-                {/* Выбор типа повторения */}
-                <div>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px',
-                    fontSize: '14px',
+              {/* Зависимая задача */}
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '12px',
+                opacity: isViewMode ? 0.6 : 1
+              }}>
+                <input
+                  type="radio"
+                  id="taskTypeDependency"
+                  name="taskType"
+                  checked={hasDependency}
+                  onChange={() => {
+                    if (!isViewMode) {
+                      setIsRepeating(false);
+                      setHasSpecificTime(false);
+                      setHasPossibleTime(false);
+                      setHasDependency(true);
+                    }
+                  }}
+                  disabled={isViewMode}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    cursor: isViewMode ? 'not-allowed' : 'pointer',
+                    accentColor: currentTheme.colors.primary
+                  }}
+                />
+                <label 
+                  htmlFor="taskTypeDependency"
+                  style={{ 
+                    fontWeight: '500',
                     color: currentTheme.colors.text,
-                    fontWeight: '500'
-                  }}>
-                    Тип повторения:
-                  </label>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button
-                      type="button"
-                      onClick={() => setRepeatType('count')}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
-                        padding: '10px',
-                        border: `2px solid ${repeatType === 'count' ? currentTheme.colors.primary : currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        backgroundColor: repeatType === 'count' ? currentTheme.colors.background : currentTheme.colors.surface,
-                        color: currentTheme.colors.text,
-                        cursor: isViewMode ? 'not-allowed' : 'pointer',
-                        fontWeight: repeatType === 'count' ? '600' : '400'
-                      }}
-                    >
-                      По количеству
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRepeatType('period')}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
-                        padding: '10px',
-                        border: `2px solid ${repeatType === 'period' ? currentTheme.colors.primary : currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        backgroundColor: repeatType === 'period' ? currentTheme.colors.background : currentTheme.colors.surface,
-                        color: currentTheme.colors.text,
-                        cursor: isViewMode ? 'not-allowed' : 'pointer',
-                        fontWeight: repeatType === 'period' ? '600' : '400'
-                      }}
-                    >
-                      По периоду
-                    </button>
-                  </div>
-                </div>
+                    cursor: isViewMode ? 'not-allowed' : 'pointer',
+                    flex: 1
+                  }}
+                >
+                  Зависит ли задача от другой задачи?
+                </label>
+              </div>
 
-                {/* Количество повторений (если выбран тип "count") */}
-                {repeatType === 'count' && (
+              {hasDependency && (
+                <div style={{ 
+                  padding: '15px', 
+                  marginLeft: '30px',
+                  backgroundColor: currentTheme.colors.background,
+                  borderRadius: '6px',
+                  border: `1px solid ${currentTheme.colors.border}`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '15px'
+                }}>
+                  {/* Что за задача */}
                   <div>
                     <label style={{ 
                       display: 'block', 
@@ -1266,18 +1698,12 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                       fontSize: '14px',
                       color: currentTheme.colors.text
                     }}>
-                      Количество повторений:
+                      Родительская задача:
                     </label>
-                    <input
-                      type="text"
-                      value={repeatCount}
-                      onChange={(e) => {
-                        const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                        setRepeatCount(onlyNums);
-                      }}
+                    <select
+                      value={dependencyTask}
+                      onChange={(e) => setDependencyTask(e.target.value)}
                       disabled={isViewMode}
-                      min="0"
-                      placeholder="0"
                       style={{
                         width: '100%',
                         padding: '8px',
@@ -1285,473 +1711,85 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                         borderRadius: '4px',
                         fontSize: '14px',
                         backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
+                        cursor: isViewMode ? 'not-allowed' : 'pointer',
                         color: currentTheme.colors.text
                       }}
-                    />
+                    >
+                      <option value="">Выберите задачу</option>
+                      {/* Динамически подгружаем задачи из availableTasks */}
+                      {availableTasks.map((task) => (
+                        <option key={task.id} value={task.id}>
+                          {task.title}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                )}
 
-                {/* Период повторения (если выбран тип "period") */}
-                {repeatType === 'period' && (
-                  <>
-                    <div>
-                      <label style={{ 
-                        display: 'block', 
-                        marginBottom: '8px',
-                        fontSize: '14px',
-                        color: currentTheme.colors.text
-                      }}>
-                        Начало периода повторения:
-                      </label>
-                      <div style={{ display: 'flex', gap: '10px' }}>
-                        <input
-                          type="date"
-                          value={repeatStartDate}
-                          onChange={(e) => setRepeatStartDate(e.target.value)}
-                          disabled={isViewMode}
-                          style={{
-                            flex: 1,
-                            padding: '8px',
-                            border: `1px solid ${currentTheme.colors.border}`,
-                            borderRadius: '4px',
-                            fontSize: '14px',
-                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'text',
-                            color: currentTheme.colors.text
-                          }}
-                        />
-                        <input
-                          type="time"
-                          value={repeatStartTime}
-                          onChange={(e) => setRepeatStartTime(e.target.value)}
-                          disabled={isViewMode}
-                          style={{
-                            flex: 1,
-                            padding: '8px',
-                            border: `1px solid ${currentTheme.colors.border}`,
-                            borderRadius: '4px',
-                            fontSize: '14px',
-                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'text',
-                            color: currentTheme.colors.text
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label style={{ 
-                        display: 'block', 
-                        marginBottom: '8px',
-                        fontSize: '14px',
-                        color: currentTheme.colors.text
-                      }}>
-                        Конец периода повторения:
-                      </label>
-                      <div style={{ display: 'flex', gap: '10px' }}>
-                        <input
-                          type="date"
-                          value={repeatEndDate}
-                          onChange={(e) => setRepeatEndDate(e.target.value)}
-                          disabled={isViewMode}
-                          min={repeatStartDate} 
-                          style={{
-                            flex: 1,
-                            padding: '8px',
-                            border: `1px solid ${currentTheme.colors.border}`,
-                            borderRadius: '4px',
-                            fontSize: '14px',
-                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'text',
-                            color: currentTheme.colors.text
-                          }}
-                        />
-                        <input
-                          type="time"
-                          value={repeatEndTime}
-                          onChange={(e) => setRepeatEndTime(e.target.value)}
-                          disabled={isViewMode}
-                          min={repeatStartDate === repeatEndDate ? repeatStartTime : undefined} 
-                          style={{
-                            flex: 1,
-                            padding: '8px',
-                            border: `1px solid ${currentTheme.colors.border}`,
-                            borderRadius: '4px',
-                            fontSize: '14px',
-                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'text',
-                            color: currentTheme.colors.text
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* У задачи есть конкретное время начала? */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <label style={{ 
-                fontWeight: '500',
-                color: currentTheme.colors.text
-              }}>
-                У задачи есть конкретное время начала?
-              </label>
-              <input
-                type="checkbox"
-                checked={hasSpecificTime}
-                //onChange={(e) => !isViewMode && setHasSpecificTime(e.target.checked)}
-                onChange={(e) => handleCheckboxChange('specific', e.target.checked)}
-                disabled={isViewMode || (isRepeating || hasPossibleTime || hasDependency) && !hasSpecificTime}
-                style={{
-                  width: '18px',
-                  height: '18px',
-                  cursor: isViewMode ? 'not-allowed' : 'pointer',
-                  flexShrink: 0 
-                }}
-              />
-            </div>
-
-            {hasSpecificTime && (
-              <div style={{ 
-                padding: '15px', 
-                backgroundColor: currentTheme.colors.background,
-                borderRadius: '6px',
-                border: `1px solid ${currentTheme.colors.border}`,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '15px'
-              }}>
-                <div className="dates-container">
-                <div>
-                  <div style={{ fontSize: '14px', color: currentTheme.colors.textSecondary, marginBottom: '5px' }}>Начать с:</div>
-                  <div className="date-group">
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
-                        color: currentTheme.colors.text
-                      }}
-                    />
-                    <input
-                      type="time"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
-                        color: currentTheme.colors.text
-                      }}
-                    />
-                  </div>
-                </div>
-            </div>
-
-              </div>
-            )}
-          </div>
-
-          {/* Есть ли возможное время начала и конца задачи? */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <label style={{ 
-                fontWeight: '500',
-                color: currentTheme.colors.text
-              }}>
-                Есть ли возможное время начала и конца задачи?
-              </label>
-              <input
-                type="checkbox"
-                checked={hasPossibleTime}
-                //onChange={(e) => !isViewMode && setHasPossibleTime(e.target.checked)}
-                onChange={(e) => handleCheckboxChange('possible', e.target.checked)}
-                disabled={isViewMode || (isRepeating || hasSpecificTime || hasDependency) && !hasPossibleTime} 
-                style={{
-                  width: '18px',
-                  height: '18px',
-                  cursor: isViewMode ? 'not-allowed' : 'pointer',
-                  flexShrink: 0
-                }}
-              />
-            </div>
-
-            {hasPossibleTime && (
-              <div style={{ 
-                padding: '15px', 
-                backgroundColor: currentTheme.colors.background,
-                borderRadius: '6px',
-                border: `1px solid ${currentTheme.colors.border}`,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '15px'
-              }}>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  <div style={{ flex: 1 }}>
-                    <input
-                      type="date"
-                      value={possibleStartDate}
-                      onChange={(e) => setPossibleStartDate(e.target.value)}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
-                        color: currentTheme.colors.text
-                      }}
-                    />
-                    <input
-                      type="time"
-                      value={possibleStartTime}
-                      onChange={(e) => setPossibleStartTime(e.target.value)}
-                      disabled={isViewMode}
-                      placeholder="примерно начать с..."
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
-                        fontStyle: possibleStartTime ? 'normal' : 'italic',
-                        color: possibleStartTime ? currentTheme.colors.text : currentTheme.colors.textSecondary
-                      }}
-                    />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                      <input
-                      type="date"
-                      value={possibleEndDate}
-                      onChange={(e) => setPossibleEndDate(e.target.value)}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
-                        color: currentTheme.colors.text
-                      }}
-                    />
-                    <input
-                      type="time"
-                      value={possibleEndTime}
-                      onChange={(e) => setPossibleEndTime(e.target.value)}
-                      disabled={isViewMode}
-                      placeholder="примерно закончить"
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: `1px solid ${currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                        cursor: isViewMode ? 'not-allowed' : 'text',
-                        fontStyle: possibleEndTime ? 'normal' : 'italic',
-                        color: possibleEndTime ? currentTheme.colors.text : currentTheme.colors.textSecondary
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Зависит ли задача от другой задачи? */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <label style={{ 
-                fontWeight: '500',
-                color: currentTheme.colors.text
-              }}>
-                Зависит ли задача от другой задачи?
-              </label>
-              <input
-                type="checkbox"
-                checked={hasDependency}
-                //onChange={(e) => !isViewMode && setHasDependency(e.target.checked)}
-                onChange={(e) => handleCheckboxChange('dependency', e.target.checked)}
-                disabled={isViewMode || (isRepeating || hasSpecificTime || hasPossibleTime) && !hasDependency}
-                style={{
-                  width: '18px',
-                  height: '18px',
-                  cursor: isViewMode ? 'not-allowed' : 'pointer',
-                  flexShrink: 0
-                }}
-              />
-            </div>
-
-            {hasDependency && (
-              <div style={{ 
-                padding: '15px', 
-                backgroundColor: currentTheme.colors.background,
-                borderRadius: '6px',
-                border: `1px solid ${currentTheme.colors.border}`,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '15px'
-              }}>
-                {/* Что за задача */}
-                <div>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px',
-                    fontSize: '14px',
-                    color: currentTheme.colors.text
-                  }}>
-                    Родительская задача:
-                  </label>
-                  <select
-                    value={dependencyTask}
-                    onChange={(e) => setDependencyTask(e.target.value)}
-                    disabled={isViewMode}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      border: `1px solid ${currentTheme.colors.border}`,
-                      borderRadius: '4px',
+                  {/* раньше или позже */}
+                  <div>
+                    <label style={{ 
+                      display: 'block', 
+                      marginBottom: '8px',
                       fontSize: '14px',
-                      backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                      cursor: isViewMode ? 'not-allowed' : 'pointer',
                       color: currentTheme.colors.text
-                    }}
-                  >
-                    <option value="">Выберите задачу</option>
-                    {/* Динамически подгружаем задачи из availableTasks */}
-                    {availableTasks.map((task) => (
-                      <option key={task.id} value={task.id}>
-                        {task.title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* раньше или позже */}
-                <div>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px',
-                    fontSize: '14px',
-                    color: currentTheme.colors.text
-                  }}>
-                    Поставить задачу РАНЬШЕ или ПОЗЖЕ родительской?
-                  </label>
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button
-                      type="button"
-                      onClick={() => setDependencyType('before')}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        border: `2px solid ${dependencyType === 'before' ? currentTheme.colors.primary : currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        backgroundColor: dependencyType === 'before' ? currentTheme.colors.background : currentTheme.colors.surface,
-                        color: currentTheme.colors.text,
-                        cursor: isViewMode ? 'not-allowed' : 'pointer',
-                        fontWeight: dependencyType === 'before' ? '600' : '400'
-                      }}
-                    >
-                      Раньше
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDependencyType('after')}
-                      disabled={isViewMode}
-                      style={{
-                        flex: 1,
-                        padding: '8px',
-                        border: `2px solid ${dependencyType === 'after' ? currentTheme.colors.primary : currentTheme.colors.border}`,
-                        borderRadius: '4px',
-                        backgroundColor: dependencyType === 'after' ? currentTheme.colors.background : currentTheme.colors.surface,
-                        color: currentTheme.colors.text,
-                        cursor: isViewMode ? 'not-allowed' : 'pointer',
-                        fontWeight: dependencyType === 'after' ? '600' : '400'
-                      }}
-                    >
-                      Позже
-                    </button>
-                  </div>
-                </div>
-
-                {/* Временной интервал */}
-                <div>
-                  <label style={{ 
-                    display: 'block', 
-                    marginBottom: '8px',
-                    fontSize: '14px',
-                    color: currentTheme.colors.text
-                  }}>
-                    {dependencyType === 'before' ? 'На сколько раньше?' : 'На сколько позже?'}
-                  </label>
-                  <div className="dependency-fields-container">
-                    {/* Выпадающий список */}
-                    <div className="dependency-operator">
-                      <select
-                        value={dependencyOperator}
-                        onChange={(e) => setDependencyOperator(e.target.value)}
+                    }}>
+                      Поставить задачу РАНЬШЕ или ПОЗЖЕ родительской?
+                    </label>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setDependencyType('before')}
                         disabled={isViewMode}
                         style={{
-                          width: '100%',
+                          flex: 1,
                           padding: '8px',
-                          border: `1px solid ${currentTheme.colors.border}`,
+                          border: `2px solid ${dependencyType === 'before' ? currentTheme.colors.primary : currentTheme.colors.border}`,
                           borderRadius: '4px',
-                          fontSize: '14px',
-                          backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                          backgroundColor: dependencyType === 'before' ? currentTheme.colors.background : currentTheme.colors.surface,
+                          color: currentTheme.colors.text,
                           cursor: isViewMode ? 'not-allowed' : 'pointer',
-                          color: currentTheme.colors.text
+                          fontWeight: dependencyType === 'before' ? '600' : '400'
                         }}
                       >
-                        {dependencyType === 'before' ? (
-                          <>
-                            <option value=">">больше чем на</option>
-                            <option value="<">меньше чем на</option>
-                            <option value="=">ровно на</option>
-                          </>
-                        ) : (
-                          <>
-                            <option value=">">больше чем через</option>
-                            <option value="<">меньше чем через</option>
-                            <option value="=">ровно через</option>
-                          </>
-                        )}
-                      </select>
+                        Раньше
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDependencyType('after')}
+                        disabled={isViewMode}
+                        style={{
+                          flex: 1,
+                          padding: '8px',
+                          border: `2px solid ${dependencyType === 'after' ? currentTheme.colors.primary : currentTheme.colors.border}`,
+                          borderRadius: '4px',
+                          backgroundColor: dependencyType === 'after' ? currentTheme.colors.background : currentTheme.colors.surface,
+                          color: currentTheme.colors.text,
+                          cursor: isViewMode ? 'not-allowed' : 'pointer',
+                          fontWeight: dependencyType === 'after' ? '600' : '400'
+                        }}
+                      >
+                        Позже
+                      </button>
                     </div>
+                  </div>
 
-                    <div className="dependency-inputs-container">
-                      {/* Дни */}
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <input
-                          type="text"
-                          value={dependencyDays}
-                          onChange={(e) => {
-                            const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                            setDependencyDays(onlyNums);
-                          }}
+                  {/* Временной интервал */}
+                  <div>
+                    <label style={{ 
+                      display: 'block', 
+                      marginBottom: '8px',
+                      fontSize: '14px',
+                      color: currentTheme.colors.text
+                    }}>
+                      {dependencyType === 'before' ? 'На сколько раньше?' : 'На сколько позже?'}
+                    </label>
+                    <div className="dependency-fields-container">
+                      {/* Выпадающий список */}
+                      <div className="dependency-operator">
+                        <select
+                          value={dependencyOperator}
+                          onChange={(e) => setDependencyOperator(e.target.value)}
                           disabled={isViewMode}
-                          min="0"
-                          placeholder="0"
                           style={{
                             width: '100%',
                             padding: '8px',
@@ -1759,74 +1797,115 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                             borderRadius: '4px',
                             fontSize: '14px',
                             backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'text',
-                            textAlign: 'center',
+                            cursor: isViewMode ? 'not-allowed' : 'pointer',
                             color: currentTheme.colors.text
                           }}
-                        />
-                        <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, minWidth: '25px' }}>дн</span>
+                        >
+                          {dependencyType === 'before' ? (
+                            <>
+                              <option value=">">больше чем на</option>
+                              <option value="<">меньше чем на</option>
+                              <option value="=">ровно на</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value=">">больше чем через</option>
+                              <option value="<">меньше чем через</option>
+                              <option value="=">ровно через</option>
+                            </>
+                          )}
+                        </select>
                       </div>
-                      
-                      {/* Часы */}
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <input
-                          type="text"
-                          value={dependencyHours}
-                          onChange={(e) => {
-                            const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                            setDependencyHours(onlyNums);
-                          }}
-                          disabled={isViewMode}
-                          min="0"
-                          max="23"
-                          placeholder="0"
-                          style={{
-                            width: '100%',
-                            padding: '8px',
-                            border: `1px solid ${currentTheme.colors.border}`,
-                            borderRadius: '4px',
-                            fontSize: '14px',
-                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'text',
-                            textAlign: 'center',
-                            color: currentTheme.colors.text
-                          }}
-                        />
-                        <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, minWidth: '25px' }}>час</span>
-                      </div>
-                      
-                      {/* Минуты */}
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <input
-                          type="text"
-                          value={dependencyMinutes}
-                          onChange={(e) => {
-                            const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                            setDependencyMinutes(onlyNums);
-                          }}
-                          disabled={isViewMode}
-                          min="0"
-                          max="59"
-                          placeholder="0"
-                          style={{
-                            width: '100%',
-                            padding: '8px',
-                            border: `1px solid ${currentTheme.colors.border}`,
-                            borderRadius: '4px',
-                            fontSize: '14px',
-                            backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
-                            cursor: isViewMode ? 'not-allowed' : 'text',
-                            textAlign: 'center',
-                            color: currentTheme.colors.text
-                          }}
-                        />
-                        <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, minWidth: '25px' }}>мин</span>
+
+                      <div className="dependency-inputs-container">
+                        {/* Дни */}
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <input
+                            type="text"
+                            value={dependencyDays}
+                            onChange={(e) => {
+                              const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                              setDependencyDays(onlyNums);
+                            }}
+                            disabled={isViewMode}
+                            min="0"
+                            placeholder="0"
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              border: `1px solid ${currentTheme.colors.border}`,
+                              borderRadius: '4px',
+                              fontSize: '14px',
+                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                              cursor: isViewMode ? 'not-allowed' : 'text',
+                              textAlign: 'center',
+                              color: currentTheme.colors.text
+                            }}
+                          />
+                          <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, minWidth: '25px' }}>дн</span>
+                        </div>
+                        
+                        {/* Часы */}
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <input
+                            type="text"
+                            value={dependencyHours}
+                            onChange={(e) => {
+                              const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                              setDependencyHours(onlyNums);
+                            }}
+                            disabled={isViewMode}
+                            min="0"
+                            max="23"
+                            placeholder="0"
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              border: `1px solid ${currentTheme.colors.border}`,
+                              borderRadius: '4px',
+                              fontSize: '14px',
+                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                              cursor: isViewMode ? 'not-allowed' : 'text',
+                              textAlign: 'center',
+                              color: currentTheme.colors.text
+                            }}
+                          />
+                          <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, minWidth: '25px' }}>час</span>
+                        </div>
+                        
+                        {/* Минуты */}
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <input
+                            type="text"
+                            value={dependencyMinutes}
+                            onChange={(e) => {
+                              const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                              setDependencyMinutes(onlyNums);
+                            }}
+                            disabled={isViewMode}
+                            min="0"
+                            max="59"
+                            placeholder="0"
+                            style={{
+                              width: '100%',
+                              padding: '8px',
+                              border: `1px solid ${currentTheme.colors.border}`,
+                              borderRadius: '4px',
+                              fontSize: '14px',
+                              backgroundColor: isViewMode ? currentTheme.colors.background : currentTheme.colors.surface,
+                              cursor: isViewMode ? 'not-allowed' : 'text',
+                              textAlign: 'center',
+                              color: currentTheme.colors.text
+                            }}
+                          />
+                          <span style={{ fontSize: '12px', color: currentTheme.colors.textSecondary, minWidth: '25px' }}>мин</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {formError && (
